@@ -202,23 +202,23 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
     /**
      * Try to infer a sane default value for this type set.
      *
-     * @param mixed $default_value The default value.
+     * @param mixed $defaultValue The default value.
      * @return bool True if a default value could be inferred, false otherwise.
      */
-    public function tryInferDefaultValue(mixed &$default_value): bool
+    public function tryInferDefaultValue(mixed &$defaultValue): bool
     {
         if ($this->nullOk()) {
-            $default_value = null;
+            $defaultValue = null;
         } elseif ($this->contains('bool')) {
-            $default_value = false;
+            $defaultValue = false;
         } elseif ($this->containsAny('int', 'uint', 'number', 'scalar')) {
-            $default_value = 0;
+            $defaultValue = 0;
         } elseif ($this->contains('float')) {
-            $default_value = 0.0;
+            $defaultValue = 0.0;
         } elseif ($this->contains('string')) {
-            $default_value = '';
+            $defaultValue = '';
         } elseif ($this->containsAny('array', 'iterable')) {
-            $default_value = [];
+            $defaultValue = [];
         } else {
             return false;
         }
@@ -298,8 +298,8 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      */
     private static function isClassType(string $type): bool
     {
-        $class_name_part = "[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*";
-        return (bool)preg_match("/^\\\\?($class_name_part)(?:\\\\$class_name_part)*$/", $type);
+        $classNamePart = "[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*";
+        return (bool)preg_match("/^\\\\?($classNamePart)(?:\\\\$classNamePart)*$/", $type);
     }
 
     /**

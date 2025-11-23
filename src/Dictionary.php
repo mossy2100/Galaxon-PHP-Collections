@@ -52,32 +52,32 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * If a source iterable is provided, the Dictionary will be initialized with key-value pairs from the iterable.
      *
-     * @param null|string|iterable<string>|true $key_types Allowed key types (default true, for infer).
-     * @param null|string|iterable<string>|true $value_types Allowed value types (default true, for infer).
+     * @param null|string|iterable<string>|true $keyTypes Allowed key types (default true, for infer).
+     * @param null|string|iterable<string>|true $valueTypes Allowed value types (default true, for infer).
      * @param iterable<mixed, mixed> $source A source iterable to import key-value pairs from (optional).
      * @throws ValueError If a type name is invalid.
      * @throws TypeError If a type name is not specified as a string, or any imported keys/values have disallowed types.
      */
     public function __construct(
-        null|string|iterable|true $key_types = true,
-        null|string|iterable|true $value_types = true,
+        null|string|iterable|true $keyTypes = true,
+        null|string|iterable|true $valueTypes = true,
         iterable $source = []
     ) {
         // Determine if we should infer types from the source iterable.
-        $infer_keys = $key_types === true;
-        $infer_values = $value_types === true;
+        $inferKeys = $keyTypes === true;
+        $inferValues = $valueTypes === true;
 
         // Instantiate the object and typesets.
-        parent::__construct($infer_values ? null : $value_types);
-        $this->keyTypes = new TypeSet($infer_keys ? null : $key_types);
+        parent::__construct($inferValues ? null : $valueTypes);
+        $this->keyTypes = new TypeSet($inferKeys ? null : $keyTypes);
 
         // Import initial key-value pairs from the source iterable.
         foreach ($source as $key => $value) {
             // Infer types from the source iterable if requested.
-            if ($infer_keys) {
+            if ($inferKeys) {
                 $this->keyTypes->addValueType($key);
             }
-            if ($infer_values) {
+            if ($inferValues) {
                 $this->valueTypes->addValueType($value);
             }
 
@@ -90,32 +90,32 @@ final class Dictionary extends Collection implements ArrayAccess
      * Create a new Dictionary by combining separate iterables of keys and values.
      *
      * By default, the key and value types will be automatically inferred from the provided iterables.
-     * Otherwise, if $infer_types is false, the key and value typesets will both be null (i.e. any types allowed).
+     * Otherwise, if $inferTypes is false, the key and value typesets will both be null (i.e. any types allowed).
      *
      * @param iterable<mixed> $keys The keys for the Dictionary.
      * @param iterable<mixed> $values The values for the Dictionary.
-     * @param bool $infer_types Whether to infer the key and value types (default true).
+     * @param bool $inferTypes Whether to infer the key and value types (default true).
      * @return self A new Dictionary with the combined keys and values.
      * @throws ValueError If the iterables have different counts or if keys are not unique.
      */
-    public static function combine(iterable $keys, iterable $values, bool $infer_types = true): self
+    public static function combine(iterable $keys, iterable $values, bool $inferTypes = true): self
     {
         // Convert to arrays to check counts, and enable access keys and values using a common numerical index.
-        $keys_array = is_array($keys) ? array_values($keys) : iterator_to_array($keys, false);
-        $values_array = is_array($values) ? array_values($values) : iterator_to_array($values, false);
+        $keysArray = is_array($keys) ? array_values($keys) : iterator_to_array($keys, false);
+        $valuesArray = is_array($values) ? array_values($values) : iterator_to_array($values, false);
 
         // Check counts match.
-        $key_count = count($keys_array);
-        $value_count = count($values_array);
-        if ($key_count !== $value_count) {
-            throw new ValueError("Cannot combine: keys count ($key_count) does not match values count ($value_count).");
+        $keyCount = count($keysArray);
+        $valueCount = count($valuesArray);
+        if ($keyCount !== $valueCount) {
+            throw new ValueError("Cannot combine: keys count ($keyCount) does not match values count ($valueCount).");
         }
 
         // Create a new Dictionary and add items, checking for duplicate keys along the way.
         $dict = new self();
-        for ($i = 0; $i < $key_count; $i++) {
+        for ($i = 0; $i < $keyCount; $i++) {
             // Get the key.
-            $key = $keys_array[$i];
+            $key = $keysArray[$i];
 
             // Check for duplicate keys.
             if (isset($dict[$key])) {
@@ -123,10 +123,10 @@ final class Dictionary extends Collection implements ArrayAccess
             }
 
             // Get the value.
-            $value = $values_array[$i];
+            $value = $valuesArray[$i];
 
             // Infer types if requested.
-            if ($infer_types) {
+            if ($inferTypes) {
                 $dict->keyTypes->addValueType($key);
                 $dict->valueTypes->addValueType($value);
             }
@@ -210,28 +210,28 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * This method can be called with two parameters, the key and the value, or one parameter only, a KeyValuePair.
      *
-     * @param mixed $key_or_pair The key (two-param form), or a KeyValuePair (one-param form).
+     * @param mixed $keyOrPair The key (two-param form), or a KeyValuePair (one-param form).
      * @param mixed $value The value (two-param form), or null (one-param form).
      * @return $this The modified Dictionary.
      * @throws TypeError If the key or value has a disallowed type.
      * @throws ArgumentCountError If the wrong number of parameters is supplied.
      * @throws TypeError If the one-param form is used and the argument is not a valid KeyValuePair.
      */
-    public function add(mixed $key_or_pair, mixed $value = null): self
+    public function add(mixed $keyOrPair, mixed $value = null): self
     {
         // Support calling the method with one parameter only (a KeyValuePair).
-        $n_args = func_num_args();
-        if ($n_args === 1) {
-            if ($key_or_pair instanceof KeyValuePair) {
-                $key = $key_or_pair->key;
-                $value = $key_or_pair->value;
+        $nArgs = func_num_args();
+        if ($nArgs === 1) {
+            if ($keyOrPair instanceof KeyValuePair) {
+                $key = $keyOrPair->key;
+                $value = $keyOrPair->value;
             } else {
-                throw new TypeError("Invalid key-value pair: " . Stringify::abbrev($key_or_pair));
+                throw new TypeError("Invalid key-value pair: " . Stringify::abbrev($keyOrPair));
             }
-        } elseif ($n_args === 2) {
-            $key = $key_or_pair;
+        } elseif ($nArgs === 2) {
+            $key = $keyOrPair;
         } else {
-            throw new ArgumentCountError("The add() method takes 1 or 2 parameters, got $n_args.");
+            throw new ArgumentCountError("The add() method takes 1 or 2 parameters, got $nArgs.");
         }
 
         // Check the types are valid.
@@ -304,19 +304,19 @@ final class Dictionary extends Collection implements ArrayAccess
         $this->valueTypes->check($value, 'value');
 
         // Initialize the counter.
-        $n_removed = 0;
+        $nRemoved = 0;
 
         // Remove all items with the given value.
         foreach ($this->items as $index => $pair) {
             /** @var KeyValuePair $pair */
             if ($pair->value === $value) {
                 unset($this->items[$index]);
-                $n_removed++;
+                $nRemoved++;
             }
         }
 
         // Return the number of items removed.
-        return $n_removed;
+        return $nRemoved;
     }
 
     // endregion
@@ -372,19 +372,19 @@ final class Dictionary extends Collection implements ArrayAccess
         // Check keys and item order are equal.
         // This actually compares the indexes (i.e. internal string keys), but that's equivalent to comparing the keys
         // in the KeyValuePairs. The !== operator compares type, value, and order of items.
-        $this_indexes = array_keys($this->items);
-        $other_indexes = array_keys($other->items);
-        if ($this_indexes !== $other_indexes) {
+        $thisIndexes = array_keys($this->items);
+        $otherIndexes = array_keys($other->items);
+        if ($thisIndexes !== $otherIndexes) {
             return false;
         }
 
         // Check values are equal.
-        foreach ($this_indexes as $index) {
-            /** @var KeyValuePair $this_pair */
-            $this_pair = $this->items[$index];
-            /** @var KeyValuePair $other_pair */
-            $other_pair = $other->items[$index];
-            if ($this_pair->value !== $other_pair->value) {
+        foreach ($thisIndexes as $index) {
+            /** @var KeyValuePair $thisPair */
+            $thisPair = $this->items[$index];
+            /** @var KeyValuePair $otherPair */
+            $otherPair = $other->items[$index];
+            if ($thisPair->value !== $otherPair->value) {
                 return false;
             }
         }
@@ -494,9 +494,9 @@ final class Dictionary extends Collection implements ArrayAccess
     public function merge(self $other): self
     {
         // Create a new dictionary with the combined type constraints.
-        $key_types = new TypeSet($this->keyTypes)->add($other->keyTypes);
-        $value_types = new TypeSet($this->valueTypes)->add($other->valueTypes);
-        $result = new self($key_types, $value_types);
+        $keyTypes = new TypeSet($this->keyTypes)->add($other->keyTypes);
+        $valueTypes = new TypeSet($this->valueTypes)->add($other->valueTypes);
+        $result = new self($keyTypes, $valueTypes);
 
         // Copy pairs from this dictionary.
         foreach ($this->items as $index => $pair) {

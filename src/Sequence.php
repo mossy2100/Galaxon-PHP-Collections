@@ -105,14 +105,14 @@ final class Sequence extends Collection implements ArrayAccess
      * If a source iterable is provided, the Sequence will be initialized with values from the iterable.
      *
      * @param null|string|iterable<string>|true $types Allowed value types (default true, for infer).
-     * @param mixed $default_value Default value for new items (default null).
+     * @param mixed $defaultValue Default value for new items (default null).
      * @param iterable<mixed> $source A source iterable to import values from (optional).
      * @throws ValueError If a type name is invalid.
      * @throws TypeError If a type is not specified as a string, or any imported values have disallowed types.
      */
     public function __construct(
         null|string|iterable|true $types = true,
-        mixed $default_value = null,
+        mixed $defaultValue = null,
         iterable $source = []
     ) {
         // Determine if we should infer types from the source iterable.
@@ -136,23 +136,23 @@ final class Sequence extends Collection implements ArrayAccess
         // We do this after the value types are known, in case the default value wasn't supplied and needs to be
         // inferred from the value typeset.
         // Check if we should infer the default value from the allowed types.
-        if ($default_value === null) {
+        if ($defaultValue === null) {
             // Try to determine a sane default for common types.
-            if (!$this->valueTypes->tryInferDefaultValue($default_value)) {
+            if (!$this->valueTypes->tryInferDefaultValue($defaultValue)) {
                 // If no default value could be inferred, use null and allow nulls in the Sequence.
                 $this->valueTypes->add('null');
             }
-        } elseif (!$this->valueTypes->match($default_value)) {
+        } elseif (!$this->valueTypes->match($defaultValue)) {
             // The default value has a disallowed type.
             throw new TypeError(
                 'The default value has an invalid type. ' .
                 'Expected one of: ' . $this->valueTypes . ', ' .
-                'but got: ' . Types::getBasicType($default_value) . '.'
+                'but got: ' . Types::getBasicType($defaultValue) . '.'
             );
         }
 
         // Set the default value.
-        $this->defaultValue = $default_value;
+        $this->defaultValue = $defaultValue;
     }
 
     /**
@@ -226,11 +226,11 @@ final class Sequence extends Collection implements ArrayAccess
      * Validate an index (a.k.a. offset) argument.
      *
      * @param mixed $index The index to validate.
-     * @param bool $check_upper_bound Whether to check if an index is within array bounds.
+     * @param bool $checkUpperBound Whether to check if an index is within array bounds.
      * @throws TypeError If the index is not an integer.
      * @throws OutOfRangeException If the index is outside the valid range for the Sequence.
      */
-    private function checkIndex(mixed $index, bool $check_upper_bound = true): void
+    private function checkIndex(mixed $index, bool $checkUpperBound = true): void
     {
         // Check the index is an integer.
         if (!is_int($index)) {
@@ -243,7 +243,7 @@ final class Sequence extends Collection implements ArrayAccess
         }
 
         // Check the index isn't too large.
-        if ($check_upper_bound && $index >= count($this->items)) {
+        if ($checkUpperBound && $index >= count($this->items)) {
             throw new OutOfRangeException("Index is out of range.");
         }
     }
@@ -360,14 +360,14 @@ final class Sequence extends Collection implements ArrayAccess
 
         // For indexes beyond the end of the Sequence, no items need to be shifted, so defer to offsetSet().
         // That will take care of gap-filling with default values.
-        $orig_count = count($this->items);
-        if ($index >= $orig_count) {
+        $origCount = count($this->items);
+        if ($index >= $origCount) {
             $this->offsetSet($index, $item);
             return $this;
         }
 
         // Shift elements after $index right by 1.
-        for ($j = $orig_count; $j > $index; $j--) {
+        for ($j = $origCount; $j > $index; $j--) {
             $this->items[$j] = $this->items[$j - 1];
         }
 
@@ -417,10 +417,10 @@ final class Sequence extends Collection implements ArrayAccess
         $this->checkIndex($index);
 
         // Remove the item from the Sequence.
-        $removed_items = array_splice($this->items, $index, 1);
+        $removedItems = array_splice($this->items, $index, 1);
 
         // Return the removed item.
-        return $removed_items[0];
+        return $removedItems[0];
     }
 
     /**
@@ -434,7 +434,7 @@ final class Sequence extends Collection implements ArrayAccess
     public function removeByValue(mixed $value): int
     {
         // Get the initial count of items.
-        $init_count = count($this->items);
+        $initCount = count($this->items);
 
         // Filter the Sequence to remove the matching values.
         $this->items = array_values(array_filter(
@@ -443,7 +443,7 @@ final class Sequence extends Collection implements ArrayAccess
         ));
 
         // Return the number of items removed.
-        return $init_count - $this->count();
+        return $initCount - $this->count();
     }
 
     /**
@@ -747,16 +747,16 @@ final class Sequence extends Collection implements ArrayAccess
     public function countValues(): Dictionary
     {
         // Construct the dictionary.
-        $value_count = new Dictionary($this->valueTypes, 'uint');
+        $valueCount = new Dictionary($this->valueTypes, 'uint');
 
         // Count the occurrences of each distinct value.
         foreach ($this->items as $item) {
             /** @var int $tally */
-            $tally = $value_count[$item] ?? 0;
-            $value_count[$item] = $tally + 1;
+            $tally = $valueCount[$item] ?? 0;
+            $valueCount[$item] = $tally + 1;
         }
 
-        return $value_count;
+        return $valueCount;
     }
 
     /**
@@ -765,16 +765,16 @@ final class Sequence extends Collection implements ArrayAccess
      * This method is analogous to array_fill().
      * @see https://www.php.net/manual/en/function.array-fill.php
      *
-     * @param int $start_index The zero-based index position to start filling.
+     * @param int $startIndex The zero-based index position to start filling.
      * @param int $count The number of items to fill.
      * @param mixed $value The value to fill with.
      * @return $this The calling object, for chaining.
      */
-    public function fill(int $start_index, int $count, mixed $value): self
+    public function fill(int $startIndex, int $count, mixed $value): self
     {
         // Set the specified Sequence items.
         for ($i = 0; $i < $count; $i++) {
-            $this[$start_index + $i] = $value;
+            $this[$startIndex + $i] = $value;
         }
 
         return $this;
