@@ -20,9 +20,9 @@ use ValueError;
  *
  * @example
  * $customers = new Dictionary('int', 'Customer');
- * $sales_data = new Dictionary('DateTime', 'float');
- * $country_codes = new Dictionary('string', 'string');
- * $car_make = new Dictionary('string', '?string');
+ * $salesData = new Dictionary('DateTime', 'float');
+ * $countryCodes = new Dictionary('string', 'string');
+ * $carMake = new Dictionary('string', '?string');
  *
  * @implements ArrayAccess<mixed, mixed>
  */
