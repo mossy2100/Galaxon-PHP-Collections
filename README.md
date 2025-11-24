@@ -120,6 +120,7 @@ composer require galaxon/collections
 ## Quick Start
 
 ### Sequence - Type-safe lists
+
 ```php
 use Galaxon\Collections\Sequence;
 
@@ -153,6 +154,7 @@ echo $seq->max();      // 8
 ```
 
 ### Dictionary - Key-value pairs with any type
+
 ```php
 use Galaxon\Collections\Dictionary;
 
@@ -182,6 +184,7 @@ foreach ($dict as $key => $value) {
 ```
 
 ### Set - Unique values
+
 ```php
 use Galaxon\Collections\Set;
 

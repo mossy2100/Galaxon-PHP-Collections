@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Galaxon\Collections;
 
-use ArrayIterator;
 use Galaxon\Core\Stringify;
 use Galaxon\Core\Types;
 use Override;
