@@ -697,7 +697,7 @@ $byDomain = $users->filter(fn($k, $v) => str_ends_with($k, '@example.com'));
 - ✅ Type safety for both keys and values
 - ✅ Modern, intuitive API with ArrayAccess
 - ✅ Better iteration (preserves key-value semantics)
-- **Use when:** Building modern PHP 8.3+ applications
+- **Use when:** Building modern PHP 8.4+ applications
 
 ### Quick Decision Guide
 
@@ -706,4 +706,4 @@ $byDomain = $users->filter(fn($k, $v) => str_ends_with($k, '@example.com'));
 - **Need array, resource, or scalar keys?** → Use `Dictionary`
 - **Need type safety?** → Use `Dictionary`
 - **Need transformation methods?** → Use `Dictionary`
-- **Building new PHP 8.3+ code?** → Use `Dictionary`
+- **Building new PHP 8.4+ code?** → Use `Dictionary`
