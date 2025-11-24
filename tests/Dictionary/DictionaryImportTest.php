@@ -265,7 +265,7 @@ class DictionaryImportTest extends TestCase
         $dict->import(['second' => 2, 'third' => 3]);
 
         // Test: Verify order is maintained
-        $keys = $dict->keys();
+        $keys = $dict->keys;
         $this->assertEquals(['first', 'second', 'third'], $keys);
     }
 }

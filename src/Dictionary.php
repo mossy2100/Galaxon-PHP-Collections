@@ -39,6 +39,46 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // endregion
 
+    // region Computed properties
+
+    // PHP_CodeSniffer doesn't know about property hooks yet.
+    // phpcs:disable
+
+    /**
+     * Get all the keys as an array.
+     *
+     * @var mixed[]
+     */
+    public array $keys {
+        get {
+            $keys = [];
+            foreach ($this->items as $pair) {
+                /** @var KeyValuePair $pair */
+                $keys[] = $pair->key;
+            }
+            return $keys;
+        }
+    }
+
+    /**
+     * Get all the values as an array.
+     *
+     * @var mixed[]
+     */
+    public array $values {
+        get {
+            $values = [];
+            foreach ($this->items as $pair) {
+                /** @var KeyValuePair $pair */
+                $values[] = $pair->value;
+            }
+            return $values;
+        }
+    }
+
+    // phpcs:enable
+    // endregion
+
     // region Constructor and factory methods
 
     /**
@@ -165,40 +205,6 @@ final class Dictionary extends Collection implements ArrayAccess
         }
 
         return $index;
-    }
-
-    // endregion
-
-    // region Extraction methods
-
-    /**
-     * Get all the keys as an array.
-     *
-     * @return mixed[]
-     */
-    public function keys(): array
-    {
-        $keys = [];
-        foreach ($this->items as $pair) {
-            /** @var KeyValuePair $pair */
-            $keys[] = $pair->key;
-        }
-        return $keys;
-    }
-
-    /**
-     * Get all the values as an array.
-     *
-     * @return mixed[]
-     */
-    public function values(): array
-    {
-        $values = [];
-        foreach ($this->items as $pair) {
-            /** @var KeyValuePair $pair */
-            $values[] = $pair->value;
-        }
-        return $values;
     }
 
     // endregion

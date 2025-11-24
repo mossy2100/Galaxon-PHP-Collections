@@ -294,10 +294,10 @@ unset($dict['count']);
 
 **Important:** `$dict[]` syntax uses `null` as the key (not append like arrays).
 
-### keys()
+### keys
 
 ```php
-public function keys(): array
+public array $keys
 ```
 
 Get all keys as an array.
@@ -305,13 +305,13 @@ Get all keys as an array.
 **Example:**
 ```php
 $dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
-$keys = $dict->keys(); // ['a', 'b']
+$keys = $dict->keys; // ['a', 'b']
 ```
 
-### values()
+### values
 
 ```php
-public function values(): array
+public array $values
 ```
 
 Get all values as an array.
@@ -319,7 +319,7 @@ Get all values as an array.
 **Example:**
 ```php
 $dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
-$values = $dict->values(); // [1, 2]
+$values = $dict->values; // [1, 2]
 ```
 
 ## Inspection Methods
@@ -383,10 +383,10 @@ echo count($dict);        // Countable interface
 echo $dict->count();      // Direct method
 ```
 
-### eq()
+### equals()
 
 ```php
-public function eq(Collection $other): bool
+public function equals(Collection $other): bool
 ```
 
 Check equality. Dictionaries are equal if they:
@@ -403,7 +403,7 @@ Type constraints are ignored.
 $dict1 = new Dictionary(source: ['a' => 1, 'b' => 2]);
 $dict2 = new Dictionary(source: ['a' => 1, 'b' => 2]);
 
-var_dump($dict1->eq($dict2)); // true
+var_dump($dict1->equals($dict2)); // true
 ```
 
 ### all()

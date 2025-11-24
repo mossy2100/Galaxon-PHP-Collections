@@ -31,7 +31,7 @@ class DictionarySortingTest extends TestCase
         $this->assertSame($dict, $result);
 
         // Test keys are in sorted order.
-        $keys = $dict->keys();
+        $keys = $dict->keys;
         $this->assertEquals(['a', 'b', 'c'], $keys);
     }
 
@@ -49,7 +49,7 @@ class DictionarySortingTest extends TestCase
         $dict->sortByKey();
 
         // Test keys are in sorted order.
-        $keys = $dict->keys();
+        $keys = $dict->keys;
         $this->assertEquals([1, 2, 3], $keys);
     }
 
@@ -103,7 +103,7 @@ class DictionarySortingTest extends TestCase
         $this->assertSame($dict, $result);
 
         // Test values are in sorted order.
-        $values = $dict->values();
+        $values = $dict->values;
         $this->assertEquals([1, 2, 3], $values);
     }
 
@@ -121,7 +121,7 @@ class DictionarySortingTest extends TestCase
         $dict->sortByValue();
 
         // Test values are in sorted order.
-        $values = $dict->values();
+        $values = $dict->values;
         $this->assertEquals(['apple', 'mango', 'zebra'], $values);
     }
 
@@ -153,7 +153,7 @@ class DictionarySortingTest extends TestCase
         $dict->sortByValue();
 
         // Test keys are preserved with correct values.
-        $keys = $dict->keys();
+        $keys = $dict->keys;
         $this->assertEquals(['second', 'third', 'first'], $keys);
         $this->assertEquals(100, $dict['second']);
         $this->assertEquals(200, $dict['third']);
@@ -175,7 +175,7 @@ class DictionarySortingTest extends TestCase
         $dict->sortByValue();
 
         // Test values are sorted.
-        $values = $dict->values();
+        $values = $dict->values;
         $this->assertEquals([1, 1, 2, 2], $values);
     }
 
@@ -193,7 +193,7 @@ class DictionarySortingTest extends TestCase
         $dict->sortByValue()->sortByKey();
 
         // Test final sort (by key) is applied.
-        $keys = $dict->keys();
+        $keys = $dict->keys;
         $this->assertEquals(['a', 'm', 'z'], $keys);
     }
 
@@ -228,7 +228,7 @@ class DictionarySortingTest extends TestCase
         $dict->sortByKey();
 
         // Test keys are sorted (exact order depends on spaceship operator behavior).
-        $keys = $dict->keys();
+        $keys = $dict->keys;
         $this->assertCount(4, $keys);
     }
 
@@ -246,7 +246,7 @@ class DictionarySortingTest extends TestCase
         $dict->sort(fn($a, $b) => $b->value <=> $a->value);
 
         // Test values are in descending order.
-        $values = $dict->values();
+        $values = $dict->values;
         $this->assertEquals([3, 2, 1], $values);
     }
 }

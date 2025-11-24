@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Set;
 
 use Galaxon\Collections\Dictionary;
+use Galaxon\Collections\List;
 use Galaxon\Collections\Sequence;
 use Galaxon\Collections\Set;
 use PHPUnit\Framework\Attributes\CoversClass;

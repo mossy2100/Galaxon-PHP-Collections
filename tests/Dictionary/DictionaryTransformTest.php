@@ -289,7 +289,7 @@ class DictionaryTransformTest extends TestCase
         $filtered = $dict->filter(fn($key, $value) => $value % 2 === 0);
 
         // Test order is preserved.
-        $keys = $filtered->keys();
+        $keys = $filtered->keys;
         $this->assertEquals(['second', 'fourth'], $keys);
     }
 
