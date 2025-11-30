@@ -6,6 +6,7 @@ namespace Galaxon\Collections;
 
 use ArrayAccess;
 use ArrayIterator;
+use Galaxon\Core\Numbers;
 use Galaxon\Core\Types;
 use OutOfRangeException;
 use Override;
@@ -180,7 +181,7 @@ final class Sequence extends Collection implements ArrayAccess
     public static function range(int|float $start, int|float $end, int|float $step = 1): self
     {
         // Validate step size. Use loose comparison here to validate either an int or float argument.
-        if ($step == 0) {
+        if (Numbers::isZero($step)) {
             throw new ValueError("The step size cannot be zero.");
         }
         if ($start <= $end && $step < 0) {
@@ -930,7 +931,7 @@ final class Sequence extends Collection implements ArrayAccess
         // Use a custom reducer to find the minimum value instead of min(), because that function will allow
         // non-numbers, and this one will not. It's more consistent with the type-safe philosophy of this
         // library to be strict.
-        $min = static fn (int|float $min, int|float $item): int|float => min($item, $min);
+        $min = static fn(int|float $min, int|float $item): int|float => min($item, $min);
         /** @var int|float */
         return $this->reduce($min, $this->items[0]);
     }
@@ -952,7 +953,7 @@ final class Sequence extends Collection implements ArrayAccess
         // Use a custom reducer to find the maximum value instead of max(), because that function will allow
         // non-numbers, and this one will not. It's more consistent with the type-safe philosophy of this
         // library to be strict.
-        $max = static fn (int|float $max, int|float $item): int|float => max($item, $max);
+        $max = static fn(int|float $max, int|float $item): int|float => max($item, $max);
         /** @var int|float */
         return $this->reduce($max, $this->items[0]);
     }

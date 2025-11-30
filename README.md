@@ -291,7 +291,7 @@ Manages type constraints for collections with runtime validation.
 - Building type-safe APIs
 - Type inference in generic code
 
-#### [KeyValuePair](docs/KeyValuePair.md)
+#### [Pair](docs/Pair.md)
 Immutable container for a key-value pair where both can be any type.
 
 **Key Features:**
@@ -432,7 +432,7 @@ $array = $collection->toArray();
 
 ### Memory Efficiency
 - Collections use internal PHP arrays for storage
-- KeyValuePair adds minimal overhead (just object wrapper)
+- Pair adds minimal overhead (just object wrapper)
 - TypeSet validation is optimized for common types
 
 ### Type Checking Overhead

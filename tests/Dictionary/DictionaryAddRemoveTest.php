@@ -6,7 +6,7 @@ namespace Galaxon\Collections\Tests\Dictionary;
 
 use ArgumentCountError;
 use Galaxon\Collections\Dictionary;
-use Galaxon\Collections\KeyValuePair;
+use Galaxon\Collections\Pair;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
@@ -37,12 +37,12 @@ class DictionaryAddRemoveTest extends TestCase
     }
 
     /**
-     * Test adding with one parameter (KeyValuePair).
+     * Test adding with one parameter (Pair).
      */
-    public function testAddWithKeyValuePair(): void
+    public function testAddWithPair(): void
     {
         $dict = new Dictionary('string', 'int');
-        $pair = new KeyValuePair('key1', 123);
+        $pair = new Pair('key1', 123);
 
         // Test adding the pair.
         $dict->add($pair);

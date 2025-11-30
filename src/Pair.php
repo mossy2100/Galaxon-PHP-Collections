@@ -11,10 +11,10 @@ namespace Galaxon\Collections;
  * @property mixed $key The key of the pair.
  * @property mixed $value The value of the pair.
  */
-readonly class KeyValuePair
+readonly class Pair
 {
     /**
-     * Create a new KeyValuePair.
+     * Create a new Pair.
      *
      * @param mixed $key The key.
      * @param mixed $value The value.

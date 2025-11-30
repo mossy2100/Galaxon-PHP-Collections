@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests;
 
 use DateTime;
-use Galaxon\Collections\KeyValuePair;
+use Galaxon\Collections\Pair;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for KeyValuePair class.
+ * Tests for Pair class.
  */
-#[CoversClass(KeyValuePair::class)]
-class KeyValuePairTest extends TestCase
+#[CoversClass(Pair::class)]
+class PairTest extends TestCase
 {
     /**
      * Test constructor with scalar key and value.
      */
     public function testConstructorWithScalars(): void
     {
-        $pair = new KeyValuePair('name', 'Alice');
+        $pair = new Pair('name', 'Alice');
 
-        $this->assertInstanceOf(KeyValuePair::class, $pair);
+        $this->assertInstanceOf(Pair::class, $pair);
         $this->assertSame('name', $pair->key);
         $this->assertSame('Alice', $pair->value);
     }
@@ -32,7 +32,7 @@ class KeyValuePairTest extends TestCase
      */
     public function testConstructorWithIntegerKey(): void
     {
-        $pair = new KeyValuePair(42, 'answer');
+        $pair = new Pair(42, 'answer');
 
         $this->assertSame(42, $pair->key);
         $this->assertSame('answer', $pair->value);
@@ -43,7 +43,7 @@ class KeyValuePairTest extends TestCase
      */
     public function testConstructorWithNullKey(): void
     {
-        $pair = new KeyValuePair(null, 'value');
+        $pair = new Pair(null, 'value');
 
         $this->assertNull($pair->key);
         $this->assertSame('value', $pair->value);
@@ -54,7 +54,7 @@ class KeyValuePairTest extends TestCase
      */
     public function testConstructorWithNullValue(): void
     {
-        $pair = new KeyValuePair('key', null);
+        $pair = new Pair('key', null);
 
         $this->assertSame('key', $pair->key);
         $this->assertNull($pair->value);
@@ -65,7 +65,7 @@ class KeyValuePairTest extends TestCase
      */
     public function testConstructorWithBothNull(): void
     {
-        $pair = new KeyValuePair(null, null);
+        $pair = new Pair(null, null);
 
         $this->assertNull($pair->key);
         $this->assertNull($pair->value);
@@ -77,7 +77,7 @@ class KeyValuePairTest extends TestCase
     public function testConstructorWithArrayKey(): void
     {
         $key = [1, 2, 3];
-        $pair = new KeyValuePair($key, 'coordinates');
+        $pair = new Pair($key, 'coordinates');
 
         $this->assertSame($key, $pair->key);
         $this->assertSame('coordinates', $pair->value);
@@ -89,7 +89,7 @@ class KeyValuePairTest extends TestCase
     public function testConstructorWithArrayValue(): void
     {
         $value = ['a', 'b', 'c'];
-        $pair = new KeyValuePair('letters', $value);
+        $pair = new Pair('letters', $value);
 
         $this->assertSame('letters', $pair->key);
         $this->assertSame($value, $pair->value);
@@ -101,7 +101,7 @@ class KeyValuePairTest extends TestCase
     public function testConstructorWithObjectKey(): void
     {
         $key = new DateTime('2024-01-01');
-        $pair = new KeyValuePair($key, 'event');
+        $pair = new Pair($key, 'event');
 
         $this->assertSame($key, $pair->key);
         $this->assertSame('event', $pair->value);
@@ -113,7 +113,7 @@ class KeyValuePairTest extends TestCase
     public function testConstructorWithObjectValue(): void
     {
         $value = new DateTime('2024-01-01');
-        $pair = new KeyValuePair('date', $value);
+        $pair = new Pair('date', $value);
 
         $this->assertSame('date', $pair->key);
         $this->assertSame($value, $pair->value);
@@ -124,7 +124,7 @@ class KeyValuePairTest extends TestCase
      */
     public function testConstructorWithBooleanKey(): void
     {
-        $pair = new KeyValuePair(true, 'yes');
+        $pair = new Pair(true, 'yes');
 
         $this->assertTrue($pair->key);
         $this->assertSame('yes', $pair->value);
@@ -135,7 +135,7 @@ class KeyValuePairTest extends TestCase
      */
     public function testConstructorWithFloatKey(): void
     {
-        $pair = new KeyValuePair(3.14, 'pi');
+        $pair = new Pair(3.14, 'pi');
 
         $this->assertSame(3.14, $pair->key);
         $this->assertSame('pi', $pair->value);
@@ -149,7 +149,7 @@ class KeyValuePairTest extends TestCase
         $resource = fopen('php://memory', 'r');
         $this->assertIsResource($resource);
 
-        $pair = new KeyValuePair($resource, 'stream');
+        $pair = new Pair($resource, 'stream');
 
         $this->assertSame($resource, $pair->key);
         $this->assertSame('stream', $pair->value);
@@ -158,11 +158,11 @@ class KeyValuePairTest extends TestCase
     }
 
     /**
-     * Test that KeyValuePair properties are accessible.
+     * Test that Pair properties are accessible.
      */
     public function testPropertiesAreAccessible(): void
     {
-        $pair = new KeyValuePair('key', 'value');
+        $pair = new Pair('key', 'value');
 
         // Verify properties are accessible
         $this->assertSame('key', $pair->key);
@@ -173,12 +173,12 @@ class KeyValuePairTest extends TestCase
     }
 
     /**
-     * Test multiple KeyValuePairs are independent.
+     * Test multiple Pairs are independent.
      */
     public function testMultiplePairsAreIndependent(): void
     {
-        $pair1 = new KeyValuePair('key1', 'value1');
-        $pair2 = new KeyValuePair('key2', 'value2');
+        $pair1 = new Pair('key1', 'value1');
+        $pair2 = new Pair('key2', 'value2');
 
         $this->assertSame('key1', $pair1->key);
         $this->assertSame('value1', $pair1->value);
@@ -191,10 +191,10 @@ class KeyValuePairTest extends TestCase
      */
     public function testConstructorWithMixedTypes(): void
     {
-        $pair1 = new KeyValuePair(1, 'string');
-        $pair2 = new KeyValuePair('string', 2);
-        $pair3 = new KeyValuePair([1, 2], new DateTime());
-        $pair4 = new KeyValuePair(true, false);
+        $pair1 = new Pair(1, 'string');
+        $pair2 = new Pair('string', 2);
+        $pair3 = new Pair([1, 2], new DateTime());
+        $pair4 = new Pair(true, false);
 
         $this->assertSame(1, $pair1->key);
         $this->assertSame('string', $pair1->value);

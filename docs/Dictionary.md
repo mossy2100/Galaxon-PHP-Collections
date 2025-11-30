@@ -193,7 +193,7 @@ $dict = Dictionary::combine($keys, $values);
 ```php
 public function add(mixed $key, mixed $value): self
 // OR
-public function add(KeyValuePair $pair): self
+public function add(Pair $pair): self
 ```
 
 Add a key-value pair. Returns `$this` for chaining.
@@ -204,8 +204,8 @@ $dict = new Dictionary('string', 'int');
 $dict->add('count', 42);
 $dict->add('total', 100);
 
-// Using KeyValuePair
-$dict->add(new KeyValuePair('average', 71));
+// Using Pair
+$dict->add(new Pair('average', 71));
 
 // Chaining
 $dict->add('min', 10)->add('max', 90);
@@ -418,7 +418,7 @@ Check if all items pass a test.
 ```php
 $dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
 
-// Note: Callback receives KeyValuePair objects
+// Note: Callback receives Pair objects
 $allPositive = $dict->all(fn($pair) => $pair->value > 0);
 ```
 
@@ -572,7 +572,7 @@ foreach ($dict as $key => $value) {
 public function toArray(): array
 ```
 
-Convert to array of KeyValuePair objects.
+Convert to array of Pair objects.
 
 **Example:**
 ```php
@@ -585,7 +585,7 @@ $pairs = $dict->toArray();
 public function toSequence(): Sequence
 ```
 
-Convert to Sequence of KeyValuePairs.
+Convert to Sequence of Pairs.
 
 **Example:**
 ```php

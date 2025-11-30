@@ -53,7 +53,7 @@ final class Dictionary extends Collection implements ArrayAccess
         get {
             $keys = [];
             foreach ($this->items as $pair) {
-                /** @var KeyValuePair $pair */
+                /** @var Pair $pair */
                 $keys[] = $pair->key;
             }
             return $keys;
@@ -69,7 +69,7 @@ final class Dictionary extends Collection implements ArrayAccess
         get {
             $values = [];
             foreach ($this->items as $pair) {
-                /** @var KeyValuePair $pair */
+                /** @var Pair $pair */
                 $values[] = $pair->value;
             }
             return $values;
@@ -214,21 +214,21 @@ final class Dictionary extends Collection implements ArrayAccess
     /**
      * Add a key-value pair to the dictionary.
      *
-     * This method can be called with two parameters, the key and the value, or one parameter only, a KeyValuePair.
+     * This method can be called with two parameters, the key and the value, or one parameter only, a Pair.
      *
-     * @param mixed $keyOrPair The key (two-param form), or a KeyValuePair (one-param form).
+     * @param mixed $keyOrPair The key (two-param form), or a Pair (one-param form).
      * @param mixed $value The value (two-param form), or null (one-param form).
      * @return $this The modified Dictionary.
      * @throws TypeError If the key or value has a disallowed type.
      * @throws ArgumentCountError If the wrong number of parameters is supplied.
-     * @throws TypeError If the one-param form is used and the argument is not a valid KeyValuePair.
+     * @throws TypeError If the one-param form is used and the argument is not a valid Pair.
      */
     public function add(mixed $keyOrPair, mixed $value = null): self
     {
-        // Support calling the method with one parameter only (a KeyValuePair).
+        // Support calling the method with one parameter only (a Pair).
         $nArgs = func_num_args();
         if ($nArgs === 1) {
-            if ($keyOrPair instanceof KeyValuePair) {
+            if ($keyOrPair instanceof Pair) {
                 $key = $keyOrPair->key;
                 $value = $keyOrPair->value;
             } else {
@@ -244,7 +244,7 @@ final class Dictionary extends Collection implements ArrayAccess
         $this->keyTypes->check($key, 'key');
         $this->valueTypes->check($value, 'value');
 
-        // Leverage offsetSet() to generate the lookup key and the key-value pair.
+        // Leverage offsetSet() to generate the index and the pair.
         $this[$key] = $value;
 
         // Return this for chaining.
@@ -263,7 +263,7 @@ final class Dictionary extends Collection implements ArrayAccess
     {
         // Copy the source keys and values into the new dictionary.
         foreach ($source as $key => $value) {
-            // Leverage offsetSet() to generate the lookup key and the key-value pair.
+            // Leverage offsetSet() to generate the index and the pair.
             $this[$key] = $value;
         }
 
@@ -284,7 +284,7 @@ final class Dictionary extends Collection implements ArrayAccess
         $index = $this->checkKey($key);
 
         // Get the item.
-        /** @var KeyValuePair $pair */
+        /** @var Pair $pair */
         $pair = $this->items[$index];
 
         // Get the corresponding value.
@@ -314,7 +314,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
         // Remove all items with the given value.
         foreach ($this->items as $index => $pair) {
-            /** @var KeyValuePair $pair */
+            /** @var Pair $pair */
             if ($pair->value === $value) {
                 unset($this->items[$index]);
                 $nRemoved++;
@@ -342,7 +342,7 @@ final class Dictionary extends Collection implements ArrayAccess
     public function contains(mixed $value): bool
     {
         foreach ($this->items as $pair) {
-            /** @var KeyValuePair $pair */
+            /** @var Pair $pair */
             if ($pair->value === $value) {
                 return true;
             }
@@ -377,7 +377,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
         // Check keys and item order are equal.
         // This actually compares the indexes (i.e. internal string keys), but that's equivalent to comparing the keys
-        // in the KeyValuePairs. The !== operator compares type, value, and order of items.
+        // in the Pairs. The !== operator compares type, value, and order of items.
         $thisIndexes = array_keys($this->items);
         $otherIndexes = array_keys($other->items);
         if ($thisIndexes !== $otherIndexes) {
@@ -386,9 +386,9 @@ final class Dictionary extends Collection implements ArrayAccess
 
         // Check values are equal.
         foreach ($thisIndexes as $index) {
-            /** @var KeyValuePair $thisPair */
+            /** @var Pair $thisPair */
             $thisPair = $this->items[$index];
-            /** @var KeyValuePair $otherPair */
+            /** @var Pair $otherPair */
             $otherPair = $other->items[$index];
             if ($thisPair->value !== $otherPair->value) {
                 return false;
@@ -473,7 +473,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
         // Iterate over the items in the current dictionary.
         foreach ($this->items as $pair) {
-            /** @var KeyValuePair $pair */
+            /** @var Pair $pair */
 
             // Check if this value already exists as a key in the result.
             if ($result->keyExists($pair->value)) {
@@ -506,13 +506,13 @@ final class Dictionary extends Collection implements ArrayAccess
 
         // Copy pairs from this dictionary.
         foreach ($this->items as $index => $pair) {
-            /** @var KeyValuePair $pair */
+            /** @var Pair $pair */
             $result->items[$index] = clone $pair;
         }
 
         // Copy pairs from the other dictionary.
         foreach ($other->items as $index => $pair) {
-            /** @var KeyValuePair $pair */
+            /** @var Pair $pair */
             $result->items[$index] = clone $pair;
         }
 
@@ -543,7 +543,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
         // Apply the filter with validation.
         foreach ($this->items as $pair) {
-            /** @var KeyValuePair $pair */
+            /** @var Pair $pair */
 
             // See if we want to keep this pair.
             $keep = $callback($pair->key, $pair->value);
@@ -597,7 +597,7 @@ final class Dictionary extends Collection implements ArrayAccess
         $index = $this->checkKey($offset);
 
         // Get the key-value pair.
-        /** @var KeyValuePair $pair */
+        /** @var Pair $pair */
         $pair = $this->items[$index];
 
         // Get the value.
@@ -634,7 +634,7 @@ final class Dictionary extends Collection implements ArrayAccess
         $index = Types::getUniqueString($offset);
 
         // Store the key-value pair in the items array.
-        $this->items[$index] = new KeyValuePair($offset, $value);
+        $this->items[$index] = new Pair($offset, $value);
     }
 
     /**
@@ -660,7 +660,7 @@ final class Dictionary extends Collection implements ArrayAccess
     // region Conversion methods
 
     /**
-     * Convert the Dictionary to a Sequence of KeyValuePairs.
+     * Convert the Dictionary to a Sequence of Pairs.
      *
      * @return Sequence The new Sequence.
      */
@@ -681,9 +681,9 @@ final class Dictionary extends Collection implements ArrayAccess
     #[Override]
     public function getIterator(): Traversable
     {
-        // This loop ignores the indexes, and returns the keys and values from the KeyValuePairs.
+        // This loop ignores the indexes, and returns the keys and values from the pairs.
         foreach ($this->items as $pair) {
-            /** @var KeyValuePair $pair */
+            /** @var Pair $pair */
             yield $pair->key => $pair->value;
         }
     }

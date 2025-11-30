@@ -108,7 +108,7 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable, E
     /**
      * Check if all items in the Collection pass a test.
      *
-     * NB: If calling this method on a Dictionary, the callback function must be able to accept a KeyValuePair.
+     * NB: If calling this method on a Dictionary, the callback function must be able to accept a Pair object.
      *
      * This method is analogous to array_all().
      * @see https://www.php.net/manual/en/function.array-all.php
@@ -124,7 +124,7 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable, E
     /**
      * Check if any items in the Collection pass a test.
      *
-     * NB: If calling this method on a Dictionary, the callback function must be able to accept a KeyValuePair.
+     * NB: If calling this method on a Dictionary, the callback function must be able to accept a Pair object.
      *
      * This method is analogous to array_any().
      * @see https://www.php.net/manual/en/function.array-any.php

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Dictionary;
 
 use Galaxon\Collections\Dictionary;
-use Galaxon\Collections\KeyValuePair;
+use Galaxon\Collections\Pair;
 use Galaxon\Collections\Sequence;
 use Galaxon\Collections\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 class DictionaryConversionTest extends TestCase
 {
     /**
-     * Test toArray converts Dictionary to array of KeyValuePair objects.
+     * Test toArray converts Dictionary to array of Pair objects.
      */
     public function testToArrayConvertsToArray(): void
     {
@@ -30,12 +30,12 @@ class DictionaryConversionTest extends TestCase
         // Test converting to array.
         $array = $dict->toArray();
 
-        // Test array structure (contains KeyValuePair objects as internal representation).
+        // Test array structure (contains Pair objects as internal representation).
         $this->assertIsArray($array);
         $this->assertCount(3, $array);
-        $this->assertInstanceOf(KeyValuePair::class, $array[0]);
-        $this->assertInstanceOf(KeyValuePair::class, $array[1]);
-        $this->assertInstanceOf(KeyValuePair::class, $array[2]);
+        $this->assertInstanceOf(Pair::class, $array[0]);
+        $this->assertInstanceOf(Pair::class, $array[1]);
+        $this->assertInstanceOf(Pair::class, $array[2]);
     }
 
     /**
@@ -82,7 +82,7 @@ class DictionaryConversionTest extends TestCase
         $dict->add('third', 3);
 
         // Test array entries are in insertion order.
-        /** @var KeyValuePair[] $array */
+        /** @var Pair[] $array */
         $array = $dict->toArray();
 
         $this->assertEquals('first', $array[0]->key);
@@ -122,12 +122,12 @@ class DictionaryConversionTest extends TestCase
         // Test converting to Sequence.
         $sequence = $dict->toSequence();
 
-        // Test Sequence contains KeyValuePairs.
+        // Test Sequence contains Pairs.
         $this->assertInstanceOf(Sequence::class, $sequence);
         $this->assertCount(3, $sequence);
-        $this->assertInstanceOf(KeyValuePair::class, $sequence[0]);
-        $this->assertInstanceOf(KeyValuePair::class, $sequence[1]);
-        $this->assertInstanceOf(KeyValuePair::class, $sequence[2]);
+        $this->assertInstanceOf(Pair::class, $sequence[0]);
+        $this->assertInstanceOf(Pair::class, $sequence[1]);
+        $this->assertInstanceOf(Pair::class, $sequence[2]);
     }
 
     /**
@@ -144,15 +144,15 @@ class DictionaryConversionTest extends TestCase
         $sequence = $dict->toSequence();
 
         // Test order is preserved.
-        /** @var KeyValuePair $pair */
+        /** @var Pair $pair */
         $pair = $sequence[0];
         $this->assertEquals('first', $pair->key);
 
-        /** @var KeyValuePair $pair */
+        /** @var Pair $pair */
         $pair = $sequence[1];
         $this->assertEquals('second', $pair->key);
 
-        /** @var KeyValuePair $pair */
+        /** @var Pair $pair */
         $pair = $sequence[2];
         $this->assertEquals('third', $pair->key);
     }

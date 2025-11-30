@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Default value inference
   - Support for pseudotypes (scalar, number, uint, mixed, etc.)
   - Class/interface/trait matching with inheritance support
-- **KeyValuePair** - Immutable container for key-value pairs
+- **Pair** - Immutable container for key-value pairs
   - Readonly/immutable
   - Support for any type as key and value
 - Runtime type validation with detailed error messages
