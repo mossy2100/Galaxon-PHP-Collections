@@ -42,7 +42,9 @@ final class Dictionary extends Collection implements ArrayAccess
     // region Computed properties
 
     // PHP_CodeSniffer doesn't know about property hooks yet.
-    // phpcs:disable
+    // phpcs:disable PSR2.Classes.PropertyDeclaration.Multiple
+    // phpcs:disable PSR2.Classes.PropertyDeclaration.ScopeMissing
+    // phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 
     /**
      * Get all the keys as an array.
@@ -76,7 +78,10 @@ final class Dictionary extends Collection implements ArrayAccess
         }
     }
 
-    // phpcs:enable
+    // phpcs:enable PSR2.Classes.PropertyDeclaration.Multiple
+    // phpcs:enable PSR2.Classes.PropertyDeclaration.ScopeMissing
+    // phpcs:enable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+
     // endregion
 
     // region Constructor and factory methods
