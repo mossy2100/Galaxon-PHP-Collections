@@ -42,8 +42,7 @@ final class Dictionary extends Collection implements ArrayAccess
     // region Computed properties
 
     // PHP_CodeSniffer doesn't know about property hooks yet.
-    // phpcs:disable PSR2.Classes.PropertyDeclaration.Multiple
-    // phpcs:disable PSR2.Classes.PropertyDeclaration.ScopeMissing
+    // phpcs:disable PSR2.Classes.PropertyDeclaration
     // phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 
     /**
@@ -78,8 +77,7 @@ final class Dictionary extends Collection implements ArrayAccess
         }
     }
 
-    // phpcs:enable PSR2.Classes.PropertyDeclaration.Multiple
-    // phpcs:enable PSR2.Classes.PropertyDeclaration.ScopeMissing
+    // phpcs:enable PSR2.Classes.PropertyDeclaration
     // phpcs:enable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 
     // endregion
