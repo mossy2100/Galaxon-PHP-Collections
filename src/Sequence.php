@@ -181,7 +181,7 @@ final class Sequence extends Collection implements ArrayAccess
     public static function range(int|float $start, int|float $end, int|float $step = 1): self
     {
         // Validate step size. Use loose comparison here to validate either an int or float argument.
-        if (Numbers::isZero($step)) {
+        if (Numbers::equal($step, 0)) {
             throw new ValueError("The step size cannot be zero.");
         }
         if ($start <= $end && $step < 0) {
