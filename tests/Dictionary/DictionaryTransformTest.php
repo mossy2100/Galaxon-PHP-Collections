@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Dictionary;
 
 use Galaxon\Collections\Dictionary;
+use Galaxon\Collections\DuplicateKeyException;
+use Galaxon\Collections\Pair;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 use ValueError;
 
 /**
- * Tests for Dictionary transformation methods (flip, merge, filter).
+ * Tests for Dictionary transformation methods (flip, merge, filter, map).
  */
 #[CoversClass(Dictionary::class)]
 class DictionaryTransformTest extends TestCase
@@ -62,17 +64,17 @@ class DictionaryTransformTest extends TestCase
     }
 
     /**
-     * Test flip with duplicate values throws ValueError.
+     * Test flip with duplicate values throws DuplicateKeyException.
      */
-    public function testFlipWithDuplicateValuesThrowsValueError(): void
+    public function testFlipWithDuplicateValuesThrowsDuplicateKeyException(): void
     {
         $dict = new Dictionary('string', 'int');
         $dict->add('first', 1);
         $dict->add('second', 2);
         $dict->add('third', 1);
 
-        // Test flipping with duplicate values throws ValueError.
-        $this->expectException(ValueError::class);
+        // Test flipping with duplicate values throws DuplicateKeyException.
+        $this->expectException(DuplicateKeyException::class);
         $this->expectExceptionMessage("Cannot flip Dictionary: values are not unique.");
         $dict->flip();
     }
@@ -311,5 +313,179 @@ class DictionaryTransformTest extends TestCase
         $this->assertEquals(1, $filtered['a']);
         $this->assertEquals(2, $filtered['b']);
         $this->assertEquals(3, $filtered['c']);
+    }
+
+    /**
+     * Test map transforms key-value pairs.
+     */
+    public function testMapTransformsPairs(): void
+    {
+        $dict = new Dictionary('string', 'int');
+        $dict->add('a', 1);
+        $dict->add('b', 2);
+        $dict->add('c', 3);
+
+        // Test mapping to double values.
+        // @phpstan-ignore binaryOp.invalid
+        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 2));
+
+        // Test all values are doubled.
+        $this->assertCount(3, $mapped);
+        $this->assertEquals(2, $mapped['a']);
+        $this->assertEquals(4, $mapped['b']);
+        $this->assertEquals(6, $mapped['c']);
+
+        // Test original dictionary is unchanged.
+        $this->assertCount(3, $dict);
+        $this->assertEquals(1, $dict['a']);
+    }
+
+    /**
+     * Test map can transform keys.
+     */
+    public function testMapCanTransformKeys(): void
+    {
+        $dict = new Dictionary('int', 'string');
+        $dict->add(1, 'a');
+        $dict->add(2, 'b');
+        $dict->add(3, 'c');
+
+        // Test mapping keys to strings.
+        // @phpstan-ignore encapsedStringPart.nonString
+        $mapped = $dict->map(fn($pair) => new Pair("key{$pair->key}", $pair->value));
+
+        // Test keys are transformed.
+        $this->assertCount(3, $mapped);
+        $this->assertEquals('a', $mapped['key1']);
+        $this->assertEquals('b', $mapped['key2']);
+        $this->assertEquals('c', $mapped['key3']);
+    }
+
+    /**
+     * Test map infers types from callback results.
+     */
+    public function testMapInfersTypes(): void
+    {
+        $dict = new Dictionary('string', 'int');
+        $dict->add('a', 1);
+        $dict->add('b', 2);
+
+        // Test mapping int values to float values.
+        // @phpstan-ignore binaryOp.invalid
+        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 1.5));
+
+        // Test types are inferred correctly.
+        $this->assertTrue($mapped->keyTypes->containsOnly('string'));
+        $this->assertTrue($mapped->valueTypes->containsOnly('float'));
+    }
+
+    /**
+     * Test map on empty dictionary.
+     */
+    public function testMapOnEmptyDictionary(): void
+    {
+        $dict = new Dictionary('string', 'int');
+
+        // Test mapping empty dictionary.
+        // @phpstan-ignore binaryOp.invalid
+        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 2));
+
+        // Test result is empty.
+        $this->assertCount(0, $mapped);
+        $this->assertTrue($mapped->empty());
+    }
+
+    /**
+     * Test map preserves order.
+     */
+    public function testMapPreservesOrder(): void
+    {
+        $dict = new Dictionary('string', 'int');
+        $dict->add('first', 1);
+        $dict->add('second', 2);
+        $dict->add('third', 3);
+
+        // Test mapping preserves order.
+        // @phpstan-ignore binaryOp.invalid
+        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 10));
+
+        // Test order is preserved.
+        $keys = $mapped->keys;
+        $this->assertEquals(['first', 'second', 'third'], $keys);
+    }
+
+    /**
+     * Test map callback must return Pair.
+     */
+    public function testMapCallbackMustReturnPair(): void
+    {
+        $dict = new Dictionary('string', 'int');
+        $dict->add('a', 1);
+
+        // Test callback returning non-Pair throws TypeError.
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Map callback must return a Pair');
+        // @phpstan-ignore binaryOp.invalid
+        $dict->map(fn($pair) => $pair->value * 2); // Returns int, not Pair
+    }
+
+    /**
+     * Test map with duplicate keys throws DuplicateKeyException.
+     */
+    public function testMapWithDuplicateKeysThrowsDuplicateKeyException(): void
+    {
+        $dict = new Dictionary('string', 'int');
+        $dict->add('a', 1);
+        $dict->add('b', 2);
+        $dict->add('c', 3);
+
+        // Test mapping to same key throws DuplicateKeyException.
+        $this->expectException(DuplicateKeyException::class);
+        $this->expectExceptionMessage('Map callback produced a duplicate key');
+        $dict->map(fn($pair) => new Pair('same', $pair->value));
+    }
+
+    /**
+     * Test map can change both key and value types.
+     */
+    public function testMapCanChangeKeyAndValueTypes(): void
+    {
+        $dict = new Dictionary('string', 'int');
+        $dict->add('a', 1);
+        $dict->add('b', 2);
+
+        // Test mapping to different types.
+        $mapped = $dict->map(fn($pair) => new Pair($pair->value, $pair->key));
+
+        // Test types are changed.
+        $this->assertTrue($mapped->keyTypes->containsOnly('int'));
+        $this->assertTrue($mapped->valueTypes->containsOnly('string'));
+
+        // Test values are correct.
+        $this->assertEquals('a', $mapped[1]);
+        $this->assertEquals('b', $mapped[2]);
+    }
+
+    /**
+     * Test map with complex transformation.
+     */
+    public function testMapWithComplexTransformation(): void
+    {
+        $dict = new Dictionary('string', 'int');
+        $dict->add('apple', 5);
+        $dict->add('banana', 3);
+        $dict->add('cherry', 7);
+
+        // Test complex mapping that changes both keys and values.
+        $mapped = $dict->map(fn($pair) => new Pair(
+            strtoupper($pair->key),
+            // @phpstan-ignore binaryOp.invalid
+            $pair->value * 2 + 10
+        ));
+
+        // Test transformations are applied.
+        $this->assertEquals(20, $mapped['APPLE']);  // 5 * 2 + 10
+        $this->assertEquals(16, $mapped['BANANA']); // 3 * 2 + 10
+        $this->assertEquals(24, $mapped['CHERRY']); // 7 * 2 + 10
     }
 }

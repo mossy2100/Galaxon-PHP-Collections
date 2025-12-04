@@ -5,10 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-01-14
+## [0.2.0] - 2025-01-15
 
 ### Added
-- Initial release of Galaxon Collections library
+- **Dictionary::map()** - Transform key-value pairs using a callback function
+  - Maps each Pair to a new Pair, allowing transformation of both keys and values
+  - Automatically infers types from callback results
+  - Throws `DuplicateKeyException` if callback produces duplicate keys
+  - Returns new Dictionary without modifying original
+- **DuplicateKeyException** - New exception class for duplicate key scenarios
+  - Extends `RuntimeException` for better error semantics
+  - Thrown by `Dictionary::flip()` when values are not unique
+  - Thrown by `Dictionary::map()` when callback produces duplicate keys
+  - Prevents unintended data loss in transformation operations
+
+### Changed
+- **Dictionary::flip()** - Now throws `DuplicateKeyException` instead of `ValueError` for duplicate values
+- **Dictionary::map()** - Now throws `DuplicateKeyException` instead of `ValueError` for duplicate keys
+
+### Documentation
+- Added comprehensive documentation for `Dictionary::map()` method in Dictionary.md
+- Added DuplicateKeyException.md documentation file
+- Updated README with DuplicateKeyException in Supporting Classes section
+- Added test coverage for all new functionality
+
+## [0.1.0] - 2025-01-14
+
+### Added
+- First version of Galaxon Collections library
 - **Collection** - Abstract base class for all collection types
   - Implements Countable, IteratorAggregate, Stringable
   - Common methods: `count()`, `empty()`, `clear()`, `all()`, `any()`
@@ -52,5 +76,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Requirements
 - PHP 8.4 or higher
 - galaxon/core package
-
-[1.0.0]: https://github.com/mossy2100/PHP-Collections/releases/tag/v1.0.0

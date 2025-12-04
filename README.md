@@ -113,9 +113,10 @@ $set1->isDisjointFrom($set2);  // false
 composer require galaxon/collections
 ```
 
-**Requirements:**
-- PHP 8.4 or higher
-- `galaxon/core` package
+## Requirements
+
+- PHP ^8.4
+- galaxon/core
 
 ## Quick Start
 
@@ -205,7 +206,7 @@ var_dump($set->contains(2));  // true
 var_dump($set->contains(5));  // false
 ```
 
-## Classes Documentation
+## Classes
 
 ### Base Class
 
@@ -304,6 +305,13 @@ Immutable container for a key-value pair where both can be any type.
 - Internal Dictionary storage
 - Representing key-value associations in custom code
 - When you need immutable pairs
+
+#### [DuplicateKeyException](docs/DuplicateKeyException.md)
+Exception thrown when a Dictionary operation produces duplicate keys.
+
+**Used By:**
+- Dictionary::flip() - when values are not unique
+- Dictionary::map() - when callback produces duplicate keys
 
 ## Type Safety Examples
 

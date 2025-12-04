@@ -9,7 +9,7 @@ A type-safe key-value collection that accepts any PHP type for both keys and val
 - **ArrayAccess**: Use familiar `$dict[$key]` syntax
 - **Iteration**: Full foreach support
 - **Type inference**: Automatically detect types from data
-- **Transformation methods**: filter, flip, merge, sort
+- **Transformation methods**: filter, flip, map, merge, sort
 
 ## Why Dictionary?
 
@@ -516,7 +516,7 @@ public function flip(): self
 
 Swap keys with values. All values in the Dictionary must be unique.
 
-**Throws:** `ValueError` if the Dictionary contains duplicate values.
+**Throws:** `DuplicateKeyException` if the original Dictionary contains duplicate values.
 
 **Example:**
 ```php
@@ -531,6 +531,53 @@ try {
 } catch (ValueError $e) {
     echo $e->getMessage(); // "Cannot flip Dictionary: values are not unique."
 }
+```
+
+### map()
+
+```php
+public function map(callable $fn): self
+```
+
+Transform each key-value pair using a callback function. The callback receives a Pair object and must return a new Pair. Both keys and values can be transformed, and types can change. The result Dictionary automatically infers types from the callback results.
+
+**Callback signature:** `callable(Pair): Pair`
+
+**Throws:**
+- `TypeError` if the callback doesn't return a Pair
+- `DuplicateKeyException` if the callback produces duplicate keys
+
+**Examples:**
+```php
+$dict = new Dictionary(source: [
+    'apple' => 5,
+    'banana' => 3,
+    'cherry' => 8
+]);
+
+// Double all values
+$doubled = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 2));
+// Result: ['apple' => 10, 'banana' => 6, 'cherry' => 16]
+
+// Transform keys to uppercase
+$upper = $dict->map(fn($pair) => new Pair(strtoupper($pair->key), $pair->value));
+// Result: ['APPLE' => 5, 'BANANA' => 3, 'CHERRY' => 8]
+
+// Swap keys and values
+$swapped = $dict->map(fn($pair) => new Pair($pair->value, $pair->key));
+// Result: [5 => 'apple', 3 => 'banana', 8 => 'cherry']
+
+// Complex transformation - change both key and value
+$transformed = $dict->map(fn($pair) => new Pair(
+    strtoupper($pair->key),
+    $pair->value * 2 + 10
+));
+// Result: ['APPLE' => 20, 'BANANA' => 16, 'CHERRY' => 26]
+
+// Convert to price list (changes types)
+$prices = $dict->map(fn($pair) => new Pair($pair->key, "\${$pair->value}.00"));
+// Result: ['apple' => '$5.00', 'banana' => '$3.00', 'cherry' => '$8.00']
+// Types: string => string (inferred from callback results)
 ```
 
 ### merge()
@@ -647,6 +694,13 @@ $highValue->sortByValue();
 foreach ($highValue as $product => $amount) {
     echo "$product: $" . number_format($amount) . "\n";
 }
+
+// Transform to formatted strings
+$formatted = $sales->map(fn($pair) => new Pair(
+    $pair->key,
+    "$" . number_format($pair->value)
+));
+// Result: ['Product A' => '$1,500', 'Product B' => '$3,200', 'Product C' => '$800']
 ```
 
 ### Grouping data

@@ -462,67 +462,6 @@ final class Dictionary extends Collection implements ArrayAccess
     // region Miscellaneous methods
 
     /**
-     * Swaps keys with values.
-     *
-     * All values in the Dictionary must be unique for flip to succeed.
-     *
-     * @return self A new Dictionary with keys and values swapped.
-     * @throws ValueError If the Dictionary contains duplicate values.
-     */
-    public function flip(): self
-    {
-        // Create a new dictionary to hold the result. Swap the typesets.
-        $result = new self($this->valueTypes, $this->keyTypes);
-
-        // Iterate over the items in the current dictionary.
-        foreach ($this->items as $pair) {
-            /** @var Pair $pair */
-
-            // Check if this value already exists as a key in the result.
-            if ($result->keyExists($pair->value)) {
-                throw new ValueError("Cannot flip Dictionary: values are not unique.");
-            }
-
-            // Add the flipped key-value pair to the result. Calls offsetSet().
-            $result[$pair->value] = $pair->key;
-        }
-
-        // Return the result.
-        return $result;
-    }
-
-    /**
-     * Merge two Dictionaries.
-     *
-     * If the same key exists in both, the second key-value pair (from $other) will be kept and no exception will be
-     * thrown. This is the same behaviour as array_merge().
-     *
-     * @param self $other The Dictionary to merge with this Dictionary.
-     * @return self The new Dictionary containing pairs from both source Dictionaries.
-     */
-    public function merge(self $other): self
-    {
-        // Create a new dictionary with the combined type constraints.
-        $keyTypes = new TypeSet($this->keyTypes)->add($other->keyTypes);
-        $valueTypes = new TypeSet($this->valueTypes)->add($other->valueTypes);
-        $result = new self($keyTypes, $valueTypes);
-
-        // Copy pairs from this dictionary.
-        foreach ($this->items as $index => $pair) {
-            /** @var Pair $pair */
-            $result->items[$index] = clone $pair;
-        }
-
-        // Copy pairs from the other dictionary.
-        foreach ($other->items as $index => $pair) {
-            /** @var Pair $pair */
-            $result->items[$index] = clone $pair;
-        }
-
-        return $result;
-    }
-
-    /**
      * Filter a Dictionary using a callback function.
      *
      * The resulting Dictionary will have the same type constraints, and will only contain the key-value pairs that
@@ -553,13 +492,138 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Validate the result of the callback.
             if (!is_bool($keep)) {
-                throw new TypeError("The filter callback must return a bool, got " . Types::getBasicType($keep) . ".");
+                throw new TypeError('The filter callback must return a bool, got ' . Types::getBasicType($keep) . ".");
             }
 
             // Add pair to keep to the result dictionary.
             if ($keep) {
                 $result[$pair->key] = $pair->value;
             }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Swaps keys with values.
+     *
+     * All values in the Dictionary must be unique for flip to succeed.
+     *
+     * @return self A new Dictionary with keys and values swapped.
+     * @throws DuplicateKeyException If the Dictionary contains duplicate values.
+     */
+    public function flip(): self
+    {
+        // Create a new dictionary to hold the result. Swap the typesets.
+        $result = new self($this->valueTypes, $this->keyTypes);
+
+        // Iterate over the items in the current dictionary.
+        foreach ($this->items as $pair) {
+            /** @var Pair $pair */
+
+            // Check if this value already exists as a key in the result.
+            if ($result->keyExists($pair->value)) {
+                throw new DuplicateKeyException('Cannot flip Dictionary: values are not unique.');
+            }
+
+            // Add the flipped key-value pair to the result. Calls offsetSet().
+            $result[$pair->value] = $pair->key;
+        }
+
+        // Return the result.
+        return $result;
+    }
+
+    /**
+     * Applies a callback to transform each key-value pair in the Dictionary.
+     *
+     * The callback receives each Pair object and must return a new Pair.
+     * Both keys and values can be transformed, and their types can change.
+     * The result Dictionary will have its key and value types automatically inferred
+     * from the callback results.
+     *
+     * The original Dictionary is not modified.
+     *
+     * @param callable(Pair): Pair $fn The callback function to apply to each item.
+     * @return self A new Dictionary containing the transformed key-value pairs.
+     * @throws TypeError If the callback doesn't return a Pair.
+     * @throws DuplicateKeyException If the callback produces duplicate keys.
+     *
+     * @example
+     *   $dict = new Dictionary('string', 'int');
+     *   $dict->add('apple', 5);
+     *   $dict->add('banana', 3);
+     *
+     *   // Double all values.
+     *   $doubled = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 2));
+     *   // Result: ['apple' => 10, 'banana' => 6]
+     *
+     *   // Transform keys to uppercase.
+     *   $upper = $dict->map(fn($pair) => new Pair(strtoupper($pair->key), $pair->value));
+     *   // Result: ['APPLE' => 5, 'BANANA' => 3]
+     *
+     *   // Swap keys and values.
+     *   $swapped = $dict->map(fn($pair) => new Pair($pair->value, $pair->key));
+     *   // Result: [5 => 'apple', 3 => 'banana']
+     */
+    public function map(callable $fn): self
+    {
+        // Initialize the result Dictionary with no type constraints.
+        $result = new self();
+
+        /** @var Pair $pair */
+        foreach ($this->items as $pair) {
+            // Call the mapping function.
+            $newPair = $fn($pair);
+
+            // Validate the result is a Pair.
+            if (!$newPair instanceof Pair) {
+                throw new TypeError('Map callback must return a Pair, got ' . Types::getBasicType($newPair) . '.');
+            }
+
+            // Check for duplicate keys.
+            if ($result->keyExists($newPair->key)) {
+                throw new DuplicateKeyException('Map callback produced a duplicate key: ' .
+                                                Stringify::abbrev($newPair->key) . '.');
+            }
+
+            // Add the types.
+            $result->keyTypes->addValueType($newPair->key);
+            $result->valueTypes->addValueType($newPair->value);
+
+            // Add the pair to the result.
+            $result->add($newPair);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Merge two Dictionaries.
+     *
+     * If the same key exists in both, the second key-value pair (from $other) will be kept and no exception will be
+     * thrown. This is the same behaviour as array_merge().
+     *
+     * @param self $other The Dictionary to merge with this Dictionary.
+     * @return self The new Dictionary containing pairs from both source Dictionaries.
+     */
+    public function merge(self $other): self
+    {
+        // Create a new dictionary with the combined type constraints.
+        $keyTypes = new TypeSet($this->keyTypes)->add($other->keyTypes);
+        $valueTypes = new TypeSet($this->valueTypes)->add($other->valueTypes);
+        $result = new self($keyTypes, $valueTypes);
+
+        // Copy pairs from this dictionary.
+        foreach ($this->items as $index => $pair) {
+            /** @var Pair $pair */
+            $result->items[$index] = clone $pair;
+        }
+
+        // Copy pairs from the other dictionary.
+        foreach ($other->items as $index => $pair) {
+            /** @var Pair $pair */
+            $result->items[$index] = clone $pair;
         }
 
         return $result;
