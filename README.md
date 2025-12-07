@@ -103,8 +103,8 @@ $intersection = $set1->intersect($set2); // {3, 4}
 $difference = $set1->diff($set2);        // {1, 2}
 
 // Subset checking
-$set1->isSubsetOf($set2);      // false
-$set1->isDisjointFrom($set2);  // false
+$set1->subset($set2);      // false
+$set1->disjoint($set2);  // false
 ```
 
 ## Installation
@@ -284,7 +284,7 @@ Manages type constraints for collections with runtime validation.
 - Runtime type checking
 - Type inference from values
 - Default value inference
-- Support for pseudotypes (scalar, number, uint, mixed, etc.)
+- Support for pseudotypes (scalar, number, mixed, etc.)
 - Class/interface/trait matching with inheritance
 
 **Best For:**
@@ -306,12 +306,6 @@ Immutable container for a key-value pair where both can be any type.
 - Representing key-value associations in custom code
 - When you need immutable pairs
 
-#### [DuplicateKeyException](docs/DuplicateKeyException.md)
-Exception thrown when a Dictionary operation produces duplicate keys.
-
-**Used By:**
-- Dictionary::flip() - when values are not unique
-- Dictionary::map() - when callback produces duplicate keys
 
 ## Type Safety Examples
 
@@ -337,7 +331,6 @@ $dates->append(new DateTime());
 // Pseudotypes
 $scalars = new Sequence('scalar');  // int|float|string|bool
 $numbers = new Sequence('number');  // int|float
-$uints = new Sequence('uint');      // unsigned int (>= 0)
 ```
 
 ### Type Inference

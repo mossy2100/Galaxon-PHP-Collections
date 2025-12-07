@@ -248,8 +248,8 @@ class DictionaryInspectionTest extends TestCase
         $dict2->add('b', 2);
 
         // Test dictionaries are equal.
-        $this->assertTrue($dict1->equals($dict2));
-        $this->assertTrue($dict2->equals($dict1));
+        $this->assertTrue($dict1->equal($dict2));
+        $this->assertTrue($dict2->equal($dict1));
     }
 
     /**
@@ -264,7 +264,7 @@ class DictionaryInspectionTest extends TestCase
         $dict2->add('a', 2);
 
         // Test dictionaries are not equal.
-        $this->assertFalse($dict1->equals($dict2));
+        $this->assertFalse($dict1->equal($dict2));
     }
 
     /**
@@ -279,7 +279,7 @@ class DictionaryInspectionTest extends TestCase
         $dict2->add('b', 1);
 
         // Test dictionaries are not equal.
-        $this->assertFalse($dict1->equals($dict2));
+        $this->assertFalse($dict1->equal($dict2));
     }
 
     /**
@@ -295,7 +295,7 @@ class DictionaryInspectionTest extends TestCase
         $dict2->add('b', 2);
 
         // Test dictionaries are not equal.
-        $this->assertFalse($dict1->equals($dict2));
+        $this->assertFalse($dict1->equal($dict2));
     }
 
     /**
@@ -312,7 +312,7 @@ class DictionaryInspectionTest extends TestCase
         $dict2->add('a', 1);
 
         // Test dictionaries are not equal due to order.
-        $this->assertFalse($dict1->equals($dict2));
+        $this->assertFalse($dict1->equal($dict2));
     }
 
     /**
@@ -324,7 +324,7 @@ class DictionaryInspectionTest extends TestCase
         $dict2 = new Dictionary();
 
         // Test empty dictionaries are equal.
-        $this->assertTrue($dict1->equals($dict2));
+        $this->assertTrue($dict1->equal($dict2));
     }
 
     /**

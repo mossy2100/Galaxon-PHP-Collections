@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Dictionary;
 
 use Galaxon\Collections\Dictionary;
-use Galaxon\Collections\DuplicateKeyException;
 use Galaxon\Collections\Pair;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use TypeError;
-use ValueError;
 
 /**
  * Tests for Dictionary transformation methods (flip, merge, filter, map).
@@ -64,17 +63,17 @@ class DictionaryTransformTest extends TestCase
     }
 
     /**
-     * Test flip with duplicate values throws DuplicateKeyException.
+     * Test flip with duplicate values throws RuntimeException.
      */
-    public function testFlipWithDuplicateValuesThrowsDuplicateKeyException(): void
+    public function testFlipWithDuplicateValuesThrowsRuntimeException(): void
     {
         $dict = new Dictionary('string', 'int');
         $dict->add('first', 1);
         $dict->add('second', 2);
         $dict->add('third', 1);
 
-        // Test flipping with duplicate values throws DuplicateKeyException.
-        $this->expectException(DuplicateKeyException::class);
+        // Test flipping with duplicate values throws RuntimeException.
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage("Cannot flip Dictionary: values are not unique.");
         $dict->flip();
     }
@@ -430,17 +429,17 @@ class DictionaryTransformTest extends TestCase
     }
 
     /**
-     * Test map with duplicate keys throws DuplicateKeyException.
+     * Test map with duplicate keys throws RuntimeException.
      */
-    public function testMapWithDuplicateKeysThrowsDuplicateKeyException(): void
+    public function testMapWithDuplicateKeysThrowsRuntimeException(): void
     {
         $dict = new Dictionary('string', 'int');
         $dict->add('a', 1);
         $dict->add('b', 2);
         $dict->add('c', 3);
 
-        // Test mapping to same key throws DuplicateKeyException.
-        $this->expectException(DuplicateKeyException::class);
+        // Test mapping to same key throws RuntimeException.
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Map callback produced a duplicate key');
         $dict->map(fn($pair) => new Pair('same', $pair->value));
     }

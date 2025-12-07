@@ -10,6 +10,7 @@ use Galaxon\Core\Numbers;
 use Galaxon\Core\Types;
 use OutOfRangeException;
 use Override;
+use RuntimeException;
 use Stringable;
 use Traversable;
 use TypeError;
@@ -31,22 +32,20 @@ use ValueError;
  * (NB: Intersection types and DNF syntax are currently NOT supported.)
  *
  * 3. Sequence items can be set at positions beyond the current range, but intermediate items will be filled in with a
- * default value. Sensible defaults are used for common types, or a default value can be specified in the constructor.
- * If the default value is an object, it will be cloned as needed.
- *
- * 4. Array-like access using square brackets [] and iteration using foreach is supported via the ArrayAccess and
- * Iterator interfaces.
- *
- * ## Automatic Defaults
- * For value types, the following defaults are used:
+ * default value. Sensible defaults are used for common types:
  * - null or mixed → null
- * - int, uint, number, or scalar → 0
+ * - int, number, or scalar → 0
  * - float → 0.0
  * - string → '' (empty string)
  * - bool → false
  * - array or iterable → [] (empty array)
- * For other types (i.e. resource, object, interface, callable), the automatic default value will be null, and if 'null'
- * has not been specified in the allowed types, it will be automatically added.
+ * - object → new stdClass()
+ * For other types (i.e. objects of a specific class, resource, interface, callable), a default value cannot be
+ * inferred. Therefore, if you require one, it's recommended you include 'null' in the TypeSet.
+ * If a default value is required, but one cannot be inferred, a RuntimeException will be thrown.
+ *
+ * 4. Array-like access using square brackets [] and iteration using foreach is supported via the ArrayAccess and
+ * Iterator interfaces.
  *
  * ## Implementation Notes
  * Several methods use `func_num_args()` to distinguish between "parameter omitted" and "parameter explicitly set to
@@ -57,8 +56,8 @@ use ValueError;
  * $strings->append('hello');
  * $strings[] = 'world';
  *
- * @example Union types with custom default
- * $mixed = new Sequence('string|int', 'default');
+ * @example Union types
+ * $mixed = new Sequence('string|int');
  * $mixed->append('text');
  * $mixed->append(42);
  *
@@ -75,21 +74,10 @@ use ValueError;
  */
 final class Sequence extends Collection implements ArrayAccess
 {
-    // region Properties
-
-    /**
-     * The default value.
-     *
-     * @var mixed
-     */
-    private(set) mixed $defaultValue;
-
-    // endregion
-
     // region Constructor and factory methods
 
     /**
-     * Create a new Sequence, with optional type restriction, default value, and value source.
+     * Create a new Sequence, with optional type restriction and value source.
      *
      * The allowed types for values in the Sequence can be specified in several ways:
      * - null = Values of any type are allowed.
@@ -97,25 +85,19 @@ final class Sequence extends Collection implements ArrayAccess
      * - iterable = Array or other collection of type names, e.g. ['string', 'int']
      * - true = The types will be inferred from the source iterable's values.
      *
-     * A default value may be specified, which is used to fill gaps when increasing the Sequence length as a side
-     * effect of calling insert() or offsetSet() (either directly or via square bracket syntax).
-     * If a default value is not provided (or is null), it will be determined automatically.
-     * If the default value is an object, it will be cloned as needed.
-     * It doesn't really make sense to have a resource as a default value, but it's allowed.
+     * A sensible default value will be used to fill gaps when increasing the Sequence length as a side effect of
+     * calling insert() or offsetSet() (either directly or via square bracket syntax).
+     * If a default value is required but cannot be inferred, an exception will be thrown.
      *
      * If a source iterable is provided, the Sequence will be initialized with values from the iterable.
      *
      * @param null|string|iterable<string>|true $types Allowed value types (default true, for infer).
-     * @param mixed $defaultValue Default value for new items (default null).
      * @param iterable<mixed> $source A source iterable to import values from (optional).
      * @throws ValueError If a type name is invalid.
      * @throws TypeError If a type is not specified as a string, or any imported values have disallowed types.
      */
-    public function __construct(
-        null|string|iterable|true $types = true,
-        mixed $defaultValue = null,
-        iterable $source = []
-    ) {
+    public function __construct(null|string|iterable|true $types = true, iterable $source = [])
+    {
         // Determine if we should infer types from the source iterable.
         $infer = $types === true;
 
@@ -132,28 +114,6 @@ final class Sequence extends Collection implements ArrayAccess
             // Add item to the new Sequence.
             $this->append($item);
         }
-
-        // Set the default value.
-        // We do this after the value types are known, in case the default value wasn't supplied and needs to be
-        // inferred from the value typeset.
-        // Check if we should infer the default value from the allowed types.
-        if ($defaultValue === null) {
-            // Try to determine a sane default for common types.
-            if (!$this->valueTypes->tryInferDefaultValue($defaultValue)) {
-                // If no default value could be inferred, use null and allow nulls in the Sequence.
-                $this->valueTypes->add('null');
-            }
-        } elseif (!$this->valueTypes->match($defaultValue)) {
-            // The default value has a disallowed type.
-            throw new TypeError(
-                'The default value has an invalid type. ' .
-                'Expected one of: ' . $this->valueTypes . ', ' .
-                'but got: ' . Types::getBasicType($defaultValue) . '.'
-            );
-        }
-
-        // Set the default value.
-        $this->defaultValue = $defaultValue;
     }
 
     /**
@@ -250,21 +210,8 @@ final class Sequence extends Collection implements ArrayAccess
     }
 
     /**
-     * Get a new default value.
-     *
-     * If the default value is an object, clone it.
-     * This behavior will probably be more useful than filling a Sequence with references to the same object.
-     *
-     * @return mixed The new default value.
-     */
-    private function getDefaultValue(): mixed
-    {
-        return is_object($this->defaultValue) ? clone $this->defaultValue : $this->defaultValue;
-    }
-
-    /**
-     * Create a new Sequence with the same types and default value as the calling object, and items copied from a
-     * source iterable (typically items from the calling Sequence, although this is not enforced).
+     * Create a new Sequence with the same types as the calling object, and items copied from a source iterable
+     * (typically items from the calling Sequence, although this is not enforced).
      *
      * @param iterable<mixed> $items The iterable to copy items from.
      * @return self The new Sequence.
@@ -272,7 +219,7 @@ final class Sequence extends Collection implements ArrayAccess
     private function fromSubset(iterable $items): self
     {
         // Construct the new Sequence.
-        return new self($this->valueTypes, $this->defaultValue, $items);
+        return new self($this->valueTypes, $items);
     }
 
     // endregion
@@ -521,7 +468,7 @@ final class Sequence extends Collection implements ArrayAccess
      * @return bool True if the Sequences are equal, false otherwise.
      */
     #[Override]
-    public function equals(mixed $other): bool
+    public function equal(mixed $other): bool
     {
         // Check type and item count are equal.
         if (!$other instanceof self || count($this->items) !== count($other->items)) {
@@ -618,7 +565,7 @@ final class Sequence extends Collection implements ArrayAccess
      * @see https://www.php.net/manual/en/function.array-search.php
      *
      * @param mixed $value The value to search for.
-     * @return int|null The index of the first matching value, or null if the value is not found.
+     * @return ?int The index of the first matching value, or null if the value is not found.
      */
     public function search(mixed $value): ?int
     {
@@ -748,7 +695,7 @@ final class Sequence extends Collection implements ArrayAccess
     public function countValues(): Dictionary
     {
         // Construct the dictionary.
-        $valueCount = new Dictionary($this->valueTypes, 'uint');
+        $valueCount = new Dictionary($this->valueTypes, 'int');
 
         // Count the occurrences of each distinct value.
         foreach ($this->items as $item) {
@@ -1150,14 +1097,14 @@ final class Sequence extends Collection implements ArrayAccess
      * Append or set a Sequence item.
      *
      * If the index is out of range, the Sequence will be increased in size to accommodate it.
-     * Any intermediate positions will be filled with the default value.
-     * NB: If the default is an object, all items set to the default will clone the object.
-     * If you don't want this behaviour, don't rely on it; set each Sequence item individually.
+     * Any intermediate positions will be filled with the default value, if one can be inferred.
+     * If a default value cannot be inferred, a RuntimeException will be thrown.
      *
      * @param mixed $offset The zero-based index position to set, or null to append.
      * @param mixed $value The value to set.
      * @throws TypeError If the index is neither null nor an integer.
      * @throws OutOfRangeException If the index is negative.
+     * @throws RuntimeException If a default value is required but could not be inferred.
      */
     #[Override]
     public function offsetSet(mixed $offset, mixed $value): void
@@ -1177,9 +1124,12 @@ final class Sequence extends Collection implements ArrayAccess
             $this->checkIndex($offset, false);
 
             // Fill in any missing positions with defaults.
-            $start = count($this->items);
-            for ($i = $start; $i < $offset; $i++) {
-                $this->items[$i] = $this->getDefaultValue();
+            if ($offset > count($this->items)) {
+                $start = count($this->items);
+                $defaultValue = $this->valueTypes->getDefaultValue();
+                for ($i = $start; $i < $offset; $i++) {
+                    $this->items[$i] = $defaultValue;
+                }
             }
 
             // Set the item value.
@@ -1195,13 +1145,14 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * Doing this doesn't remove an item from the Sequence, as it does with ordinary PHP arrays. This is because this
      * data structure maintains zero-indexed sequential keys. Therefore, removing an item from the Sequence would
-     * require re-indexing later items. This could be unexpected behavior.
+     * require re-indexing later items, which could be unexpected behavior.
      *
      * To remove an item from the Sequence, use one of the remove*() methods.
      *
      * @param mixed $offset The zero-based index position to unset.
      * @throws TypeError If the index is not an integer.
      * @throws OutOfRangeException If the index is outside the valid range for the Sequence.
+     * @throws RuntimeException If a default value could not be determined for the TypeSet.
      */
     #[Override]
     public function offsetUnset(mixed $offset): void
@@ -1211,7 +1162,7 @@ final class Sequence extends Collection implements ArrayAccess
 
         // Set the item to the default value.
         /** @var int $offset */
-        $this->items[$offset] = $this->getDefaultValue();
+        $this->items[$offset] = $this->valueTypes->getDefaultValue();
     }
 
     // endregion

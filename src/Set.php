@@ -97,7 +97,7 @@ final class Set extends Collection
     #[Override]
     public function import(iterable $source): static
     {
-        // Copy items from the source iterable into the Sequence.
+        // Copy items from the source iterable into the Set.
         $this->add(...$source);
 
         // Return this for chaining.
@@ -235,15 +235,15 @@ final class Set extends Collection
      * @return bool True if the Sets are equal, false otherwise.
      */
     #[Override]
-    public function equals(mixed $other): bool
+    public function equal(mixed $other): bool
     {
         // Check type and item count are equal.
         if (!$other instanceof self || count($this->items) !== count($other->items)) {
             return false;
         }
 
-        // Check values are equal. Order doesn't matter, so we can call isSubsetOf().
-        return $this->isSubsetOf($other);
+        // Check values are equal. Order doesn't matter, so we can call subset().
+        return $this->subset($other);
     }
 
     /**
@@ -252,7 +252,7 @@ final class Set extends Collection
      * @param self $other The set to compare with.
      * @return bool True if $this is a subset of $other, false otherwise.
      */
-    public function isSubsetOf(self $other): bool
+    public function subset(self $other): bool
     {
         return array_all($this->items, static fn($item) => $other->contains($item));
     }
@@ -263,9 +263,9 @@ final class Set extends Collection
      * @param self $other The set to compare with.
      * @return bool True if $this is a proper subset of $other, false otherwise.
      */
-    public function isProperSubsetOf(self $other): bool
+    public function properSubset(self $other): bool
     {
-        return ($this->count() < $other->count()) && $this->isSubsetOf($other);
+        return ($this->count() < $other->count()) && $this->subset($other);
     }
 
     /**
@@ -274,9 +274,9 @@ final class Set extends Collection
      * @param self $other The set to compare with.
      * @return bool True if $this is a superset of $other, false otherwise.
      */
-    public function isSupersetOf(self $other): bool
+    public function superset(self $other): bool
     {
-        return $other->isSubsetOf($this);
+        return $other->subset($this);
     }
 
     /**
@@ -285,9 +285,9 @@ final class Set extends Collection
      * @param self $other The set to compare with.
      * @return bool True if $this is a proper superset of $other, false otherwise.
      */
-    public function isProperSupersetOf(self $other): bool
+    public function properSuperset(self $other): bool
     {
-        return $other->isProperSubsetOf($this);
+        return $other->properSubset($this);
     }
 
     /**
@@ -296,7 +296,7 @@ final class Set extends Collection
      * @param self $other The set to compare with.
      * @return bool True if this set is disjoint from the other set, false otherwise.
      */
-    public function isDisjointFrom(self $other): bool
+    public function disjoint(self $other): bool
     {
         return array_all($this->items, static fn($item) => !$other->contains($item));
     }

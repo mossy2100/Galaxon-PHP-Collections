@@ -6,7 +6,7 @@ A type-specific list implementation with zero-based sequential integer indexing.
 
 - Sequential integer indexes starting from 0
 - Optional type constraints with runtime validation
-- Automatic default values with gap-filling support
+- Automatic default value determination for gap-filling
 - Immutable and mutating operations
 - ArrayAccess and iteration support
 - Rich set of transformation and aggregation methods
@@ -18,12 +18,11 @@ A type-specific list implementation with zero-based sequential integer indexing.
 ```php
 public function __construct(
     null|string|iterable|true $types = true,
-    mixed $default_value = null,
     iterable $source = []
 )
 ```
 
-Create a new Sequence with optional type constraints, default value, and initial values from a source iterable.
+Create a new Sequence with optional type constraints and initial values from a source iterable.
 
 **Type Constraints:**
 
@@ -33,60 +32,49 @@ The `$types` parameter accepts:
 - `iterable` - Array or other collection of type names (e.g., `['string', 'int']`)
 - `true` (default) - Types will be inferred automatically from the source iterable's values
 
-**Default Value Inference:**
+**Automatic Default Values:**
 
-If the default value is not specified, it will be automatically inferred from the type constraints:
+When gaps are created in the Sequence (via `offsetSet()` or `insert()`), they are automatically filled with appropriate default values based on the type constraints:
 
-- `null` or `mixed` → `null`
-- `int`, `uint`, `number`, or `scalar` → `0`
+- Contains `null` → `null`
+- `bool` → `false`
+- `int`, `number`, or `scalar` → `0`
 - `float` → `0.0`
 - `string` → `''` (empty string)
-- `bool` → `false`
 - `array` or `iterable` → `[]` (empty array)
+- `object` → `new stdClass()`
 
-For other types (classes, interfaces, traits, resources, callables), the default value will be `null`, and `'null'` will be automatically added to the allowed types if not already present.
+For types where no suitable default can be determined (like `DateTime`), `'null'` will be automatically added to the allowed types.
 
 **Examples:**
 ```php
-// No type constraints, default is null
+// No type constraints
 $seq = new Sequence();
 
-// Single type constraint, default inferred
+// Single type constraint
 $seq = new Sequence('int');
-echo $seq->defaultValue; // 0
+// When gaps are created, they'll be filled with 0
 
-// Union type constraint, default inferred
+// Union type constraint
 $seq = new Sequence('string|int');
-echo $seq->defaultValue; // 0 (first suitable type)
+// Gaps filled with 0 (int takes priority)
 
 // Array of types
 $seq = new Sequence(['string', 'int']);
 
-// With custom default value
-$seq = new Sequence('string', 'default');
-echo $seq->defaultValue; // 'default'
-
 // Object type - null added automatically
 $seq = new Sequence('DateTime');
-echo $seq->defaultValue === null; // true
 var_dump($seq->valueTypes->contains('null')); // true (auto-added)
-
-// Object type with explicit default
-$seq = new Sequence('DateTime', new DateTime());
-echo $seq->defaultValue instanceof DateTime; // true
+// Gaps filled with null
 
 // Create from array with type inference (default)
 $seq = new Sequence(source: [1, 2, 3, 4, 5]);
 echo $seq->count(); // 5
-// Types inferred as 'int', default value inferred as 0
+// Types inferred as 'int'
 
 // Create from array with explicit types
-$seq = new Sequence('int', null, [1, 2, 3]);
+$seq = new Sequence('int', [1, 2, 3]);
 echo $seq->count(); // 3
-
-// Create with custom default and source
-$seq = new Sequence('int', 99, [1, 2, 3]);
-echo $seq->defaultValue; // 99
 
 // Create from generator with type inference
 $generator = function() {
@@ -96,6 +84,12 @@ $generator = function() {
 };
 $seq = new Sequence(source: $generator());
 echo $seq->count(); // 3
+
+// Gap-filling example
+$seq = new Sequence('int');
+$seq[5] = 99;  // Creates gaps at positions 0-4
+echo $seq[0];  // 0 (automatically filled)
+echo $seq[5];  // 99
 ```
 
 ## Factory Methods
@@ -321,10 +315,10 @@ var_dump($seq->contains(2));   // true
 var_dump($seq->contains('2')); // false (strict)
 ```
 
-### equals()
+### equal()
 
 ```php
-public function equals(Collection $other): bool
+public function equal(Collection $other): bool
 ```
 
 Check if equal to another Collection. Collections must be same class, have same count, and same values in same order. Type constraints are ignored.
@@ -335,8 +329,8 @@ $seq1 = new Sequence(source: [1, 2, 3]);
 $seq2 = new Sequence(source: [1, 2, 3]);
 $seq3 = new Sequence(source: [1, 2, 4]);
 
-var_dump($seq1->equals($seq2)); // true
-var_dump($seq1->equals($seq3)); // false
+var_dump($seq1->equal($seq2)); // true
+var_dump($seq1->equal($seq3)); // false
 ```
 
 ### indexExists()

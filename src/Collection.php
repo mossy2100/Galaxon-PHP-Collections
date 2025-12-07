@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Galaxon\Collections;
 
 use Countable;
-use Galaxon\Core\Equatable;
 use Galaxon\Core\Stringify;
+use Galaxon\Core\Traits\Equatable;
 use IteratorAggregate;
 use Override;
 use Stringable;
@@ -19,8 +19,10 @@ use ValueError;
  *
  * @implements IteratorAggregate<mixed, mixed>
  */
-abstract class Collection implements Countable, IteratorAggregate, Stringable, Equatable
+abstract class Collection implements Countable, IteratorAggregate, Stringable
 {
+    use Equatable;
+
     // region Properties
 
     /**
@@ -136,15 +138,6 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable, E
     {
         return array_any($this->items, $fn);
     }
-
-    /**
-     * Check if the Collection is equal to another Collection (definition of "equal" varies by type).
-     *
-     * @param mixed $other The other Collection.
-     * @return bool True if the Collections are equal, false otherwise.
-     */
-    #[Override]
-    abstract public function equals(mixed $other): bool;
 
     // endregion
 

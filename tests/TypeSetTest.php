@@ -9,6 +9,7 @@ use DateTime;
 use Galaxon\Collections\TypeSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use stdClass;
 use TypeError;
 use ValueError;
@@ -336,19 +337,6 @@ class TypeSetTest extends TestCase
     }
 
     /**
-     * Test match() with uint pseudotype.
-     */
-    public function testMatchUint(): void
-    {
-        $ts = new TypeSet('uint');
-
-        $this->assertTrue($ts->match(0));
-        $this->assertTrue($ts->match(42));
-        $this->assertFalse($ts->match(-1));
-        $this->assertFalse($ts->match(3.14));
-    }
-
-    /**
      * Test match() with iterable pseudotype.
      */
     public function testMatchIterable(): void
@@ -536,185 +524,173 @@ class TypeSetTest extends TestCase
 
     // endregion
 
-    // region tryInferDefaultValue() method tests
+    // region getDefaultValue() method tests
 
     /**
-     * Test tryInferDefaultValue() for null.
+     * Test getDefaultValue() for null.
      */
-    public function testTryInferDefaultValueForNull(): void
+    public function testGetDefaultValueForNull(): void
     {
         $ts = new TypeSet('?int');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertNull($default);
     }
 
     /**
-     * Test tryInferDefaultValue() for bool.
+     * Test getDefaultValue() for bool.
      */
-    public function testTryInferDefaultValueForBool(): void
+    public function testGetDefaultValueForBool(): void
     {
         $ts = new TypeSet('bool');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertFalse($default);
     }
 
     /**
-     * Test tryInferDefaultValue() for int.
+     * Test getDefaultValue() for int.
      */
-    public function testTryInferDefaultValueForInt(): void
+    public function testGetDefaultValueForInt(): void
     {
         $ts = new TypeSet('int');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertSame(0, $default);
     }
 
     /**
-     * Test tryInferDefaultValue() for uint.
+     * Test getDefaultValue() for number.
      */
-    public function testTryInferDefaultValueForUint(): void
-    {
-        $ts = new TypeSet('uint');
-
-        $result = $ts->tryInferDefaultValue($default);
-
-        $this->assertTrue($result);
-        $this->assertSame(0, $default);
-    }
-
-    /**
-     * Test tryInferDefaultValue() for number.
-     */
-    public function testTryInferDefaultValueForNumber(): void
+    public function testGetDefaultValueForNumber(): void
     {
         $ts = new TypeSet('number');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertSame(0, $default);
     }
 
     /**
-     * Test tryInferDefaultValue() for scalar.
+     * Test getDefaultValue() for scalar.
      */
-    public function testTryInferDefaultValueForScalar(): void
+    public function testGetDefaultValueForScalar(): void
     {
         $ts = new TypeSet('scalar');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertSame(0, $default);
     }
 
     /**
-     * Test tryInferDefaultValue() for float.
+     * Test getDefaultValue() for float.
      */
-    public function testTryInferDefaultValueForFloat(): void
+    public function testGetDefaultValueForFloat(): void
     {
         $ts = new TypeSet('float');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertSame(0.0, $default);
     }
 
     /**
-     * Test tryInferDefaultValue() for string.
+     * Test getDefaultValue() for string.
      */
-    public function testTryInferDefaultValueForString(): void
+    public function testGetDefaultValueForString(): void
     {
         $ts = new TypeSet('string');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertSame('', $default);
     }
 
     /**
-     * Test tryInferDefaultValue() for array.
+     * Test getDefaultValue() for array.
      */
-    public function testTryInferDefaultValueForArray(): void
+    public function testGetDefaultValueForArray(): void
     {
         $ts = new TypeSet('array');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertSame([], $default);
     }
 
     /**
-     * Test tryInferDefaultValue() for iterable.
+     * Test getDefaultValue() for iterable.
      */
-    public function testTryInferDefaultValueForIterable(): void
+    public function testGetDefaultValueForIterable(): void
     {
         $ts = new TypeSet('iterable');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertSame([], $default);
     }
 
     /**
-     * Test tryInferDefaultValue() returns false for object types.
+     * Test getDefaultValue() for object.
      */
-    public function testTryInferDefaultValueReturnsFalseForObject(): void
+    public function testGetDefaultValueForObject(): void
     {
+        $ts = new TypeSet('object');
+
+        $default = $ts->getDefaultValue();
+
+        $this->assertInstanceOf(stdClass::class, $default);
+    }
+
+    /**
+     * Test getDefaultValue() throws RuntimeException for types without defaults.
+     */
+    public function testGetDefaultValueThrowsForDateTime(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('No default value could be determined for this TypeSet');
+
         $ts = new TypeSet('DateTime');
-
-        $result = $ts->tryInferDefaultValue($default);
-
-        $this->assertFalse($result);
+        $ts->getDefaultValue();
     }
 
     /**
-     * Test tryInferDefaultValue() returns false for callable.
+     * Test getDefaultValue() throws RuntimeException for callable.
      */
-    public function testTryInferDefaultValueReturnsFalseForCallable(): void
+    public function testGetDefaultValueThrowsForCallable(): void
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('No default value could be determined for this TypeSet');
+
         $ts = new TypeSet('callable');
-
-        $result = $ts->tryInferDefaultValue($default);
-
-        $this->assertFalse($result);
+        $ts->getDefaultValue();
     }
 
     /**
-     * Test tryInferDefaultValue() priority: null has highest priority.
+     * Test getDefaultValue() priority: null has highest priority.
      */
-    public function testTryInferDefaultValuePriorityNull(): void
+    public function testGetDefaultValuePriorityNull(): void
     {
         $ts = new TypeSet('int|string|null');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertNull($default); // null has priority
     }
 
     /**
-     * Test tryInferDefaultValue() priority: bool before int.
+     * Test getDefaultValue() priority: bool before int.
      */
-    public function testTryInferDefaultValuePriorityBool(): void
+    public function testGetDefaultValuePriorityBool(): void
     {
         $ts = new TypeSet('int|bool|string');
 
-        $result = $ts->tryInferDefaultValue($default);
+        $default = $ts->getDefaultValue();
 
-        $this->assertTrue($result);
         $this->assertFalse($default); // bool has priority over int
     }
 

@@ -245,10 +245,10 @@ var_dump($set->contains('2')); // false (different type)
 var_dump($set->contains(4));   // false (not in set)
 ```
 
-### equals()
+### equal()
 
 ```php
-public function equals(Collection $other): bool
+public function equal(Collection $other): bool
 ```
 
 Check if two Sets are equal. Sets are equal if they have the same type (both Sets), same number of items, and same item values. Order doesn't matter. Type constraints are not considered.
@@ -258,19 +258,19 @@ Check if two Sets are equal. Sets are equal if they have the same type (both Set
 $set1 = new Set('int', [1, 2, 3]);
 $set2 = new Set('int', [3, 2, 1]); // Different order
 
-var_dump($set1->equals($set2)); // true (order doesn't matter)
+var_dump($set1->equal($set2)); // true (order doesn't matter)
 
 $set3 = new Set('int', [1, 2]);
-var_dump($set1->equals($set3)); // false (different count)
+var_dump($set1->equal($set3)); // false (different count)
 
 $set4 = new Set('int', [1, 2, 4]);
-var_dump($set1->equals($set4)); // false (different values)
+var_dump($set1->equal($set4)); // false (different values)
 ```
 
-### isSubsetOf()
+### subset()
 
 ```php
-public function isSubsetOf(self $other): bool
+public function subset(self $other): bool
 ```
 
 Check if this set is a subset of another set (all items in this set are also in the other set).
@@ -280,17 +280,17 @@ Check if this set is a subset of another set (all items in this set are also in 
 $set1 = new Set('int', [1, 2]);
 $set2 = new Set('int', [1, 2, 3, 4]);
 
-var_dump($set1->isSubsetOf($set2)); // true
-var_dump($set2->isSubsetOf($set1)); // false
+var_dump($set1->subset($set2)); // true
+var_dump($set2->subset($set1)); // false
 
 // A set is a subset of itself
-var_dump($set1->isSubsetOf($set1)); // true
+var_dump($set1->subset($set1)); // true
 ```
 
-### isProperSubsetOf()
+### properSubset()
 
 ```php
-public function isProperSubsetOf(self $other): bool
+public function properSubset(self $other): bool
 ```
 
 Check if this set is a proper subset of another set (subset but not equal). This means all items in this set are in the other set, AND the other set has at least one additional item.
@@ -301,14 +301,14 @@ $set1 = new Set('int', [1, 2]);
 $set2 = new Set('int', [1, 2, 3]);
 $set3 = new Set('int', [1, 2]);
 
-var_dump($set1->isProperSubsetOf($set2)); // true
-var_dump($set1->isProperSubsetOf($set3)); // false (equal sets)
+var_dump($set1->properSubset($set2)); // true
+var_dump($set1->properSubset($set3)); // false (equal sets)
 ```
 
-### isSupersetOf()
+### superset()
 
 ```php
-public function isSupersetOf(self $other): bool
+public function superset(self $other): bool
 ```
 
 Check if this set is a superset of another set (contains all items from the other set).
@@ -318,14 +318,14 @@ Check if this set is a superset of another set (contains all items from the othe
 $set1 = new Set('int', [1, 2, 3, 4]);
 $set2 = new Set('int', [1, 2]);
 
-var_dump($set1->isSupersetOf($set2)); // true
-var_dump($set2->isSupersetOf($set1)); // false
+var_dump($set1->superset($set2)); // true
+var_dump($set2->superset($set1)); // false
 ```
 
-### isProperSupersetOf()
+### properSuperset()
 
 ```php
-public function isProperSupersetOf(self $other): bool
+public function properSuperset(self $other): bool
 ```
 
 Check if this set is a proper superset of another set (superset but not equal).
@@ -336,14 +336,14 @@ $set1 = new Set('int', [1, 2, 3]);
 $set2 = new Set('int', [1, 2]);
 $set3 = new Set('int', [1, 2, 3]);
 
-var_dump($set1->isProperSupersetOf($set2)); // true
-var_dump($set1->isProperSupersetOf($set3)); // false (equal sets)
+var_dump($set1->properSuperset($set2)); // true
+var_dump($set1->properSuperset($set3)); // false (equal sets)
 ```
 
-### isDisjointFrom()
+### disjoint()
 
 ```php
-public function isDisjointFrom(self $other): bool
+public function disjoint(self $other): bool
 ```
 
 Check if this set is disjoint from another set (they have no elements in common).
@@ -354,8 +354,8 @@ $set1 = new Set('int', [1, 2, 3]);
 $set2 = new Set('int', [4, 5, 6]);
 $set3 = new Set('int', [3, 4, 5]);
 
-var_dump($set1->isDisjointFrom($set2)); // true (no overlap)
-var_dump($set1->isDisjointFrom($set3)); // false (3 is in both)
+var_dump($set1->disjoint($set2)); // true (no overlap)
+var_dump($set1->disjoint($set3)); // false (3 is in both)
 ```
 
 ## Collection Methods
@@ -578,7 +578,7 @@ $provided = ['username', 'email', 'password', 'age'];
 $requiredSet = new Set(source: $required);
 $providedSet = new Set(source: $provided);
 
-if ($requiredSet->isSubsetOf($providedSet)) {
+if ($requiredSet->subset($providedSet)) {
     echo "All required fields provided";
 }
 ```

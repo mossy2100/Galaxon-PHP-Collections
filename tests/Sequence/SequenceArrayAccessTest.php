@@ -170,16 +170,16 @@ class SequenceArrayAccessTest extends TestCase
     }
 
     /**
-     * Test offsetUnset sets item to default value.
+     * Test offsetUnset fills gap with inferred default value.
      */
-    public function testOffsetUnsetSetsItemToDefaultValue(): void
+    public function testOffsetUnsetFillsGapWithDefault(): void
     {
         // Test: Unset item in non-nullable Sequence
         $seq = new Sequence('int');
         $seq->append(1, 2, 3);
         unset($seq[1]);
 
-        // Test: Verify item is now the default value (0) and count unchanged.
+        // Test: Verify gap is filled with inferred default (0 for int) and count unchanged
         $this->assertCount(3, $seq);
         $this->assertSame(0, $seq[1]);
     }
@@ -328,24 +328,6 @@ class SequenceArrayAccessTest extends TestCase
         // Test: Verify correct number removed
         $this->assertCount(3, $removed);
         $this->assertCount($originalCount - 3, $seq);
-    }
-
-    /**
-     * Test object cloning in default values.
-     */
-    public function testObjectCloningInDefaultValues(): void
-    {
-        // Test: Verify objects are cloned, not shared
-        $defaultDate = new DateTime('2025-01-01');
-        $seq = new Sequence('DateTime', $defaultDate);
-        $seq[2] = new DateTime('2025-01-15'); // Fill gaps with clones
-
-        // Test: Verify default objects are clones
-        $this->assertCount(3, $seq);
-        $date0 = $seq[0];
-        $date1 = $seq[1];
-        $this->assertNotSame($date0, $date1); // Different objects
-        $this->assertEquals($date0, $date1); // Same value
     }
 
     /**

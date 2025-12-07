@@ -38,8 +38,7 @@ class SequenceConstructorTest extends TestCase
         $seq = new Sequence('string');
 
         $this->assertInstanceOf(Sequence::class, $seq);
-        // Test: Verify default value is empty string
-        $this->assertSame('', $seq->defaultValue);
+        $this->assertTrue($seq->valueTypes->containsOnly('string'));
     }
 
     /**
@@ -50,8 +49,7 @@ class SequenceConstructorTest extends TestCase
         // Test: Create a Sequence with int type constraint
         $seq = new Sequence('int');
 
-        // Test: Verify default value is 0
-        $this->assertSame(0, $seq->defaultValue);
+        $this->assertTrue($seq->valueTypes->containsOnly('int'));
     }
 
     /**
@@ -62,8 +60,7 @@ class SequenceConstructorTest extends TestCase
         // Test: Create a Sequence with float type constraint
         $seq = new Sequence('float');
 
-        // Test: Verify default value is 0.0
-        $this->assertSame(0.0, $seq->defaultValue);
+        $this->assertTrue($seq->valueTypes->containsOnly('float'));
     }
 
     /**
@@ -74,8 +71,7 @@ class SequenceConstructorTest extends TestCase
         // Test: Create a Sequence with bool type constraint
         $seq = new Sequence('bool');
 
-        // Test: Verify default value is false
-        $this->assertFalse($seq->defaultValue);
+        $this->assertTrue($seq->valueTypes->containsOnly('bool'));
     }
 
     /**
@@ -86,8 +82,7 @@ class SequenceConstructorTest extends TestCase
         // Test: Create a Sequence with array type constraint
         $seq = new Sequence('array');
 
-        // Test: Verify default value is empty array
-        $this->assertSame([], $seq->defaultValue);
+        $this->assertTrue($seq->valueTypes->containsOnly('array'));
     }
 
     /**
@@ -98,8 +93,7 @@ class SequenceConstructorTest extends TestCase
         // Test: Create a Sequence with nullable int type
         $seq = new Sequence('?int');
 
-        // Test: Verify default value is null
-        $this->assertNull($seq->defaultValue);
+        $this->assertTrue($seq->valueTypes->containsAll('int', 'null'));
     }
 
     /**
@@ -110,58 +104,7 @@ class SequenceConstructorTest extends TestCase
         // Test: Create a Sequence with union type constraint
         $seq = new Sequence('string|int');
 
-        // Test: Verify default value is determined (should be 0 for int)
-        $this->assertSame(0, $seq->defaultValue);
-    }
-
-    /**
-     * Test constructor with custom default value.
-     */
-    public function testConstructorWithCustomDefaultValue(): void
-    {
-        // Test: Create a Sequence with custom default value
-        $seq = new Sequence('string', 'default');
-
-        // Test: Verify custom default value
-        $this->assertSame('default', $seq->defaultValue);
-    }
-
-    /**
-     * Test constructor with object type and default value.
-     */
-    public function testConstructorWithObjectTypeAndDefault(): void
-    {
-        // Test: Create a Sequence with DateTime type and default
-        $default = new DateTime('2025-01-01');
-        $seq = new Sequence('DateTime', $default);
-
-        // Test: Verify default value is set
-        $this->assertInstanceOf(DateTime::class, $seq->defaultValue);
-        $this->assertEquals($default, $seq->defaultValue);
-    }
-
-    /**
-     * Test constructor adds null to typeset when default cannot be inferred.
-     */
-    public function testConstructorAddsNullWhenNoOtherDefaultCanBeInferred(): void
-    {
-        // Test: Create a Sequence with DateTime type and no default.
-        $seq = new Sequence('DateTime');
-
-        // Check there are two types in the typeset, null and DateTime.
-        $this->assertTrue($seq->valueTypes->containsOnly('null', 'DateTime'));
-    }
-
-    /**
-     * Test constructor throws TypeError for invalid default value.
-     */
-    public function testConstructorThrowsTypeErrorForInvalidDefault(): void
-    {
-        // Test: Attempt to create a Sequence with mismatched default type
-        $this->expectException(TypeError::class);
-        $this->expectExceptionMessage("The default value has an invalid type");
-
-        new Sequence('int', 'string_value');
+        $this->assertTrue($seq->valueTypes->containsAll('string', 'int'));
     }
 
     /**
@@ -233,7 +176,7 @@ class SequenceConstructorTest extends TestCase
     public function testConstructorWithExplicitTypesAndSource(): void
     {
         // Test: Create Sequence with explicit type constraint
-        $seq = new Sequence('int', null, [1, 2, 3]);
+        $seq = new Sequence('int', [1, 2, 3]);
 
         // Test: Verify type constraint applied
         $this->assertTrue($seq->valueTypes->containsOnly('int'));
@@ -242,27 +185,24 @@ class SequenceConstructorTest extends TestCase
     /**
      * Test constructor with explicit types and custom default.
      */
-    public function testConstructorWithExplicitTypesAndCustomDefault(): void
+    public function testConstructorWithExplicitTypes(): void
     {
         // Test: Create Sequence with explicit types and custom default
-        $seq = new Sequence('int', 99, [1, 2, 3]);
+        $seq = new Sequence('int', [1, 2, 3]);
 
-        // Test: Verify custom default value set
-        $this->assertSame(99, $seq->defaultValue);
         $this->assertCount(3, $seq);
     }
 
     /**
-     * Test constructor with type inference and custom default.
+     * Test constructor with type inference.
      */
     public function testConstructorWithTypeInferenceAndCustomDefault(): void
     {
-        // Test: Create Sequence with type inference and custom default
-        $seq = new Sequence(true, 0, [1, 2, 3]);
+        // Test: Create Sequence with type inference
+        $seq = new Sequence(true, [1, 2, 3]);
 
-        // Test: Verify types inferred and default set
+        // Test: Verify types inferred
         $this->assertTrue($seq->valueTypes->contains('int'));
-        $this->assertSame(0, $seq->defaultValue);
     }
 
     /**
@@ -300,7 +240,7 @@ class SequenceConstructorTest extends TestCase
         // Test: Attempt to create Sequence with mismatched type
         $this->expectException(TypeError::class);
 
-        new Sequence('string', null, [1, 2, 3]);
+        new Sequence('string', [1, 2, 3]);
     }
 
     /**
@@ -325,36 +265,12 @@ class SequenceConstructorTest extends TestCase
     }
 
     /**
-     * Test constructor infers default value when types are inferred.
-     */
-    public function testConstructorInfersDefaultValueWhenTypesInferred(): void
-    {
-        // Test: Create Sequence with inferred int type
-        $seq = new Sequence(source: [1, 2, 3]);
-
-        // Test: Verify default value inferred as 0 for int
-        $this->assertSame(0, $seq->defaultValue);
-    }
-
-    /**
-     * Test constructor infers default value with mixed types.
-     */
-    public function testConstructorInfersDefaultValueWithMixedTypes(): void
-    {
-        // Test: Create Sequence with mixed types including null
-        $seq = new Sequence(source: [1, 'hello', null]);
-
-        // Test: Verify default value is null (since null is an option)
-        $this->assertNull($seq->defaultValue);
-    }
-
-    /**
      * Test constructor with null type parameter explicitly.
      */
     public function testConstructorWithNullTypeParameter(): void
     {
         // Test: Create Sequence with null as types parameter (any type allowed)
-        $seq = new Sequence(null, null, [1, 'hello', 3.14]);
+        $seq = new Sequence(null, [1, 'hello', 3.14]);
 
         // Test: Verify no type constraints applied
         $this->assertCount(3, $seq);
@@ -368,7 +284,7 @@ class SequenceConstructorTest extends TestCase
     public function testConstructorWithUnionTypeString(): void
     {
         // Test: Create Sequence with union type constraint
-        $seq = new Sequence('int|string', null, [1, 'hello', 2, 'world']);
+        $seq = new Sequence('int|string', [1, 'hello', 2, 'world']);
 
         // Test: Verify both types accepted
         $this->assertCount(4, $seq);

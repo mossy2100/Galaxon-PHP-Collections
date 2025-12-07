@@ -26,7 +26,7 @@ class SequenceEqualityTest extends TestCase
         $seq2 = new Sequence(source: [1, 2, 3]);
 
         // Test: Verify equality
-        $this->assertTrue($seq1->equals($seq2));
+        $this->assertTrue($seq1->equal($seq2));
     }
 
     /**
@@ -39,7 +39,7 @@ class SequenceEqualityTest extends TestCase
         $seq2 = new Sequence();
 
         // Test: Verify empty sequences are equal
-        $this->assertTrue($seq1->equals($seq2));
+        $this->assertTrue($seq1->equal($seq2));
     }
 
     /**
@@ -52,7 +52,7 @@ class SequenceEqualityTest extends TestCase
         $seq2 = new Sequence(source: [1, 2, 4]);
 
         // Test: Verify inequality
-        $this->assertFalse($seq1->equals($seq2));
+        $this->assertFalse($seq1->equal($seq2));
     }
 
     /**
@@ -65,7 +65,7 @@ class SequenceEqualityTest extends TestCase
         $seq2 = new Sequence(source: [1, 2]);
 
         // Test: Verify inequality
-        $this->assertFalse($seq1->equals($seq2));
+        $this->assertFalse($seq1->equal($seq2));
     }
 
     /**
@@ -78,7 +78,7 @@ class SequenceEqualityTest extends TestCase
         $seq2 = new Sequence(source: [3, 2, 1]);
 
         // Test: Verify inequality (order matters)
-        $this->assertFalse($seq1->equals($seq2));
+        $this->assertFalse($seq1->equal($seq2));
     }
 
     /**
@@ -94,7 +94,7 @@ class SequenceEqualityTest extends TestCase
         $dict[2] = 3;
 
         // Test: Verify different collection types are not equal
-        $this->assertFalse($seq->equals($dict));
+        $this->assertFalse($seq->equal($dict));
     }
 
     /**
@@ -107,7 +107,7 @@ class SequenceEqualityTest extends TestCase
         $seq2 = new Sequence(source: [1, null, 3]);
 
         // Test: Verify equality with null values
-        $this->assertTrue($seq1->equals($seq2));
+        $this->assertTrue($seq1->equal($seq2));
     }
 
     /**
@@ -120,7 +120,7 @@ class SequenceEqualityTest extends TestCase
         $seq2 = new Sequence(source: [1, 'hello', 3.14, true, null]);
 
         // Test: Verify equality across different types
-        $this->assertTrue($seq1->equals($seq2));
+        $this->assertTrue($seq1->equal($seq2));
     }
 
     /**
@@ -137,8 +137,8 @@ class SequenceEqualityTest extends TestCase
         $seq3 = new Sequence(source: [$obj2]); // Different object
 
         // Test: Verify identity comparison (===)
-        $this->assertTrue($seq1->equals($seq2));
-        $this->assertFalse($seq1->equals($seq3));
+        $this->assertTrue($seq1->equal($seq2));
+        $this->assertFalse($seq1->equal($seq3));
     }
 
     /**
@@ -152,8 +152,8 @@ class SequenceEqualityTest extends TestCase
         $seq3 = new Sequence(source: [[1, 2], [3, 5]]);
 
         // Test: Verify strict array comparison
-        $this->assertTrue($seq1->equals($seq2));
-        $this->assertFalse($seq1->equals($seq3));
+        $this->assertTrue($seq1->equal($seq2));
+        $this->assertFalse($seq1->equal($seq3));
     }
 
     /**
@@ -162,8 +162,8 @@ class SequenceEqualityTest extends TestCase
     public function testTypeConstraintsAreIgnored(): void
     {
         // Test: Compare sequences with different type constraints
-        $seq1 = new Sequence('int', 0);
-        $seq2 = new Sequence(null, 0); // No type constraint
+        $seq1 = new Sequence('int');
+        $seq2 = new Sequence(); // No type constraint
 
         $seq1->append(1);
         $seq1->append(2);
@@ -171,24 +171,6 @@ class SequenceEqualityTest extends TestCase
         $seq2->append(2);
 
         // Test: Verify type constraints don't affect equality
-        $this->assertTrue($seq1->equals($seq2));
-    }
-
-    /**
-     * Test default values do not affect equality.
-     */
-    public function testDefaultValuesDoNotAffectEquality(): void
-    {
-        // Test: Compare sequences with different default values
-        $seq1 = new Sequence(null, 0);  // Default value 0
-        $seq2 = new Sequence(null, 99); // Default value 99
-
-        $seq1->append(1);
-        $seq1->append(2);
-        $seq2->append(1);
-        $seq2->append(2);
-
-        // Test: Verify default values don't affect equality
-        $this->assertTrue($seq1->equals($seq2));
+        $this->assertTrue($seq1->equal($seq2));
     }
 }

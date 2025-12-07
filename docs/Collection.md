@@ -279,10 +279,12 @@ Check if the Collection contains a specific value. Uses strict equality (value a
 - **Dictionary:** Checks if a value exists (not a key)
 - **Set:** Checks if value exists in the set
 
-### equals()
+### equal()
+
+This method comes from the Equatable trait. (TODO add a link here)
 
 ```php
-abstract public function equals(Collection $other): bool
+abstract public function equal(Collection $other): bool
 ```
 
 Check if two Collections are equal. The definition of "equal" varies by collection type.
@@ -330,12 +332,12 @@ protected function equalTypeAndCount(Collection $other): bool
 
 Check if two Collections have the same concrete type and same number of items.
 
-**Used by:** `equals()` implementations in concrete classes as a first check before comparing values.
+**Used by:** `equal()` implementations in concrete classes as a first check before comparing values.
 
 **Example (internal use):**
 ```php
-// In Sequence::equals()
-public function equals(Collection $other): bool
+// In Sequence::equal()
+public function equal(Collection $other): bool
 {
     // First check type and count match
     if (!$this->equalTypeAndCount($other)) {
@@ -458,7 +460,7 @@ class MyCustomCollection extends Collection
         return false;
     }
 
-    public function equals(Collection $other): bool
+    public function equal(Collection $other): bool
     {
         // Implementation
         return false;

@@ -14,7 +14,7 @@ While primarily used internally by Sequence, Dictionary, Set, and Collection cla
 - **Type validation**: Runtime checking of values against type constraints
 - **Type inference**: Automatically detect types from values
 - **Default value inference**: Smart defaults for common types
-- **Pseudotypes**: Support for scalar, number, uint, iterable, callable, mixed
+- **Pseudotypes**: Support for scalar, number, iterable, callable, mixed
 - **Class types**: Classes, interfaces, traits (including inheritance)
 - **Resource types**: Specific resource types like 'resource (stream)'
 
@@ -62,7 +62,6 @@ $ts = new TypeSet('Countable');
 // Pseudotypes
 $ts = new TypeSet('scalar');   // int|float|string|bool
 $ts = new TypeSet('number');   // int|float
-$ts = new TypeSet('uint');     // unsigned int (>= 0)
 $ts = new TypeSet('mixed');    // Any type
 ```
 
@@ -98,12 +97,6 @@ $ts = new TypeSet('number');
 var_dump($ts->match(42));      // true
 var_dump($ts->match(3.14));    // true
 var_dump($ts->match('42'));    // false (string, not number)
-
-// Uint pseudotype
-$ts = new TypeSet('uint');
-var_dump($ts->match(0));       // true
-var_dump($ts->match(42));      // true
-var_dump($ts->match(-1));      // false (negative)
 
 // Class matching (with inheritance)
 $ts = new TypeSet('DateTime');
@@ -330,53 +323,51 @@ $ts4 = new TypeSet('int|string');
 var_dump($ts4->nullOk()); // false
 ```
 
-## Default Value Inference
+## Default Value
 
-### tryInferDefaultValue()
+### getDefaultValue()
 
 ```php
-public function tryInferDefaultValue(mixed &$default_value): bool
+public function getDefaultValue(): mixed
 ```
 
-Try to infer a sensible default value based on the types in the TypeSet. Returns `true` if successful, `false` otherwise. The inferred value is set via the reference parameter.
+Get a sensible default value based on the types in the TypeSet.
 
-**Inference Rules (in priority order):**
+**Default Value Rules (in priority order):**
 
-1. `null` or contains 'null' → `null`
+1. Contains 'null' → `null`
 2. `bool` → `false`
-3. `int`, `uint`, `number`, or `scalar` → `0`
+3. `int`, `number`, or `scalar` → `0`
 4. `float` → `0.0`
 5. `string` → `''` (empty string)
 6. `array` or `iterable` → `[]` (empty array)
-7. Other types (classes, resources, etc.) → returns `false`
+7. `object` → `new stdClass()`
+8. Other types → throws `RuntimeException`
 
 **Examples:**
 ```php
 $ts = new TypeSet('int');
-$result = $ts->tryInferDefaultValue($default);
-// $result = true, $default = 0
+$default = $ts->getDefaultValue(); // 0
 
 $ts = new TypeSet('string');
-$result = $ts->tryInferDefaultValue($default);
-// $result = true, $default = ''
+$default = $ts->getDefaultValue(); // ''
 
 $ts = new TypeSet('?int');
-$result = $ts->tryInferDefaultValue($default);
-// $result = true, $default = null (null has priority)
+$default = $ts->getDefaultValue(); // null (null has priority)
 
 $ts = new TypeSet('array');
-$result = $ts->tryInferDefaultValue($default);
-// $result = true, $default = []
+$default = $ts->getDefaultValue(); // []
+
+$ts = new TypeSet('object');
+$default = $ts->getDefaultValue(); // new stdClass()
 
 $ts = new TypeSet('DateTime');
-$result = $ts->tryInferDefaultValue($default);
-// $result = false (can't infer default for objects)
+$default = $ts->getDefaultValue();
+// RuntimeException: No default value could be determined for this TypeSet.
 
-// Use case: Sequence uses this to infer default values
+// Use case: Sequence uses this to fill gaps
 $ts = new TypeSet('int');
-if ($ts->tryInferDefaultValue($default)) {
-    echo "Default value: $default"; // Default value: 0
-}
+echo $ts->getDefaultValue(); // 0
 ```
 
 ## Supported Type Names
@@ -395,7 +386,6 @@ if ($ts->tryInferDefaultValue($default)) {
 - `mixed` - Any type (no restrictions)
 - `scalar` - String, int, float, or bool
 - `number` - Int or float
-- `uint` - Unsigned integer (int >= 0)
 - `iterable` - Arrays, iterators, generators
 - `callable` - Functions, methods, closures
 

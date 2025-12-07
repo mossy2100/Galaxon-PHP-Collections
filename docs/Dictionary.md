@@ -383,10 +383,10 @@ echo count($dict);        // Countable interface
 echo $dict->count();      // Direct method
 ```
 
-### equals()
+### equal()
 
 ```php
-public function equals(Collection $other): bool
+public function equal(Collection $other): bool
 ```
 
 Check equality. Dictionaries are equal if they:
@@ -403,7 +403,7 @@ Type constraints are ignored.
 $dict1 = new Dictionary(source: ['a' => 1, 'b' => 2]);
 $dict2 = new Dictionary(source: ['a' => 1, 'b' => 2]);
 
-var_dump($dict1->equals($dict2)); // true
+var_dump($dict1->equal($dict2)); // true
 ```
 
 ### all()
@@ -516,7 +516,7 @@ public function flip(): self
 
 Swap keys with values. All values in the Dictionary must be unique.
 
-**Throws:** `DuplicateKeyException` if the original Dictionary contains duplicate values.
+**Throws:** `RuntimeException` if the original Dictionary contains duplicate values.
 
 **Example:**
 ```php
@@ -545,7 +545,7 @@ Transform each key-value pair using a callback function. The callback receives a
 
 **Throws:**
 - `TypeError` if the callback doesn't return a Pair
-- `DuplicateKeyException` if the callback produces duplicate keys
+- `RuntimeException` if the callback produces duplicate keys
 
 **Examples:**
 ```php

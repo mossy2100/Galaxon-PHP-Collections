@@ -258,9 +258,9 @@ class SequenceTransformationTest extends TestCase
     }
 
     /**
-     * Test fill method with default value.
+     * Test fill method with value.
      */
-    public function testFillWithDefaultValue(): void
+    public function testFillWithValue2(): void
     {
         // Test: Fill with value.
         $seq = new Sequence('int');

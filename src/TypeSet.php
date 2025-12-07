@@ -6,8 +6,11 @@ namespace Galaxon\Collections;
 
 use ArrayIterator;
 use Countable;
+use Galaxon\Core\Numbers;
 use Galaxon\Core\Types;
 use IteratorAggregate;
+use RuntimeException;
+use stdClass;
 use Stringable;
 use Traversable;
 use TypeError;
@@ -34,9 +37,8 @@ use ValueError;
  * - 'iterable' - Arrays, iterators, generators (anything iterable)
  * - 'callable' - Functions, methods, closures, invokables
  *
- * ### Custom pseudotypes (invented for this package)
+ * ### Custom pseudotype (invented for this package)
  * - 'number' - Either number type (int|float)
- * - 'uint' - Unsigned integer type (int where value >= 0)
  *
  * ### Resource types
  * Examples: 'resource (stream)', 'resource (curl)', etc.
@@ -134,12 +136,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
         }
 
         // Check number.
-        if ($this->contains('number') && Types::isNumber($value)) {
-            return true;
-        }
-
-        // Check uint.
-        if ($this->contains('uint') && Types::isUint($value)) {
+        if ($this->contains('number') && Numbers::isNumber($value)) {
             return true;
         }
 
@@ -200,30 +197,32 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
     }
 
     /**
-     * Try to infer a sane default value for this type set.
+     * Get the default value for this type set.
      *
-     * @param mixed $defaultValue The default value.
-     * @return bool True if a default value could be inferred, false otherwise.
+     * @return mixed The default value.
+     * @throws RuntimeException If no default value could be determined for this type set.
      */
-    public function tryInferDefaultValue(mixed &$defaultValue): bool
+    public function getDefaultValue(): mixed
     {
         if ($this->nullOk()) {
-            $defaultValue = null;
+            return null;
         } elseif ($this->contains('bool')) {
-            $defaultValue = false;
-        } elseif ($this->containsAny('int', 'uint', 'number', 'scalar')) {
-            $defaultValue = 0;
-        } elseif ($this->contains('float')) {
-            $defaultValue = 0.0;
-        } elseif ($this->contains('string')) {
-            $defaultValue = '';
-        } elseif ($this->containsAny('array', 'iterable')) {
-            $defaultValue = [];
-        } else {
             return false;
+        } elseif ($this->containsAny('int', 'number', 'scalar')) {
+            return 0;
+        } elseif ($this->contains('float')) {
+            return 0.0;
+        } elseif ($this->contains('string')) {
+            return '';
+        } elseif ($this->containsAny('array', 'iterable')) {
+            return [];
+        } elseif ($this->contains('object')) {
+            return new stdClass();
         }
 
-        return true;
+        throw new RuntimeException(
+            "No default value could be determined for this TypeSet. Consider adding 'null' to the TypeSet."
+        );
     }
 
     // endregion
@@ -264,7 +263,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      */
     private static function isPseudoType(string $type): bool
     {
-        $types = ['callable', 'iterable', 'mixed', 'scalar', 'number', 'uint'];
+        $types = ['callable', 'iterable', 'mixed', 'scalar', 'number'];
         return in_array($type, $types, true);
     }
 

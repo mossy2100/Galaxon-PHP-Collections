@@ -71,8 +71,8 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3);
 
-        $this->assertTrue($set1->equals($set2));
-        $this->assertTrue($set2->equals($set1));
+        $this->assertTrue($set1->equal($set2));
+        $this->assertTrue($set2->equal($set1));
     }
 
     /**
@@ -86,7 +86,7 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(3, 2, 1);
 
-        $this->assertTrue($set1->equals($set2));
+        $this->assertTrue($set1->equal($set2));
     }
 
     /**
@@ -100,7 +100,7 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2);
 
-        $this->assertFalse($set1->equals($set2));
+        $this->assertFalse($set1->equal($set2));
     }
 
     /**
@@ -114,7 +114,7 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 4);
 
-        $this->assertFalse($set1->equals($set2));
+        $this->assertFalse($set1->equal($set2));
     }
 
     /**
@@ -128,7 +128,7 @@ class SetComparisonTest extends TestCase
         $seq = new Sequence('int');
         $seq->append(1, 2, 3);
 
-        $this->assertFalse($set->equals($seq));
+        $this->assertFalse($set->equal($seq));
     }
 
     /**
@@ -139,7 +139,7 @@ class SetComparisonTest extends TestCase
         $set1 = new Set('int');
         $set2 = new Set('int');
 
-        $this->assertTrue($set1->equals($set2));
+        $this->assertTrue($set1->equal($set2));
     }
 
     /**
@@ -153,13 +153,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int|string');
         $set2->add(1, 2, 3);
 
-        $this->assertTrue($set1->equals($set2));
+        $this->assertTrue($set1->equal($set2));
     }
 
     /**
-     * Test isSubsetOf returns true when all items are in other set.
+     * Test subset returns true when all items are in other set.
      */
-    public function testIsSubsetOfReturnsTrueForSubset(): void
+    public function testSubsetReturnsTrueForSubset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2);
@@ -167,13 +167,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3, 4);
 
-        $this->assertTrue($set1->isSubsetOf($set2));
+        $this->assertTrue($set1->subset($set2));
     }
 
     /**
-     * Test isSubsetOf returns false when not all items are in other set.
+     * Test subset returns false when not all items are in other set.
      */
-    public function testIsSubsetOfReturnsFalseForNonSubset(): void
+    public function testSubsetReturnsFalseForNonSubset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 5);
@@ -181,13 +181,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3, 4);
 
-        $this->assertFalse($set1->isSubsetOf($set2));
+        $this->assertFalse($set1->subset($set2));
     }
 
     /**
-     * Test isSubsetOf returns true for equal sets.
+     * Test subset returns true for equal sets.
      */
-    public function testIsSubsetOfReturnsTrueForEqualSets(): void
+    public function testSubsetReturnsTrueForEqualSets(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -195,26 +195,26 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3);
 
-        $this->assertTrue($set1->isSubsetOf($set2));
+        $this->assertTrue($set1->subset($set2));
     }
 
     /**
-     * Test isSubsetOf returns true for empty set.
+     * Test subset returns true for empty set.
      */
-    public function testIsSubsetOfReturnsTrueForEmptySet(): void
+    public function testSubsetReturnsTrueForEmptySet(): void
     {
         $set1 = new Set('int');
 
         $set2 = new Set('int');
         $set2->add(1, 2, 3);
 
-        $this->assertTrue($set1->isSubsetOf($set2));
+        $this->assertTrue($set1->subset($set2));
     }
 
     /**
-     * Test isProperSubsetOf returns true for proper subset.
+     * Test properSubset returns true for proper subset.
      */
-    public function testIsProperSubsetOfReturnsTrueForProperSubset(): void
+    public function testProperSubsetReturnsTrueForProperSubset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2);
@@ -222,13 +222,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3, 4);
 
-        $this->assertTrue($set1->isProperSubsetOf($set2));
+        $this->assertTrue($set1->properSubset($set2));
     }
 
     /**
-     * Test isProperSubsetOf returns false for equal sets.
+     * Test properSubset returns false for equal sets.
      */
-    public function testIsProperSubsetOfReturnsFalseForEqualSets(): void
+    public function testProperSubsetReturnsFalseForEqualSets(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -236,13 +236,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3);
 
-        $this->assertFalse($set1->isProperSubsetOf($set2));
+        $this->assertFalse($set1->properSubset($set2));
     }
 
     /**
-     * Test isProperSubsetOf returns false when not a subset.
+     * Test properSubset returns false when not a subset.
      */
-    public function testIsProperSubsetOfReturnsFalseForNonSubset(): void
+    public function testProperSubsetReturnsFalseForNonSubset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 5);
@@ -250,13 +250,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3, 4);
 
-        $this->assertFalse($set1->isProperSubsetOf($set2));
+        $this->assertFalse($set1->properSubset($set2));
     }
 
     /**
-     * Test isSupersetOf returns true when contains all items from other set.
+     * Test superset returns true when contains all items from other set.
      */
-    public function testIsSupersetOfReturnsTrueForSuperset(): void
+    public function testSupersetReturnsTrueForSuperset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3, 4);
@@ -264,13 +264,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2);
 
-        $this->assertTrue($set1->isSupersetOf($set2));
+        $this->assertTrue($set1->superset($set2));
     }
 
     /**
-     * Test isSupersetOf returns false when not containing all items.
+     * Test superset returns false when not containing all items.
      */
-    public function testIsSupersetOfReturnsFalseForNonSuperset(): void
+    public function testSupersetReturnsFalseForNonSuperset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -278,13 +278,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 5);
 
-        $this->assertFalse($set1->isSupersetOf($set2));
+        $this->assertFalse($set1->superset($set2));
     }
 
     /**
-     * Test isSupersetOf returns true for equal sets.
+     * Test superset returns true for equal sets.
      */
-    public function testIsSupersetOfReturnsTrueForEqualSets(): void
+    public function testSupersetReturnsTrueForEqualSets(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -292,13 +292,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3);
 
-        $this->assertTrue($set1->isSupersetOf($set2));
+        $this->assertTrue($set1->superset($set2));
     }
 
     /**
-     * Test isProperSupersetOf returns true for proper superset.
+     * Test properSuperset returns true for proper superset.
      */
-    public function testIsProperSupersetOfReturnsTrueForProperSuperset(): void
+    public function testProperSupersetReturnsTrueForProperSuperset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3, 4);
@@ -306,13 +306,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2);
 
-        $this->assertTrue($set1->isProperSupersetOf($set2));
+        $this->assertTrue($set1->properSuperset($set2));
     }
 
     /**
-     * Test isProperSupersetOf returns false for equal sets.
+     * Test properSuperset returns false for equal sets.
      */
-    public function testIsProperSupersetOfReturnsFalseForEqualSets(): void
+    public function testProperSupersetReturnsFalseForEqualSets(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -320,13 +320,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 3);
 
-        $this->assertFalse($set1->isProperSupersetOf($set2));
+        $this->assertFalse($set1->properSuperset($set2));
     }
 
     /**
-     * Test isProperSupersetOf returns false when not a superset.
+     * Test properSuperset returns false when not a superset.
      */
-    public function testIsProperSupersetOfReturnsFalseForNonSuperset(): void
+    public function testProperSupersetReturnsFalseForNonSuperset(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -334,13 +334,13 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(1, 2, 5);
 
-        $this->assertFalse($set1->isProperSupersetOf($set2));
+        $this->assertFalse($set1->properSuperset($set2));
     }
 
     /**
-     * Test isDisjointFrom returns true for disjoint sets.
+     * Test disjoint returns true for disjoint sets.
      */
-    public function testIsDisjointFromReturnsTrueForDisjointSets(): void
+    public function testDisjointReturnsTrueForDisjointSets(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -348,14 +348,14 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(4, 5, 6);
 
-        $this->assertTrue($set1->isDisjointFrom($set2));
-        $this->assertTrue($set2->isDisjointFrom($set1));
+        $this->assertTrue($set1->disjoint($set2));
+        $this->assertTrue($set2->disjoint($set1));
     }
 
     /**
-     * Test isDisjointFrom returns false for overlapping sets.
+     * Test disjoint returns false for overlapping sets.
      */
-    public function testIsDisjointFromReturnsFalseForOverlappingSets(): void
+    public function testDisjointReturnsFalseForOverlappingSets(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
@@ -363,32 +363,32 @@ class SetComparisonTest extends TestCase
         $set2 = new Set('int');
         $set2->add(3, 4, 5);
 
-        $this->assertFalse($set1->isDisjointFrom($set2));
+        $this->assertFalse($set1->disjoint($set2));
     }
 
     /**
-     * Test isDisjointFrom returns true for empty sets.
+     * Test disjoint returns true for empty sets.
      */
-    public function testIsDisjointFromReturnsTrueForEmptySets(): void
+    public function testDisjointReturnsTrueForEmptySets(): void
     {
         $set1 = new Set('int');
         $set2 = new Set('int');
 
-        $this->assertTrue($set1->isDisjointFrom($set2));
+        $this->assertTrue($set1->disjoint($set2));
     }
 
     /**
-     * Test isDisjointFrom returns true when one set is empty.
+     * Test disjoint returns true when one set is empty.
      */
-    public function testIsDisjointFromReturnsTrueWhenOneSetIsEmpty(): void
+    public function testDisjointReturnsTrueWhenOneSetIsEmpty(): void
     {
         $set1 = new Set('int');
         $set1->add(1, 2, 3);
 
         $set2 = new Set('int');
 
-        $this->assertTrue($set1->isDisjointFrom($set2));
-        $this->assertTrue($set2->isDisjointFrom($set1));
+        $this->assertTrue($set1->disjoint($set2));
+        $this->assertTrue($set2->disjoint($set1));
     }
 
     /**

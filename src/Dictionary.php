@@ -10,6 +10,7 @@ use Galaxon\Core\Stringify;
 use Galaxon\Core\Types;
 use OutOfBoundsException;
 use Override;
+use RuntimeException;
 use Traversable;
 use TypeError;
 use ValueError;
@@ -371,7 +372,7 @@ final class Dictionary extends Collection implements ArrayAccess
      * @return bool True if the Dictionaries are equal, false otherwise.
      */
     #[Override]
-    public function equals(mixed $other): bool
+    public function equal(mixed $other): bool
     {
         // Check type and item count are equal.
         if (!$other instanceof self || count($this->items) !== count($other->items)) {
@@ -510,7 +511,7 @@ final class Dictionary extends Collection implements ArrayAccess
      * All values in the Dictionary must be unique for flip to succeed.
      *
      * @return self A new Dictionary with keys and values swapped.
-     * @throws DuplicateKeyException If the Dictionary contains duplicate values.
+     * @throws RuntimeException If the Dictionary contains duplicate values.
      */
     public function flip(): self
     {
@@ -523,7 +524,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Check if this value already exists as a key in the result.
             if ($result->keyExists($pair->value)) {
-                throw new DuplicateKeyException('Cannot flip Dictionary: values are not unique.');
+                throw new RuntimeException('Cannot flip Dictionary: values are not unique.');
             }
 
             // Add the flipped key-value pair to the result. Calls offsetSet().
@@ -547,7 +548,7 @@ final class Dictionary extends Collection implements ArrayAccess
      * @param callable(Pair): Pair $fn The callback function to apply to each item.
      * @return self A new Dictionary containing the transformed key-value pairs.
      * @throws TypeError If the callback doesn't return a Pair.
-     * @throws DuplicateKeyException If the callback produces duplicate keys.
+     * @throws RuntimeException If the callback produces duplicate keys.
      *
      * @example
      *   $dict = new Dictionary('string', 'int');
@@ -583,8 +584,8 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Check for duplicate keys.
             if ($result->keyExists($newPair->key)) {
-                throw new DuplicateKeyException('Map callback produced a duplicate key: ' .
-                                                Stringify::abbrev($newPair->key) . '.');
+                throw new RuntimeException('Map callback produced a duplicate key: ' .
+                                           Stringify::abbrev($newPair->key) . '.');
             }
 
             // Add the types.
