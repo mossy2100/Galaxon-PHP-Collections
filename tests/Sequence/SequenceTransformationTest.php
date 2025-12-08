@@ -539,7 +539,7 @@ class SequenceTransformationTest extends TestCase
     {
         // Test: Attempt to find min of empty Sequence
         $this->expectException(ValueError::class);
-        $this->expectExceptionMessage("Cannot find the minimum value of empty Sequence.");
+        $this->expectExceptionMessage('Cannot find the minimum value of empty Sequence.');
 
         $seq = new Sequence('int');
         $seq->min();
@@ -591,7 +591,7 @@ class SequenceTransformationTest extends TestCase
     {
         // Test: Attempt to find max of empty Sequence
         $this->expectException(ValueError::class);
-        $this->expectExceptionMessage("Cannot find the maximum value of empty Sequence.");
+        $this->expectExceptionMessage('Cannot find the maximum value of empty Sequence.');
 
         $seq = new Sequence('int');
         $seq->max();
@@ -656,7 +656,7 @@ class SequenceTransformationTest extends TestCase
     {
         // Test: Attempt to find average of empty Sequence
         $this->expectException(UnderflowException::class);
-        $this->expectExceptionMessage("Cannot calculate the average value of empty Sequence.");
+        $this->expectExceptionMessage('Cannot calculate the average value of empty Sequence.');
 
         $seq = new Sequence('int');
         $seq->average();

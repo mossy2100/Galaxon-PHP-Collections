@@ -8,6 +8,7 @@ use Galaxon\Collections\Dictionary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
+use ValueError;
 
 /**
  * Tests for Dictionary constructor and factory methods.
@@ -552,7 +553,7 @@ class DictionaryConstructorTest extends TestCase
         $keys = ['a', 'b', 'c'];
         $values = [1, 2]; // One less value
 
-        $this->expectException(\ValueError::class);
+        $this->expectException(ValueError::class);
         $this->expectExceptionMessage('Cannot combine: keys count (3) does not match values count (2).');
 
         Dictionary::combine($keys, $values);
@@ -566,7 +567,7 @@ class DictionaryConstructorTest extends TestCase
         $keys = ['a', 'b', 'a']; // Duplicate 'a'
         $values = [1, 2, 3];
 
-        $this->expectException(\ValueError::class);
+        $this->expectException(ValueError::class);
         $this->expectExceptionMessage('Cannot combine: keys are not unique.');
 
         Dictionary::combine($keys, $values);
@@ -581,7 +582,7 @@ class DictionaryConstructorTest extends TestCase
         $keys = [$obj, $obj]; // Same object twice
         $values = ['first', 'second'];
 
-        $this->expectException(\ValueError::class);
+        $this->expectException(ValueError::class);
         $this->expectExceptionMessage('Cannot combine: keys are not unique.');
 
         Dictionary::combine($keys, $values);

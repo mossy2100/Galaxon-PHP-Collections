@@ -334,7 +334,7 @@ final class Set extends Collection
 
             // Validate the result of the callback.
             if (!is_bool($keep)) {
-                throw new TypeError("The filter callback must return a bool, got " . Types::getBasicType($keep) . ".");
+                throw new TypeError('The filter callback must return a bool, got ' . Types::getBasicType($keep) . '.');
             }
 
             // Add item to the result Set.

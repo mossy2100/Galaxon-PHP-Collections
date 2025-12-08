@@ -163,7 +163,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Check for duplicate keys.
             if (isset($dict[$key])) {
-                throw new ValueError("Cannot combine: keys are not unique.");
+                throw new ValueError('Cannot combine: keys are not unique.');
             }
 
             // Get the value.
@@ -205,7 +205,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
         // Check index (and thus key) exists in the Dictionary.
         if (!array_key_exists($index, $this->items)) {
-            throw new OutOfBoundsException("Unknown key: " . Stringify::abbrev($key) . ".");
+            throw new OutOfBoundsException('Unknown key: ' . Stringify::abbrev($key) . '.');
         }
 
         return $index;
@@ -236,7 +236,7 @@ final class Dictionary extends Collection implements ArrayAccess
                 $key = $keyOrPair->key;
                 $value = $keyOrPair->value;
             } else {
-                throw new TypeError("Invalid key-value pair: " . Stringify::abbrev($keyOrPair));
+                throw new TypeError('Invalid key-value pair: ' . Stringify::abbrev($keyOrPair));
             }
         } elseif ($nArgs === 2) {
             $key = $keyOrPair;
@@ -493,7 +493,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Validate the result of the callback.
             if (!is_bool($keep)) {
-                throw new TypeError('The filter callback must return a bool, got ' . Types::getBasicType($keep) . ".");
+                throw new TypeError('The filter callback must return a bool, got ' . Types::getBasicType($keep) . '.');
             }
 
             // Add pair to keep to the result dictionary.

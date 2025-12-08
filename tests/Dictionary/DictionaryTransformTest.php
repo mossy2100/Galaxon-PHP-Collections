@@ -74,7 +74,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test flipping with duplicate values throws RuntimeException.
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage("Cannot flip Dictionary: values are not unique.");
+        $this->expectExceptionMessage('Cannot flip Dictionary: values are not unique.');
         $dict->flip();
     }
 

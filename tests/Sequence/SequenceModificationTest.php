@@ -269,7 +269,7 @@ class SequenceModificationTest extends TestCase
     {
         // Test: Attempt to remove first from empty Sequence
         $this->expectException(UnderflowException::class);
-        $this->expectExceptionMessage("No items in the Sequence");
+        $this->expectExceptionMessage('No items in the Sequence');
 
         $seq = new Sequence('int');
         $seq->removeFirst();
@@ -298,7 +298,7 @@ class SequenceModificationTest extends TestCase
     {
         // Test: Attempt to remove last from empty Sequence
         $this->expectException(UnderflowException::class);
-        $this->expectExceptionMessage("No items in the Sequence");
+        $this->expectExceptionMessage('No items in the Sequence');
 
         $seq = new Sequence('int');
         $seq->removeLast();

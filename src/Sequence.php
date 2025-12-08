@@ -142,13 +142,13 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Validate step size. Use loose comparison here to validate either an int or float argument.
         if (Numbers::equal($step, 0)) {
-            throw new ValueError("The step size cannot be zero.");
+            throw new ValueError('The step size cannot be zero.');
         }
         if ($start <= $end && $step < 0) {
-            throw new ValueError("The step size must be positive for an increasing range.");
+            throw new ValueError('The step size must be positive for an increasing range.');
         }
         if ($start >= $end && $step > 0) {
-            throw new ValueError("The step size must be negative for a decreasing range.");
+            throw new ValueError('The step size must be negative for a decreasing range.');
         }
 
         // If any of the arguments are floats, generate a Sequence of floats; otherwise, ints.
@@ -200,12 +200,12 @@ final class Sequence extends Collection implements ArrayAccess
 
         // Check the index isn't negative.
         if ($index < 0) {
-            throw new OutOfRangeException("Index cannot be negative.");
+            throw new OutOfRangeException('Index cannot be negative.');
         }
 
         // Check the index isn't too large.
         if ($checkUpperBound && $index >= count($this->items)) {
-            throw new OutOfRangeException("Index is out of range.");
+            throw new OutOfRangeException('Index is out of range.');
         }
     }
 
@@ -406,7 +406,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check for an empty Sequence.
         if (count($this->items) === 0) {
-            throw new UnderflowException("No items in the Sequence.");
+            throw new UnderflowException('No items in the Sequence.');
         }
 
         // Remove and return the first item.
@@ -425,7 +425,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check for an empty Sequence.
         if (count($this->items) === 0) {
-            throw new UnderflowException("No items in the Sequence.");
+            throw new UnderflowException('No items in the Sequence.');
         }
 
         // Remove and return the last item.
@@ -509,7 +509,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Guard against empty Sequences.
         if ($this->empty()) {
-            throw new OutOfRangeException("No items in the Sequence.");
+            throw new OutOfRangeException('No items in the Sequence.');
         }
 
         // Get the first item.
@@ -526,7 +526,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Guard against empty Sequences.
         if ($this->empty()) {
-            throw new OutOfRangeException("No items in the Sequence.");
+            throw new OutOfRangeException('No items in the Sequence.');
         }
 
         // Get the last item.
@@ -669,7 +669,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Guard against invalid chunk sizes.
         if ($size <= 0) {
-            throw new ValueError("Chunk size must be at least 1.");
+            throw new ValueError('Chunk size must be at least 1.');
         }
 
         // Break the array of items into chunks.
@@ -872,7 +872,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check we have items.
         if (empty($this->items)) {
-            throw new ValueError("Cannot find the minimum value of empty Sequence.");
+            throw new ValueError('Cannot find the minimum value of empty Sequence.');
         }
 
         // Use a custom reducer to find the minimum value instead of min(), because that function will allow
@@ -894,7 +894,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check we have items.
         if (empty($this->items)) {
-            throw new ValueError("Cannot find the maximum value of empty Sequence.");
+            throw new ValueError('Cannot find the maximum value of empty Sequence.');
         }
 
         // Use a custom reducer to find the maximum value instead of max(), because that function will allow
@@ -915,7 +915,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check we have items.
         if ($this->empty()) {
-            throw new UnderflowException("Cannot calculate the average value of empty Sequence.");
+            throw new UnderflowException('Cannot calculate the average value of empty Sequence.');
         }
 
         // Find the average value.
@@ -965,10 +965,10 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Guards.
         if ($this->empty()) {
-            throw new OutOfRangeException("Cannot choose items from an empty Sequence.");
+            throw new OutOfRangeException('Cannot choose items from an empty Sequence.');
         }
         if ($count <= 0) {
-            throw new OutOfRangeException("Count must be greater than 0.");
+            throw new OutOfRangeException('Count must be greater than 0.');
         }
         if ($count > $this->count()) {
             throw new OutOfRangeException("Cannot choose $count items from a Sequence with {$this->count()} items.");

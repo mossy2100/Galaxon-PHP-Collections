@@ -7,6 +7,7 @@ namespace Galaxon\Collections\Tests\Dictionary;
 use Galaxon\Collections\Dictionary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Traversable;
 
 /**
  * Tests for Dictionary iteration functionality.
@@ -216,7 +217,7 @@ class DictionaryIterationTest extends TestCase
         $iterator = $dict->getIterator();
 
         // Test iterator is traversable.
-        $this->assertInstanceOf(\Traversable::class, $iterator);
+        $this->assertInstanceOf(Traversable::class, $iterator);
     }
 
     /**

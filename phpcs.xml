@@ -6,7 +6,7 @@
     <file>src</file>
     <file>tests</file>
 
-    <!-- Use Galaxon PHP Coding Standard (includes PSR12 + custom rules) -->
+    <!-- Use Galaxon PHP Coding Standard (includes PSR12 + additional rules) -->
     <rule ref="Galaxon"/>
 
 </ruleset>
