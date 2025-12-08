@@ -938,8 +938,8 @@ final class Sequence extends Collection implements ArrayAccess
         foreach ($this->items as $item) {
             if (is_object($item) && !$item instanceof Stringable) {
                 throw new ValueError(
-                    'Cannot join Sequence: contains an object of class ' .
-                    get_class($item) . ', which does not implement Stringable.'
+                    'Cannot join Sequence: contains an object of class ' . $item::class .
+                        ', which does not implement Stringable.'
                 );
             }
         }
