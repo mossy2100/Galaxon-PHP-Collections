@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Galaxon\Collections\Tests\Sequence;
 
-use DateTime;
 use Galaxon\Collections\Sequence;
 use OutOfRangeException;
 use PHPUnit\Framework\Attributes\CoversClass;

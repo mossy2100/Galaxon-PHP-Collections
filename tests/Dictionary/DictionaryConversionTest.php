@@ -7,7 +7,6 @@ namespace Galaxon\Collections\Tests\Dictionary;
 use Galaxon\Collections\Dictionary;
 use Galaxon\Collections\Pair;
 use Galaxon\Collections\Sequence;
-use Galaxon\Collections\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
