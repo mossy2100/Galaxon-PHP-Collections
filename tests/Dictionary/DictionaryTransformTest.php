@@ -183,7 +183,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('d', 4);
 
         // Test filtering for even values.
-        $filtered = $dict->filter(fn($key, $value) => $value % 2 === 0);
+        $filtered = $dict->filter(static fn ($key, $value) => $value % 2 === 0);
 
         // Test only even values are kept.
         $this->assertCount(2, $filtered);
@@ -205,7 +205,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('avocado', 7);
 
         // Test filtering based on key starting with 'a'.
-        $filtered = $dict->filter(fn($key, $value) => str_starts_with($key, 'a'));
+        $filtered = $dict->filter(static fn ($key, $value) => str_starts_with($key, 'a'));
 
         // Test only items with keys starting with 'a' are kept.
         $this->assertCount(2, $filtered);
@@ -223,7 +223,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('b', 2);
 
         // Test filtering with no matches.
-        $filtered = $dict->filter(fn($key, $value) => $value > 10);
+        $filtered = $dict->filter(static fn ($key, $value) => $value > 10);
 
         // Test result is empty.
         $this->assertCount(0, $filtered);
@@ -238,7 +238,7 @@ class DictionaryTransformTest extends TestCase
         $dict = new Dictionary();
 
         // Test filtering empty dictionary.
-        $filtered = $dict->filter(fn($key, $value) => true);
+        $filtered = $dict->filter(static fn ($key, $value) => true);
 
         // Test result is empty.
         $this->assertCount(0, $filtered);
@@ -255,7 +255,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('c', 3);
 
         // Test filtering creates dictionary with same types.
-        $filtered = $dict->filter(fn($key, $value) => $value > 1);
+        $filtered = $dict->filter(static fn ($key, $value) => $value > 1);
 
         // Test type constraints are preserved - we can add items with same types.
         $filtered->add('d', 4);
@@ -272,7 +272,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test callback returning non-bool throws TypeError.
         $this->expectException(TypeError::class);
-        $dict->filter(fn($key, $value) => $value); // Returns int, not bool
+        $dict->filter(static fn ($key, $value) => $value); // Returns int, not bool
     }
 
     /**
@@ -287,7 +287,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('fourth', 4);
 
         // Test filtering preserves order.
-        $filtered = $dict->filter(fn($key, $value) => $value % 2 === 0);
+        $filtered = $dict->filter(static fn ($key, $value) => $value % 2 === 0);
 
         // Test order is preserved.
         $keys = $filtered->keys;
@@ -305,7 +305,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('c', 3);
 
         // Test filtering with always-true callback.
-        $filtered = $dict->filter(fn($key, $value) => true);
+        $filtered = $dict->filter(static fn ($key, $value) => true);
 
         // Test all items are kept.
         $this->assertCount(3, $filtered);
@@ -326,7 +326,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test mapping to double values.
         // @phpstan-ignore binaryOp.invalid
-        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 2));
+        $mapped = $dict->map(static fn ($pair) => new Pair($pair->key, $pair->value * 2));
 
         // Test all values are doubled.
         $this->assertCount(3, $mapped);
@@ -351,7 +351,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test mapping keys to strings.
         // @phpstan-ignore encapsedStringPart.nonString
-        $mapped = $dict->map(fn($pair) => new Pair("key{$pair->key}", $pair->value));
+        $mapped = $dict->map(static fn ($pair) => new Pair("key{$pair->key}", $pair->value));
 
         // Test keys are transformed.
         $this->assertCount(3, $mapped);
@@ -371,7 +371,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test mapping int values to float values.
         // @phpstan-ignore binaryOp.invalid
-        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 1.5));
+        $mapped = $dict->map(static fn ($pair) => new Pair($pair->key, $pair->value * 1.5));
 
         // Test types are inferred correctly.
         $this->assertTrue($mapped->keyTypes->containsOnly('string'));
@@ -387,7 +387,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test mapping empty dictionary.
         // @phpstan-ignore binaryOp.invalid
-        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 2));
+        $mapped = $dict->map(static fn ($pair) => new Pair($pair->key, $pair->value * 2));
 
         // Test result is empty.
         $this->assertCount(0, $mapped);
@@ -406,7 +406,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test mapping preserves order.
         // @phpstan-ignore binaryOp.invalid
-        $mapped = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 10));
+        $mapped = $dict->map(static fn ($pair) => new Pair($pair->key, $pair->value * 10));
 
         // Test order is preserved.
         $keys = $mapped->keys;
@@ -425,7 +425,7 @@ class DictionaryTransformTest extends TestCase
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('Map callback must return a Pair');
         // @phpstan-ignore binaryOp.invalid
-        $dict->map(fn($pair) => $pair->value * 2); // Returns int, not Pair
+        $dict->map(static fn ($pair) => $pair->value * 2); // Returns int, not Pair
     }
 
     /**
@@ -441,7 +441,7 @@ class DictionaryTransformTest extends TestCase
         // Test mapping to same key throws RuntimeException.
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Map callback produced a duplicate key');
-        $dict->map(fn($pair) => new Pair('same', $pair->value));
+        $dict->map(static fn ($pair) => new Pair('same', $pair->value));
     }
 
     /**
@@ -454,7 +454,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('b', 2);
 
         // Test mapping to different types.
-        $mapped = $dict->map(fn($pair) => new Pair($pair->value, $pair->key));
+        $mapped = $dict->map(static fn ($pair) => new Pair($pair->value, $pair->key));
 
         // Test types are changed.
         $this->assertTrue($mapped->keyTypes->containsOnly('int'));
@@ -476,7 +476,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('cherry', 7);
 
         // Test complex mapping that changes both keys and values.
-        $mapped = $dict->map(fn($pair) => new Pair(
+        $mapped = $dict->map(static fn ($pair) => new Pair(
             strtoupper($pair->key),
             // @phpstan-ignore binaryOp.invalid
             $pair->value * 2 + 10

@@ -254,7 +254,7 @@ final class Set extends Collection
      */
     public function subset(self $other): bool
     {
-        return array_all($this->items, static fn($item) => $other->contains($item));
+        return array_all($this->items, static fn ($item) => $other->contains($item));
     }
 
     /**
@@ -298,7 +298,7 @@ final class Set extends Collection
      */
     public function disjoint(self $other): bool
     {
-        return array_all($this->items, static fn($item) => !$other->contains($item));
+        return array_all($this->items, static fn ($item) => !$other->contains($item));
     }
 
     // endregion
@@ -359,7 +359,7 @@ final class Set extends Collection
      */
     public function __toString(): string
     {
-        $items = array_map(static fn($item) => Stringify::stringify($item), $this->items);
+        $items = array_map(static fn ($item) => Stringify::stringify($item), $this->items);
         return '{' . implode(', ', $items) . '}';
     }
 

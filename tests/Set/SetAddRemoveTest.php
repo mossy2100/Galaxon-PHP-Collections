@@ -132,7 +132,7 @@ class SetAddRemoveTest extends TestCase
     public function testImportWithGenerator(): void
     {
         $set = new Set('int');
-        $generator = function () {
+        $generator = static function () {
             yield 1;
             yield 2;
             yield 3;

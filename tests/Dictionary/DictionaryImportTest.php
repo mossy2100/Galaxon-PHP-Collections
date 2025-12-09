@@ -188,7 +188,7 @@ class DictionaryImportTest extends TestCase
         try {
             $dict->import(['b' => 2, 'c' => 'invalid', 'd' => 4]);
             $this->fail('Expected TypeError was not thrown');
-        } catch (TypeError $e) {
+        } catch (TypeError) {
             // Test: Verify only valid items before error were imported
             $this->assertCount(2, $dict); // 'a', 'b'
             $this->assertSame(2, $dict['b']);

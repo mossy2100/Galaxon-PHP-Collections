@@ -7,10 +7,10 @@ namespace Galaxon\Collections\Tests\Dictionary;
 use ArgumentCountError;
 use Galaxon\Collections\Dictionary;
 use Galaxon\Collections\Pair;
+use OutOfBoundsException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use TypeError;
-use OutOfBoundsException;
 
 /**
  * Tests for Dictionary add and remove methods.

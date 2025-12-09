@@ -248,7 +248,7 @@ class SequenceConstructorTest extends TestCase
     public function testConstructorWithGeneratorAndTypeInference(): void
     {
         // Test: Create Sequence from generator with type inference
-        $generator = function () {
+        $generator = static function () {
             yield 10;
             yield 20;
             yield 30;

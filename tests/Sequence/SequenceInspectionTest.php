@@ -246,7 +246,7 @@ class SequenceInspectionTest extends TestCase
         // Test: Find first even number
         $seq = new Sequence('int');
         $seq->append(1, 3, 4, 6, 8);
-        $result = $seq->find(fn($x) => $x % 2 === 0);
+        $result = $seq->find(static fn ($x) => $x % 2 === 0);
 
         // Test: Verify first even number returned
         $this->assertSame(4, $result);
@@ -260,7 +260,7 @@ class SequenceInspectionTest extends TestCase
         // Test: Try to find element that doesn't exist
         $seq = new Sequence('int');
         $seq->append(1, 3, 5, 7);
-        $result = $seq->find(fn($x) => $x > 10);
+        $result = $seq->find(static fn ($x) => $x > 10);
 
         // Test: Verify null returned
         $this->assertNull($result);
@@ -276,7 +276,7 @@ class SequenceInspectionTest extends TestCase
         $seq->append(1, 2, 3, 4, 5);
 
         // Test: Verify all() returns true
-        $this->assertTrue($seq->all(fn($x) => $x > 0));
+        $this->assertTrue($seq->all(static fn ($x) => $x > 0));
     }
 
     /**
@@ -289,7 +289,7 @@ class SequenceInspectionTest extends TestCase
         $seq->append(2, 4, 5, 6);
 
         // Test: Verify all() returns false (5 is odd)
-        $this->assertFalse($seq->all(fn($x) => $x % 2 === 0));
+        $this->assertFalse($seq->all(static fn ($x) => $x % 2 === 0));
     }
 
     /**
@@ -302,7 +302,7 @@ class SequenceInspectionTest extends TestCase
         $seq->append(1, 3, 4, 7);
 
         // Test: Verify any() returns true
-        $this->assertTrue($seq->any(fn($x) => $x % 2 === 0));
+        $this->assertTrue($seq->any(static fn ($x) => $x % 2 === 0));
     }
 
     /**
@@ -315,7 +315,7 @@ class SequenceInspectionTest extends TestCase
         $seq->append(1, 2, 3, 4, 5);
 
         // Test: Verify any() returns false
-        $this->assertFalse($seq->any(fn($x) => $x > 10));
+        $this->assertFalse($seq->any(static fn ($x) => $x > 10));
     }
 
     /**

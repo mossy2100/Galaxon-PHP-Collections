@@ -76,7 +76,7 @@ class SequenceImportTest extends TestCase
     public function testImportFromGenerator(): void
     {
         // Test: Import from a generator
-        $generator = function () {
+        $generator = static function () {
             yield 10;
             yield 20;
             yield 30;
@@ -170,7 +170,7 @@ class SequenceImportTest extends TestCase
         try {
             $seq->import([3, 4, 'invalid', 5, 6]);
             $this->fail('Expected TypeError was not thrown');
-        } catch (TypeError $e) {
+        } catch (TypeError) {
             // Test: Verify only valid items before error were imported
             $this->assertCount(4, $seq); // 1, 2, 3, 4
             $this->assertSame(4, $seq[3]);

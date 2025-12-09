@@ -186,7 +186,7 @@ class SetConstructorTest extends TestCase
      */
     public function testConstructorWithGeneratorAndTypeInference(): void
     {
-        $generator = function () {
+        $generator = static function () {
             yield 10;
             yield 20;
             yield 30;

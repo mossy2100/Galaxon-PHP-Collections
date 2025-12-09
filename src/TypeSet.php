@@ -427,7 +427,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      */
     public function containsAll(string ...$types): bool
     {
-        return array_all($types, fn($type) => $this->contains($type));
+        return array_all($types, fn ($type) => $this->contains($type));
     }
 
     /**
@@ -438,7 +438,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      */
     public function containsAny(string ...$types): bool
     {
-        return array_any($types, fn($type) => $this->contains($type));
+        return array_any($types, fn ($type) => $this->contains($type));
     }
 
     /**

@@ -73,7 +73,7 @@ class SequenceTransformationTest extends TestCase
         // Test: Sort by absolute value
         $seq = new Sequence('int');
         $seq->append(-5, 3, -1, 4, -2);
-        $sorted = $seq->sortBy(fn($a, $b) => abs($a) <=> abs($b));
+        $sorted = $seq->sortBy(static fn ($a, $b) => abs($a) <=> abs($b));
 
         // Test: Verify sorted by absolute value
         $this->assertSame(-1, $sorted[0]);
@@ -88,7 +88,7 @@ class SequenceTransformationTest extends TestCase
         // Test: Filter even numbers
         $seq = new Sequence('int');
         $seq->append(1, 2, 3, 4, 5, 6, 7, 8);
-        $filtered = $seq->filter(fn($x) => $x % 2 === 0);
+        $filtered = $seq->filter(static fn ($x) => $x % 2 === 0);
 
         // Test: Verify only even numbers remain
         $this->assertCount(4, $filtered);
@@ -104,7 +104,7 @@ class SequenceTransformationTest extends TestCase
         // Test: Filter for values greater than 10
         $seq = new Sequence('int');
         $seq->append(1, 2, 3, 4, 5);
-        $filtered = $seq->filter(fn($x) => $x > 10);
+        $filtered = $seq->filter(static fn ($x) => $x > 10);
 
         // Test: Verify empty Sequence returned
         $this->assertCount(0, $filtered);
@@ -118,7 +118,7 @@ class SequenceTransformationTest extends TestCase
         // Test: Double each value
         $seq = new Sequence('int');
         $seq->append(1, 2, 3, 4, 5);
-        $mapped = $seq->map(fn($x) => $x * 2);
+        $mapped = $seq->map(static fn ($x) => $x * 2);
 
         // Test: Verify transformation applied
         $this->assertCount(5, $mapped);
@@ -134,7 +134,7 @@ class SequenceTransformationTest extends TestCase
         // Test: Convert integers to strings
         $seq = new Sequence('int');
         $seq->append(1, 2, 3);
-        $mapped = $seq->map(fn($x) => "Number $x");
+        $mapped = $seq->map(static fn ($x) => "Number $x");
 
         // Test: Verify type changed
         $this->assertSame('Number 1', $mapped[0]);
@@ -280,7 +280,7 @@ class SequenceTransformationTest extends TestCase
         // Test: Sum using reduce
         $seq = new Sequence('int');
         $seq->append(1, 2, 3, 4, 5);
-        $sum = $seq->reduce(fn($acc, $x) => $acc + $x, 0);
+        $sum = $seq->reduce(static fn ($acc, $x) => $acc + $x, 0);
 
         // Test: Verify correct sum
         $this->assertSame(15, $sum);
@@ -294,7 +294,7 @@ class SequenceTransformationTest extends TestCase
         // Test: Concatenate strings
         $seq = new Sequence('string');
         $seq->append('a', 'b', 'c');
-        $result = $seq->reduce(fn($acc, $x) => $acc . $x, '');
+        $result = $seq->reduce(static fn ($acc, $x) => $acc . $x, '');
 
         // Test: Verify concatenation
         $this->assertSame('abc', $result);

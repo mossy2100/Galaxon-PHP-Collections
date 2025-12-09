@@ -243,7 +243,7 @@ class DictionarySortingTest extends TestCase
         $dict->add('c', 2);
 
         // Test sorting with custom descending comparison.
-        $dict->sort(fn($a, $b) => $b->value <=> $a->value);
+        $dict->sort(static fn ($a, $b) => $b->value <=> $a->value);
 
         // Test values are in descending order.
         $values = $dict->values;

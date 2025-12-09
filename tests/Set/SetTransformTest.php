@@ -23,7 +23,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3, 4, 5, 6);
 
-        $filtered = $set->filter(fn($value) => $value % 2 === 0);
+        $filtered = $set->filter(static fn ($value) => $value % 2 === 0);
 
         $this->assertCount(3, $filtered);
         $this->assertTrue($filtered->contains(2));
@@ -40,7 +40,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3);
 
-        $filtered = $set->filter(fn($value) => $value > 10);
+        $filtered = $set->filter(static fn ($value) => $value > 10);
 
         $this->assertCount(0, $filtered);
         $this->assertTrue($filtered->empty());
@@ -53,7 +53,7 @@ class SetTransformTest extends TestCase
     {
         $set = new Set('int');
 
-        $filtered = $set->filter(fn($value) => true);
+        $filtered = $set->filter(static fn ($value) => true);
 
         $this->assertCount(0, $filtered);
     }
@@ -66,7 +66,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3, 4, 5);
 
-        $filtered = $set->filter(fn($value) => $value > 2);
+        $filtered = $set->filter(static fn ($value) => $value > 2);
 
         // Test type constraints are preserved - we can add items with same type.
         $filtered->add(10);
@@ -83,7 +83,7 @@ class SetTransformTest extends TestCase
 
         // Test callback returning non-bool throws TypeError.
         $this->expectException(TypeError::class);
-        $set->filter(fn($value) => $value); // Returns int, not bool
+        $set->filter(static fn ($value) => $value); // Returns int, not bool
     }
 
     /**
@@ -94,7 +94,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3, 4, 5);
 
-        $filtered = $set->filter(fn($value) => true);
+        $filtered = $set->filter(static fn ($value) => true);
 
         $this->assertCount(5, $filtered);
         $this->assertTrue($filtered->contains(1));
@@ -109,7 +109,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3, 4, 5);
 
-        $filtered = $set->filter(fn($value) => $value % 2 === 0);
+        $filtered = $set->filter(static fn ($value) => $value % 2 === 0);
 
         // Test original set is unchanged.
         $this->assertCount(5, $set);
@@ -127,7 +127,7 @@ class SetTransformTest extends TestCase
         $set = new Set('string');
         $set->add('apple', 'banana', 'avocado', 'cherry');
 
-        $filtered = $set->filter(fn($value) => str_starts_with($value, 'a'));
+        $filtered = $set->filter(static fn ($value) => str_starts_with($value, 'a'));
 
         $this->assertCount(2, $filtered);
         $this->assertTrue($filtered->contains('apple'));
@@ -143,7 +143,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int|string');
         $set->add(1, 'two', 3, 'four', 5);
 
-        $filtered = $set->filter(fn($value) => is_int($value));
+        $filtered = $set->filter(static fn ($value) => is_int($value));
 
         $this->assertCount(3, $filtered);
         $this->assertTrue($filtered->contains(1));
@@ -160,7 +160,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(2, 4, 6, 8);
 
-        $result = $set->all(fn($value) => $value % 2 === 0);
+        $result = $set->all(static fn ($value) => $value % 2 === 0);
 
         $this->assertTrue($result);
     }
@@ -173,7 +173,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(2, 4, 5, 8);
 
-        $result = $set->all(fn($value) => $value % 2 === 0);
+        $result = $set->all(static fn ($value) => $value % 2 === 0);
 
         $this->assertFalse($result);
     }
@@ -185,7 +185,7 @@ class SetTransformTest extends TestCase
     {
         $set = new Set('int');
 
-        $result = $set->all(fn($value) => $value > 100);
+        $result = $set->all(static fn ($value) => $value > 100);
 
         $this->assertTrue($result);
     }
@@ -198,7 +198,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3, 4, 5);
 
-        $result = $set->any(fn($value) => $value > 3);
+        $result = $set->any(static fn ($value) => $value > 3);
 
         $this->assertTrue($result);
     }
@@ -211,7 +211,7 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3);
 
-        $result = $set->any(fn($value) => $value > 10);
+        $result = $set->any(static fn ($value) => $value > 10);
 
         $this->assertFalse($result);
     }
@@ -223,7 +223,7 @@ class SetTransformTest extends TestCase
     {
         $set = new Set('int');
 
-        $result = $set->any(fn($value) => true);
+        $result = $set->any(static fn ($value) => true);
 
         $this->assertFalse($result);
     }

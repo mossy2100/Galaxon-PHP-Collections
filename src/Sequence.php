@@ -387,7 +387,7 @@ final class Sequence extends Collection implements ArrayAccess
         // Filter the Sequence to remove the matching values.
         $this->items = array_values(array_filter(
             $this->items,
-            static fn($item) => $item !== $value
+            static fn ($item) => $item !== $value
         ));
 
         // Return the number of items removed.
@@ -476,7 +476,7 @@ final class Sequence extends Collection implements ArrayAccess
         }
 
         // Check values are equal.
-        $eq = fn($value, $key) => $this->items[$key] === $other->items[$key];
+        $eq = fn ($value, $key) => $this->items[$key] === $other->items[$key];
         return array_all($this->items, $eq);
     }
 
@@ -840,7 +840,7 @@ final class Sequence extends Collection implements ArrayAccess
         // Use a custom reducer to find the product instead of array_product(), because that function will allow
         // non-numbers, and this one will not. It's more consistent with the type-safe philosophy of this
         // library to be strict.
-        $prod = static fn(int|float $acc, int|float $item): int|float => $acc * $item;
+        $prod = static fn (int|float $acc, int|float $item): int|float => $acc * $item;
         /** @var int|float */
         return $this->reduce($prod, 1);
     }
@@ -856,7 +856,7 @@ final class Sequence extends Collection implements ArrayAccess
         // Use a custom reducer to find the sum instead of array_sum(), because that function will allow
         // non-numbers, and this one will not. It's more consistent with the type-safe philosophy of this
         // library to be strict.
-        $sum = static fn(int|float $acc, int|float $item): int|float => $acc + $item;
+        $sum = static fn (int|float $acc, int|float $item): int|float => $acc + $item;
         /** @var int|float */
         return $this->reduce($sum, 0);
     }
@@ -878,7 +878,7 @@ final class Sequence extends Collection implements ArrayAccess
         // Use a custom reducer to find the minimum value instead of min(), because that function will allow
         // non-numbers, and this one will not. It's more consistent with the type-safe philosophy of this
         // library to be strict.
-        $min = static fn(int|float $min, int|float $item): int|float => min($item, $min);
+        $min = static fn (int|float $min, int|float $item): int|float => min($item, $min);
         /** @var int|float */
         return $this->reduce($min, $this->items[0]);
     }
@@ -900,7 +900,7 @@ final class Sequence extends Collection implements ArrayAccess
         // Use a custom reducer to find the maximum value instead of max(), because that function will allow
         // non-numbers, and this one will not. It's more consistent with the type-safe philosophy of this
         // library to be strict.
-        $max = static fn(int|float $max, int|float $item): int|float => max($item, $max);
+        $max = static fn (int|float $max, int|float $item): int|float => max($item, $max);
         /** @var int|float */
         return $this->reduce($max, $this->items[0]);
     }

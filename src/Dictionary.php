@@ -441,7 +441,7 @@ final class Dictionary extends Collection implements ArrayAccess
      */
     public function sortByKey(): self
     {
-        $fn = fn($a, $b) => $a->key <=> $b->key;
+        $fn = static fn ($a, $b) => $a->key <=> $b->key;
         return $this->sort($fn);
     }
 
@@ -454,7 +454,7 @@ final class Dictionary extends Collection implements ArrayAccess
      */
     public function sortByValue(): self
     {
-        $fn = fn($a, $b) => $a->value <=> $b->value;
+        $fn = static fn ($a, $b) => $a->value <=> $b->value;
         return $this->sort($fn);
     }
 

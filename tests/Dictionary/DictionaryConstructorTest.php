@@ -417,7 +417,7 @@ class DictionaryConstructorTest extends TestCase
     public function testConstructorWithGeneratorAndTypeInference(): void
     {
         // Test: Create Dictionary from generator with type inference
-        $generator = function () {
+        $generator = static function () {
             yield 'a' => 10;
             yield 'b' => 20;
             yield 'c' => 30;
@@ -524,13 +524,13 @@ class DictionaryConstructorTest extends TestCase
      */
     public function testCombineWithIterators(): void
     {
-        $keysGen = function () {
+        $keysGen = static function () {
             yield 'key1';
             yield 'key2';
             yield 'key3';
         };
 
-        $valuesGen = function () {
+        $valuesGen = static function () {
             yield 10;
             yield 20;
             yield 30;
