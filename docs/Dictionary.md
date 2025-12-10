@@ -30,8 +30,8 @@ $dict[null] = 'empty';                  // ✅ Null key
 
 ```php
 public function __construct(
-    null|string|iterable|true $key_types = true,
-    null|string|iterable|true $value_types = true,
+    null|string|iterable|true $keyTypes = true,
+    null|string|iterable|true $valueTypes = true,
     iterable $source = []
 )
 ```
@@ -40,7 +40,7 @@ Create a Dictionary with optional type constraints and initial key-value pairs f
 
 **Type Constraints:**
 
-The `$key_types` and `$value_types` parameters accept:
+The `$keyTypes` and `$valueTypes` parameters accept:
 - `null` - Any type allowed (no constraints)
 - `string` - A type name, or multiple types using union type or nullable type syntax (e.g., `'int'`, `'int|string'`, `'?int'`)
 - `iterable` - Array or other collection of type names (e.g., `['int', 'string']`)
@@ -111,7 +111,7 @@ echo $dict->count(); // 3
 public static function combine(
     iterable $keys,
     iterable $values,
-    bool $infer_types = true
+    bool $inferTypes = true
 ): self
 ```
 
@@ -120,11 +120,11 @@ Create a new Dictionary by combining separate iterables of keys and values.
 **Parameters:**
 - `$keys` - Iterable of keys
 - `$values` - Iterable of values
-- `$infer_types` - Whether to infer key and value types from the data (default: `true`)
+- `$inferTypes` - Whether to infer key and value types from the data (default: `true`)
 
 **Type Inference:**
-- When `$infer_types = true` (default), types are automatically inferred from the provided keys and values
-- When `$infer_types = false`, no type constraints are applied (any type allowed)
+- When `$inferTypes = true` (default), types are automatically inferred from the provided keys and values
+- When `$inferTypes = false`, no type constraints are applied (any type allowed)
 
 **Throws:**
 - `ValueError` if the iterables have different counts

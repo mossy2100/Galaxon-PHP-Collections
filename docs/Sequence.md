@@ -638,7 +638,7 @@ echo $chunks[3]->count(); // 1 (remainder)
 ### fill()
 
 ```php
-public function fill(int $start_index, int $count, mixed $value): self
+public function fill(int $startIndex, int $count, mixed $value): self
 ```
 
 Fill a portion of the Sequence with a value. Returns `$this` for chaining.
