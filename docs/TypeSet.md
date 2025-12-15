@@ -8,7 +8,7 @@ TypeSet is a utility class that manages a set of allowed type names for collecti
 
 While primarily used internally by Sequence, Dictionary, Set, and Collection classes, TypeSet can be useful in your own code when you need flexible runtime type checking.
 
-## Features
+### Key Features
 
 - **Flexible type specification**: Strings, union types, nullable types, arrays of types
 - **Type validation**: Runtime checking of values against type constraints
@@ -18,18 +18,71 @@ While primarily used internally by Sequence, Dictionary, Set, and Collection cla
 - **Class types**: Classes, interfaces, traits (including inheritance)
 - **Resource types**: Specific resource types like 'resource (stream)'
 
+**Implements:** `Countable`, `Stringable`, `IteratorAggregate`
+
+## Supported Type Names
+
+### Basic Types
+- `null` - Null values
+- `bool` - Boolean values
+- `int` - Integer values
+- `float` - Floating point values
+- `string` - String values
+- `array` - Array values
+- `object` - Any object
+- `resource` - Any resource
+
+### Pseudotypes
+- `mixed` - Any type (no restrictions)
+- `scalar` - String, int, float, or bool
+- `number` - Int or float (custom pseudotype)
+- `iterable` - Arrays, iterators, generators
+- `callable` - Functions, methods, closures
+
+### Resource Types
+Must be specified in the format returned by `get_debug_type()`:
+- `resource (stream)`
+- `resource (curl)`
+- etc.
+
+### Class Types
+- Class names: `DateTime`, `MyNamespace\MyClass`
+- Interface names: `Countable`, `JsonSerializable`
+- Trait names: `MyTrait`
+- Leading backslashes are optional and will be stripped
+
+**Inheritance Support:**
+Values are matched against parent classes, interfaces, and traits:
+
+```php
+$ts = new TypeSet('DateTime');
+$ts->match(new DateTimeImmutable()); // true (subclass)
+
+$ts = new TypeSet('Countable');
+$ts->match(new ArrayObject());       // true (implements interface)
+```
+
+## Properties
+
+### types
+
+```php
+private(set) array $types = []
+```
+
+The set of type names. Uses PHP 8.4 asymmetric visibility - readable internally, not directly modifiable from outside. Use `add()` or `addValueType()` to add types.
+
 ## Constructor
 
 ### __construct()
 
 ```php
-public function __construct(string|iterable|null $types = null)
+public function __construct(null|string|iterable $types = null)
 ```
 
 Create a TypeSet with optional type specifications.
 
 **Type Specification Options:**
-
 - `null` - Empty TypeSet (any type allowed)
 - `string` - Single type or union type syntax (e.g., `'int'`, `'int|string'`, `'?int'`)
 - `iterable` - Array of type names (e.g., `['int', 'string']`)
@@ -65,71 +118,7 @@ $ts = new TypeSet('number');   // int|float
 $ts = new TypeSet('mixed');    // Any type
 ```
 
-## Type Checking Methods
-
-### match()
-
-```php
-public function match(mixed $value): bool
-```
-
-Check if a value matches one of the types in the TypeSet. Returns `true` if the value is allowed, `false` otherwise.
-
-**Examples:**
-```php
-$ts = new TypeSet('int|string');
-
-var_dump($ts->match(42));      // true
-var_dump($ts->match('hello')); // true
-var_dump($ts->match(3.14));    // false
-var_dump($ts->match(true));    // false
-
-// Pseudotype matching
-$ts = new TypeSet('scalar');
-var_dump($ts->match(42));      // true (int is scalar)
-var_dump($ts->match('text'));  // true (string is scalar)
-var_dump($ts->match(3.14));    // true (float is scalar)
-var_dump($ts->match(true));    // true (bool is scalar)
-var_dump($ts->match([]));      // false (array is not scalar)
-
-// Number pseudotype
-$ts = new TypeSet('number');
-var_dump($ts->match(42));      // true
-var_dump($ts->match(3.14));    // true
-var_dump($ts->match('42'));    // false (string, not number)
-
-// Class matching (with inheritance)
-$ts = new TypeSet('DateTime');
-var_dump($ts->match(new DateTime()));           // true
-var_dump($ts->match(new DateTimeImmutable()));  // true (subclass)
-
-// Interface matching
-$ts = new TypeSet('Countable');
-var_dump($ts->match(new ArrayObject()));  // true
-var_dump($ts->match([1, 2, 3]));         // false (arrays aren't objects)
-```
-
-### check()
-
-```php
-public function check(mixed $value, string $label = ''): void
-```
-
-Check if a value matches the types. Throws `TypeError` if the value doesn't match.
-
-**Examples:**
-```php
-$ts = new TypeSet('int');
-
-$ts->check(42);        // OK, no exception
-$ts->check('hello');   // TypeError: Disallowed type: string.
-
-// With custom label
-$ts->check(42, 'age');        // OK
-$ts->check('text', 'age');    // TypeError: Disallowed age type: string.
-```
-
-## Type Management Methods
+## Modification Methods
 
 ### add()
 
@@ -193,6 +182,48 @@ echo $ts; // {int, string, float, bool, null}
 ```
 
 ## Inspection Methods
+
+### match()
+
+```php
+public function match(mixed $value): bool
+```
+
+Check if a value matches one of the types in the TypeSet. Returns `true` if the value is allowed, `false` otherwise.
+
+**Examples:**
+```php
+$ts = new TypeSet('int|string');
+
+var_dump($ts->match(42));      // true
+var_dump($ts->match('hello')); // true
+var_dump($ts->match(3.14));    // false
+var_dump($ts->match(true));    // false
+
+// Pseudotype matching
+$ts = new TypeSet('scalar');
+var_dump($ts->match(42));      // true (int is scalar)
+var_dump($ts->match('text'));  // true (string is scalar)
+var_dump($ts->match(3.14));    // true (float is scalar)
+var_dump($ts->match(true));    // true (bool is scalar)
+var_dump($ts->match([]));      // false (array is not scalar)
+
+// Number pseudotype
+$ts = new TypeSet('number');
+var_dump($ts->match(42));      // true
+var_dump($ts->match(3.14));    // true
+var_dump($ts->match('42'));    // false (string, not number)
+
+// Class matching (with inheritance)
+$ts = new TypeSet('DateTime');
+var_dump($ts->match(new DateTime()));           // true
+var_dump($ts->match(new DateTimeImmutable()));  // true (subclass)
+
+// Interface matching
+$ts = new TypeSet('Countable');
+var_dump($ts->match(new ArrayObject()));  // true
+var_dump($ts->match([1, 2, 3]));         // false (arrays aren't objects)
+```
 
 ### contains()
 
@@ -323,7 +354,29 @@ $ts4 = new TypeSet('int|string');
 var_dump($ts4->nullOk()); // false
 ```
 
-## Default Value
+## Validation Methods
+
+### checkValueType()
+
+```php
+public function checkValueType(mixed $value, string $label = ''): void
+```
+
+Check if a value matches the types. Throws `TypeError` if the value doesn't match.
+
+**Examples:**
+```php
+$ts = new TypeSet('int');
+
+$ts->checkValueType(42);        // OK, no exception
+$ts->checkValueType('hello');   // TypeError: Disallowed type: string.
+
+// With custom label
+$ts->checkValueType(42, 'age');        // OK
+$ts->checkValueType('text', 'age');    // TypeError: Disallowed age type: string.
+```
+
+## Extraction Methods
 
 ### getDefaultValue()
 
@@ -331,11 +384,11 @@ var_dump($ts4->nullOk()); // false
 public function getDefaultValue(): mixed
 ```
 
-Get a sensible default value based on the types in the TypeSet.
+Get a sensible default value based on the types in the TypeSet. Throws `RuntimeException` if no default can be determined.
 
 **Default Value Rules (in priority order):**
 
-1. Contains 'null' → `null`
+1. 'null' → `null`
 2. `bool` → `false`
 3. `int`, `number`, or `scalar` → `0`
 4. `float` → `0.0`
@@ -364,55 +417,9 @@ $default = $ts->getDefaultValue(); // new stdClass()
 $ts = new TypeSet('DateTime');
 $default = $ts->getDefaultValue();
 // RuntimeException: No default value could be determined for this TypeSet.
-
-// Use case: Sequence uses this to fill gaps
-$ts = new TypeSet('int');
-echo $ts->getDefaultValue(); // 0
 ```
 
-## Supported Type Names
-
-### Basic Types
-- `null` - Null values
-- `bool` - Boolean values
-- `int` - Integer values
-- `float` - Floating point values
-- `string` - String values
-- `array` - Array values
-- `object` - Any object
-- `resource` - Any resource
-
-### Pseudotypes
-- `mixed` - Any type (no restrictions)
-- `scalar` - String, int, float, or bool
-- `number` - Int or float
-- `iterable` - Arrays, iterators, generators
-- `callable` - Functions, methods, closures
-
-### Resource Types
-Must be specified in the format returned by `get_debug_type()`:
-- `resource (stream)`
-- `resource (curl)`
-- etc.
-
-### Class Types
-- Class names: `DateTime`, `MyNamespace\MyClass`
-- Interface names: `Countable`, `JsonSerializable`
-- Trait names: `MyTrait`
-- Leading backslashes are optional and will be stripped
-
-**Inheritance Support:**
-Values are matched against parent classes, interfaces, and traits:
-
-```php
-$ts = new TypeSet('DateTime');
-$ts->match(new DateTimeImmutable()); // true (subclass)
-
-$ts = new TypeSet('Countable');
-$ts->match(new ArrayObject());       // true (implements interface)
-```
-
-## Utility Methods
+## Aggregation Methods
 
 ### count()
 
@@ -428,6 +435,8 @@ $ts = new TypeSet('int|string|bool');
 echo $ts->count(); // 3
 ```
 
+## Conversion Methods
+
 ### __toString()
 
 ```php
@@ -442,13 +451,9 @@ $ts = new TypeSet('int|string');
 echo $ts; // {int, string}
 ```
 
-### getIterator()
+## Iteration
 
-```php
-public function getIterator(): Traversable
-```
-
-Get an iterator for foreach loops.
+Supports `foreach` through the `IteratorAggregate` interface:
 
 **Example:**
 ```php
@@ -463,13 +468,13 @@ foreach ($ts as $type) {
 // bool
 ```
 
-## Practical Examples
+## Usage Examples
 
 ### Validating function arguments
 ```php
 function processValue(mixed $value, TypeSet $allowedTypes): void
 {
-    $allowedTypes->check($value);
+    $allowedTypes->checkValueType($value);
     // Process the value...
 }
 
@@ -505,7 +510,7 @@ class Config
 
     public function setValue(mixed $value): void
     {
-        $this->allowedTypes->check($value, 'config value');
+        $this->allowedTypes->checkValueType($value, 'config value');
         $this->value = $value;
     }
 }
@@ -515,3 +520,10 @@ $config->setValue(42);      // OK
 $config->setValue('text');  // OK
 $config->setValue(true);    // TypeError: Disallowed config value type: bool.
 ```
+
+## See Also
+
+- **[Collection](Collection.md)** - Abstract base class using TypeSet
+- **[Dictionary](Dictionary.md)** - Key-value collection
+- **[Sequence](Sequence.md)** - Ordered list implementation
+- **[Set](Set.md)** - Unique value collection

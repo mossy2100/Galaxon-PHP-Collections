@@ -74,7 +74,7 @@ use ValueError;
  */
 final class Sequence extends Collection implements ArrayAccess
 {
-    // region Constructor and factory methods
+    // region Constructor
 
     /**
      * Create a new Sequence, with optional type restriction and value source.
@@ -115,6 +115,10 @@ final class Sequence extends Collection implements ArrayAccess
             $this->append($item);
         }
     }
+
+    // endregion
+
+    // region Factory methods
 
     /**
      * Generate a new Sequence of numbers spanning a given range, using a given step size.
@@ -181,50 +185,7 @@ final class Sequence extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Private helper methods
-
-    /**
-     * Validate an index (a.k.a. offset) argument.
-     *
-     * @param mixed $index The index to validate.
-     * @param bool $checkUpperBound Whether to check if an index is within array bounds.
-     * @throws TypeError If the index is not an integer.
-     * @throws OutOfRangeException If the index is outside the valid range for the Sequence.
-     */
-    private function checkIndex(mixed $index, bool $checkUpperBound = true): void
-    {
-        // Check the index is an integer.
-        if (!is_int($index)) {
-            throw Types::createError('index', 'int', $index);
-        }
-
-        // Check the index isn't negative.
-        if ($index < 0) {
-            throw new OutOfRangeException('Index cannot be negative.');
-        }
-
-        // Check the index isn't too large.
-        if ($checkUpperBound && $index >= count($this->items)) {
-            throw new OutOfRangeException('Index is out of range.');
-        }
-    }
-
-    /**
-     * Create a new Sequence with the same types as the calling object, and items copied from a source iterable
-     * (typically items from the calling Sequence, although this is not enforced).
-     *
-     * @param iterable<mixed> $items The iterable to copy items from.
-     * @return self The new Sequence.
-     */
-    private function fromSubset(iterable $items): self
-    {
-        // Construct the new Sequence.
-        return new self($this->valueTypes, $items);
-    }
-
-    // endregion
-
-    // region Add items to the Sequence
+    // region Modification methods
 
     /**
      * Add one or more items to the end of the Sequence.
@@ -244,7 +205,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         foreach ($items as $item) {
             // Check the item type.
-            $this->valueTypes->check($item);
+            $this->valueTypes->checkValueType($item);
 
             // Append an element to the end of the Sequence.
             $this->items[] = $item;
@@ -278,7 +239,7 @@ final class Sequence extends Collection implements ArrayAccess
             $item = $items[$i];
 
             // Check the item type.
-            $this->valueTypes->check($item);
+            $this->valueTypes->checkValueType($item);
 
             // Prepend an element at the start of the Sequence.
             array_unshift($this->items, $item);
@@ -301,7 +262,7 @@ final class Sequence extends Collection implements ArrayAccess
     public function insert(int $index, mixed $item): self
     {
         // Check the item type.
-        $this->valueTypes->check($item);
+        $this->valueTypes->checkValueType($item);
 
         // Check the index is valid.
         $this->checkIndex($index, false);
@@ -342,10 +303,6 @@ final class Sequence extends Collection implements ArrayAccess
         // Return this for chaining.
         return $this;
     }
-
-    // endregion
-
-    // region Remove items from the Sequence
 
     /**
      * Remove the item at the given index from the Sequence.
@@ -434,8 +391,7 @@ final class Sequence extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Comparison and inspection methods
-    // These are non-mutating and return bools.
+    // region Inspection methods
 
     /**
      * Check if the Sequence contains a value.
@@ -450,6 +406,25 @@ final class Sequence extends Collection implements ArrayAccess
     {
         return in_array($value, $this->items, true);
     }
+
+    /**
+     * Check if the Sequence contains an index.
+     *
+     * This is an alias for offsetExists(), which isn't normally called directly.
+     * One small difference is that the parameter must be an int.
+     * This method has a better name, as the documentation uses "index" rather than "offset" or "key".
+     *
+     * @param int $index The index to check for.
+     * @return bool True if the Sequence contains the index, false otherwise.
+     */
+    public function indexExists(int $index): bool
+    {
+        return $this->offsetExists($index);
+    }
+
+    // endregion
+
+    // region Comparison methods
 
     /**
      * Check if the Sequence is equal to another Collection.
@@ -480,24 +455,9 @@ final class Sequence extends Collection implements ArrayAccess
         return array_all($this->items, $eq);
     }
 
-    /**
-     * Check if the Sequence contains an index.
-     *
-     * This is an alias for offsetExists(), which isn't normally called directly.
-     * One small difference is that the parameter must be an int.
-     * This method has a better name, as the documentation uses "index" rather than "offset" or "key".
-     *
-     * @param int $index The index to check for.
-     * @return bool True if the Sequence contains the index, false otherwise.
-     */
-    public function indexExists(int $index): bool
-    {
-        return $this->offsetExists($index);
-    }
-
     // endregion
 
-    // region Get items from the Sequence
+    // region Extraction methods
 
     /**
      * Get the first item from the Sequence.
@@ -589,62 +549,18 @@ final class Sequence extends Collection implements ArrayAccess
         return array_find($this->items, $fn);
     }
 
-    // endregion
-
-    // region Sort methods
-
     /**
-     * Return a new Sequence with the items sorted in ascending order.
+     * Get the unique values from the Sequence.
      *
-     * This method is analogous to sort(), except it's non-mutating.
-     * @see https://www.php.net/manual/en/function.sort.php
+     * This method is analogous to array_unique().
+     * @see https://www.php.net/manual/en/function.array-unique.php
      *
-     * @param int $flags The sorting flags.
-     * @return self The sorted Sequence.
+     * @return self A new Sequence containing the unique values.
      */
-    public function sort(int $flags = SORT_REGULAR): self
+    public function unique(): self
     {
-        // Copy the items array so the method is non-mutating.
-        $items = $this->items;
-        sort($items, $flags);
-
-        // Construct the result.
-        return $this->fromSubset($items);
-    }
-
-    /**
-     * Return a new Sequence with the items sorted in descending order.
-     *
-     * This method is analogous to rsort(), except it's non-mutating.
-     * @see https://www.php.net/manual/en/function.rsort.php
-     *
-     * @param int $flags The sorting flags.
-     * @return self The sorted Sequence.
-     */
-    public function sortReverse(int $flags = SORT_REGULAR): self
-    {
-        // Copy the items array so the method is non-mutating.
-        $items = $this->items;
-        rsort($items, $flags);
-
-        // Construct the result.
-        return $this->fromSubset($items);
-    }
-
-    /**
-     * Return a new Sequence with the items sorted using a custom comparison function.
-     *
-     * This method is analogous to usort(), except it's non-mutating.
-     * @see https://www.php.net/manual/en/function.usort.php
-     *
-     * @param callable $fn The comparison function.
-     * @return self The sorted Sequence.
-     */
-    public function sortBy(callable $fn): self
-    {
-        // Copy the items array so the method is non-mutating.
-        $items = $this->items;
-        usort($items, $fn);
+        // Get the unique values.
+        $items = array_unique($this->items);
 
         // Construct the result.
         return $this->fromSubset($items);
@@ -652,7 +568,7 @@ final class Sequence extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Miscellaneous methods
+    // region Transformation methods
 
     /**
      * Split the Sequence into chunks of a given size.
@@ -682,29 +598,6 @@ final class Sequence extends Collection implements ArrayAccess
         }
 
         return $result;
-    }
-
-    /**
-     * Counts the occurrences of each distinct value in a Sequence.
-     *
-     * This method is analogous to array_count_values().
-     * @see https://www.php.net/manual/en/function.array-count-values.php
-     *
-     * @return Dictionary A Dictionary mapping values to the number of occurrences.
-     */
-    public function countValues(): Dictionary
-    {
-        // Construct the dictionary.
-        $valueCount = new Dictionary($this->valueTypes, 'int');
-
-        // Count the occurrences of each distinct value.
-        foreach ($this->items as $item) {
-            /** @var int $tally */
-            $tally = $valueCount[$item] ?? 0;
-            $valueCount[$item] = $tally + 1;
-        }
-
-        return $valueCount;
     }
 
     /**
@@ -791,26 +684,32 @@ final class Sequence extends Collection implements ArrayAccess
         return $this->fromSubset($items);
     }
 
-    /**
-     * Get the unique values from the Sequence.
-     *
-     * This method is analogous to array_unique().
-     * @see https://www.php.net/manual/en/function.array-unique.php
-     *
-     * @return self A new Sequence containing the unique values.
-     */
-    public function unique(): self
-    {
-        // Get the unique values.
-        $items = array_unique($this->items);
-
-        // Construct the result.
-        return $this->fromSubset($items);
-    }
-
     // endregion
 
     // region Aggregation methods
+
+    /**
+     * Counts the occurrences of each distinct value in a Sequence.
+     *
+     * This method is analogous to array_count_values().
+     * @see https://www.php.net/manual/en/function.array-count-values.php
+     *
+     * @return Dictionary A Dictionary mapping values to the number of occurrences.
+     */
+    public function countValues(): Dictionary
+    {
+        // Construct the dictionary.
+        $valueCount = new Dictionary($this->valueTypes, 'int');
+
+        // Count the occurrences of each distinct value.
+        foreach ($this->items as $item) {
+            /** @var int $tally */
+            $tally = $valueCount[$item] ?? 0;
+            $valueCount[$item] = $tally + 1;
+        }
+
+        return $valueCount;
+    }
 
     /**
      * Reduce the Sequence to a single value using a callback function.
@@ -949,43 +848,108 @@ final class Sequence extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Random methods
+    // region Sorting methods
 
     /**
-     * Randomly choose one or more indexes from the Sequence.
+     * Return a new Sequence with the items sorted in ascending order.
      *
-     * NB: This is a private helper method called from chooseRand() and removeRand(), and not part of the public API.
+     * This method is analogous to sort(), except it's non-mutating.
+     * @see https://www.php.net/manual/en/function.sort.php
      *
-     * @param int $count The number of indexes to choose (default: 1).
-     * @return int[] An array containing the chosen indexes.
-     * @throws OutOfRangeException If the Sequence is empty, or the count is non-positive, or the Sequence doesn't
-     * have enough items to choose the requested number of items.
+     * @param int $flags The sorting flags.
+     * @return self The sorted Sequence.
      */
-    private function chooseRandIndexes(int $count = 1): array
+    public function sort(int $flags = SORT_REGULAR): self
     {
-        // Guards.
-        if ($this->empty()) {
-            throw new OutOfRangeException('Cannot choose items from an empty Sequence.');
-        }
-        if ($count <= 0) {
-            throw new OutOfRangeException('Count must be greater than 0.');
-        }
-        if ($count > $this->count()) {
-            throw new OutOfRangeException("Cannot choose $count items from a Sequence with {$this->count()} items.");
-        }
+        // Copy the items array so the method is non-mutating.
+        $items = $this->items;
+        sort($items, $flags);
 
-        // Randomly choose one or more indexes.
-        $indexes = array_rand($this->items, $count);
-
-        // Convert result to an array if necessary.
-        // This is necessary because array_rand() will return a single value when $count is 1.
-        if (!is_array($indexes)) {
-            $indexes = [$indexes];
-        }
-
-        /** @var int[] $indexes */
-        return $indexes;
+        // Construct the result.
+        return $this->fromSubset($items);
     }
+
+    /**
+     * Return a new Sequence with the items sorted in descending order.
+     *
+     * This method is analogous to rsort(), except it's non-mutating.
+     * @see https://www.php.net/manual/en/function.rsort.php
+     *
+     * @param int $flags The sorting flags.
+     * @return self The sorted Sequence.
+     */
+    public function sortReverse(int $flags = SORT_REGULAR): self
+    {
+        // Copy the items array so the method is non-mutating.
+        $items = $this->items;
+        rsort($items, $flags);
+
+        // Construct the result.
+        return $this->fromSubset($items);
+    }
+
+    /**
+     * Return a new Sequence with the items sorted using a custom comparison function.
+     *
+     * This method is analogous to usort(), except it's non-mutating.
+     * @see https://www.php.net/manual/en/function.usort.php
+     *
+     * @param callable $fn The comparison function.
+     * @return self The sorted Sequence.
+     */
+    public function sortBy(callable $fn): self
+    {
+        // Copy the items array so the method is non-mutating.
+        $items = $this->items;
+        usort($items, $fn);
+
+        // Construct the result.
+        return $this->fromSubset($items);
+    }
+
+    // endregion
+
+    // region Conversion methods
+
+    /**
+     * Convert the Sequence to a Dictionary. The Sequence's indexes will be keys in the new Dictionary.
+     *
+     * @return Dictionary The new Dictionary.
+     */
+    public function toDictionary(): Dictionary
+    {
+        // Construct the new Dictionary.
+        $dict = new Dictionary('int', $this->valueTypes);
+
+        // Copy the items into the new Dictionary.
+        foreach ($this->items as $key => $value) {
+            $dict[$key] = $value;
+        }
+
+        // Return the new Dictionary.
+        return $dict;
+    }
+
+    /**
+     * Convert the Sequence to a Set. The resulting Set will contain only unique values from the Sequence.
+     *
+     * @return Set The new Set.
+     */
+    public function toSet(): Set
+    {
+        // Create the new Set.
+        $set = new Set($this->valueTypes);
+
+        // Add the values to the Set. Duplicates will be ignored.
+        $set->add(...$this->items);
+
+        // Return the new Set.
+        return $set;
+    }
+
+    // endregion
+
+    // region Random methods
 
     /**
      * Randomly choose one or more items from the Sequence.
@@ -1110,7 +1074,7 @@ final class Sequence extends Collection implements ArrayAccess
     public function offsetSet(mixed $offset, mixed $value): void
     {
         // Check the item has a valid type.
-        $this->valueTypes->check($value);
+        $this->valueTypes->checkValueType($value);
 
         if ($offset === null) {
             // Called from $sequence[] = $value
@@ -1167,46 +1131,6 @@ final class Sequence extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Conversion methods
-
-    /**
-     * Convert the Sequence to a Dictionary. The Sequence's indexes will be keys in the new Dictionary.
-     *
-     * @return Dictionary The new Dictionary.
-     */
-    public function toDictionary(): Dictionary
-    {
-        // Construct the new Dictionary.
-        $dict = new Dictionary('int', $this->valueTypes);
-
-        // Copy the items into the new Dictionary.
-        foreach ($this->items as $key => $value) {
-            $dict[$key] = $value;
-        }
-
-        // Return the new Dictionary.
-        return $dict;
-    }
-
-    /**
-     * Convert the Sequence to a Set. The resulting Set will contain only unique values from the Sequence.
-     *
-     * @return Set The new Set.
-     */
-    public function toSet(): Set
-    {
-        // Create the new Set.
-        $set = new Set($this->valueTypes);
-
-        // Add the values to the Set. Duplicates will be ignored.
-        $set->add(...$this->items);
-
-        // Return the new Set.
-        return $set;
-    }
-
-    // endregion
-
     // region IteratorAggregate implementation
 
     /**
@@ -1218,6 +1142,85 @@ final class Sequence extends Collection implements ArrayAccess
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->items);
+    }
+
+    // endregion
+
+    // region Helper methods
+
+    /**
+     * Validate an index (a.k.a. offset) argument.
+     *
+     * @param mixed $index The index to validate.
+     * @param bool $checkUpperBound Whether to check if an index is within array bounds.
+     * @throws TypeError If the index is not an integer.
+     * @throws OutOfRangeException If the index is outside the valid range for the Sequence.
+     */
+    private function checkIndex(mixed $index, bool $checkUpperBound = true): void
+    {
+        // Check the index is an integer.
+        if (!is_int($index)) {
+            throw Types::createError('index', 'int', $index);
+        }
+
+        // Check the index isn't negative.
+        if ($index < 0) {
+            throw new OutOfRangeException('Index cannot be negative.');
+        }
+
+        // Check the index isn't too large.
+        if ($checkUpperBound && $index >= count($this->items)) {
+            throw new OutOfRangeException('Index is out of range.');
+        }
+    }
+
+    /**
+     * Create a new Sequence with the same types as the calling object, and items copied from a source iterable
+     * (typically items from the calling Sequence, although this is not enforced).
+     *
+     * @param iterable<mixed> $items The iterable to copy items from.
+     * @return self The new Sequence.
+     */
+    private function fromSubset(iterable $items): self
+    {
+        // Construct the new Sequence.
+        return new self($this->valueTypes, $items);
+    }
+
+    /**
+     * Randomly choose one or more indexes from the Sequence.
+     *
+     * NB: This is a private helper method called from chooseRand() and removeRand(), and not part of the public API.
+     *
+     * @param int $count The number of indexes to choose (default: 1).
+     * @return int[] An array containing the chosen indexes.
+     * @throws OutOfRangeException If the Sequence is empty, or the count is non-positive, or the Sequence doesn't
+     * have enough items to choose the requested number of items.
+     */
+    private function chooseRandIndexes(int $count = 1): array
+    {
+        // Guards.
+        if ($this->empty()) {
+            throw new OutOfRangeException('Cannot choose items from an empty Sequence.');
+        }
+        if ($count <= 0) {
+            throw new OutOfRangeException('Count must be greater than 0.');
+        }
+        if ($count > $this->count()) {
+            throw new OutOfRangeException("Cannot choose $count items from a Sequence with {$this->count()} items.");
+        }
+
+        // Randomly choose one or more indexes.
+        $indexes = array_rand($this->items, $count);
+
+        // Convert result to an array if necessary.
+        // This is necessary because array_rand() will return a single value when $count is 1.
+        if (!is_array($indexes)) {
+            $indexes = [$indexes];
+        }
+
+        /** @var int[] $indexes */
+        return $indexes;
     }
 
     // endregion

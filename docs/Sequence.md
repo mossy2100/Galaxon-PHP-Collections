@@ -2,7 +2,11 @@
 
 A type-specific list implementation with zero-based sequential integer indexing.
 
-## Features
+## Overview
+
+Sequence provides a type-safe, indexed collection similar to arrays in languages like C# (`List<T>`) or Java (`ArrayList<E>`). Unlike PHP arrays, Sequence maintains strict sequential integer indexes starting from 0 and provides optional runtime type validation.
+
+### Key Features
 
 - Sequential integer indexes starting from 0
 - Optional type constraints with runtime validation
@@ -11,6 +15,23 @@ A type-specific list implementation with zero-based sequential integer indexing.
 - ArrayAccess and iteration support
 - Rich set of transformation and aggregation methods
 
+## Properties
+
+### valueTypes
+
+```php
+protected(set) TypeSet $valueTypes
+```
+
+TypeSet managing allowed value types for the Sequence. Inherited from Collection.
+
+Example:
+```php
+$seq = new Sequence('int|string');
+echo $seq->valueTypes; // {int, string}
+var_dump($seq->valueTypes->contains('int')); // true
+```
+    
 ## Constructor
 
 ### __construct()
@@ -44,7 +65,7 @@ When gaps are created in the Sequence (via `offsetSet()` or `insert()`), they ar
 - `array` or `iterable` → `[]` (empty array)
 - `object` → `new stdClass()`
 
-For types where no suitable default can be determined (like `DateTime`), `'null'` will be automatically added to the allowed types.
+For types where no suitable default can be determined (like `DateTime`), a `RuntimeException` will be thrown if an attempt is made to generate a default value (e.g., when gap-filling). This is uncommon; to avoid it, include `'null'` in the allowed types.
 
 **Examples:**
 ```php
@@ -62,10 +83,8 @@ $seq = new Sequence('string|int');
 // Array of types
 $seq = new Sequence(['string', 'int']);
 
-// Object type - null added automatically
-$seq = new Sequence('DateTime');
-var_dump($seq->valueTypes->contains('null')); // true (auto-added)
-// Gaps filled with null
+// Object type - include null to allow gap-filling if needed
+$seq = new Sequence('?DateTime');
 
 // Create from array with type inference (default)
 $seq = new Sequence(source: [1, 2, 3, 4, 5]);
@@ -114,7 +133,7 @@ $seq = Sequence::range(10, 1, -1);    // [10, 9, 8, ..., 1]
 $seq = Sequence::range(0.0, 1.0, 0.2); // [0.0, 0.2, 0.4, ..., 1.0]
 ```
 
-## Add Items to Sequence
+## Modification Methods
 
 ### append()
 
@@ -177,7 +196,7 @@ $seq->insert(5, 10); // [1, 2, 0, 0, 0, 10]
 ### import()
 
 ```php
-public function import(iterable $src): static
+public function import(iterable $source): static
 ```
 
 Import values from an iterable into the Sequence. Returns `$this` for chaining. Throws `TypeError` for invalid value types.
@@ -190,8 +209,6 @@ $seq->import([3, 4, 5]);
 
 echo $seq->count(); // 5
 ```
-
-## Remove Items from Sequence
 
 ### clear()
 
@@ -315,24 +332,6 @@ var_dump($seq->contains(2));   // true
 var_dump($seq->contains('2')); // false (strict)
 ```
 
-### equal()
-
-```php
-public function equal(Collection $other): bool
-```
-
-Check if equal to another Collection. Collections must be same class, have same count, and same values in same order. Type constraints are ignored.
-
-**Example:**
-```php
-$seq1 = new Sequence(source: [1, 2, 3]);
-$seq2 = new Sequence(source: [1, 2, 3]);
-$seq3 = new Sequence(source: [1, 2, 4]);
-
-var_dump($seq1->equal($seq2)); // true
-var_dump($seq1->equal($seq3)); // false
-```
-
 ### indexExists()
 
 ```php
@@ -384,7 +383,27 @@ var_dump($seq->any(fn($x) => $x % 2 === 0)); // true
 var_dump($seq->any(fn($x) => $x > 10));      // false
 ```
 
-## Get Items from Sequence
+## Comparison Methods
+
+### equal()
+
+```php
+public function equal(mixed $other): bool
+```
+
+Check if equal to another Collection. Collections must be same class, have same count, and same values in same order. Type constraints are ignored.
+
+**Example:**
+```php
+$seq1 = new Sequence(source: [1, 2, 3]);
+$seq2 = new Sequence(source: [1, 2, 3]);
+$seq3 = new Sequence(source: [1, 2, 4]);
+
+var_dump($seq1->equal($seq2)); // true
+var_dump($seq1->equal($seq3)); // false
+```
+
+## Extraction Methods
 
 ### first()
 
@@ -472,62 +491,61 @@ $result = $seq->find(fn($x) => $x % 2 === 0); // 4
 $result = $seq->find(fn($x) => $x > 10);      // null
 ```
 
-## Sort Methods
-
-### sort()
+### unique()
 
 ```php
-public function sort(int $flags = SORT_REGULAR): self
+public function unique(): self
 ```
 
-Return a new Sequence with items sorted in ascending order (non-mutating).
+Return a new Sequence containing only unique values.
 
 **Example:**
 ```php
 $seq = new Sequence('int');
-$seq->append(5, 2, 8, 1, 9);
-$sorted = $seq->sort();
+$seq->append(1, 2, 2, 3, 3, 3, 4);
+$unique = $seq->unique();
 
-echo $sorted[0]; // 1
-echo $seq[0];    // 5 (original unchanged)
-```
-
-### sortReverse()
-
-```php
-public function sortReverse(int $flags = SORT_REGULAR): self
-```
-
-Return a new Sequence with items sorted in descending order (non-mutating).
-
-**Example:**
-```php
-$seq = new Sequence('int');
-$seq->append(5, 2, 8, 1, 9);
-$sorted = $seq->sortReverse();
-
-echo $sorted[0]; // 9
-```
-
-### sortBy()
-
-```php
-public function sortBy(callable $fn): self
-```
-
-Return a new Sequence sorted using a custom comparison function (non-mutating).
-
-**Example:**
-```php
-$seq = new Sequence('int');
-$seq->append(-5, 3, -1, 4, -2);
-
-// Sort by absolute value
-$sorted = $seq->sortBy(fn($a, $b) => abs($a) <=> abs($b));
-echo $sorted[0]; // -1
+echo $unique->count(); // 4
 ```
 
 ## Transformation Methods
+
+### chunk()
+
+```php
+public function chunk(int $size): array
+```
+
+Split the Sequence into chunks of a given size. Returns an array of Sequences.
+
+**Example:**
+```php
+$seq = Sequence::range(1, 10);
+$chunks = $seq->chunk(3);
+
+echo count($chunks);     // 4
+echo $chunks[0]->count(); // 3
+echo $chunks[3]->count(); // 1 (remainder)
+```
+
+### fill()
+
+```php
+public function fill(int $startIndex, int $count, mixed $value): self
+```
+
+Fill a portion of the Sequence with a value. Returns `$this` for chaining.
+
+**Examples:**
+```php
+$seq = new Sequence('int');
+$seq->append(1, 2, 3, 4, 5);
+$seq->fill(1, 3, 99); // [1, 99, 99, 99, 5]
+
+// Fill an empty sequence
+$seq = new Sequence('int');
+$seq->fill(0, 5, 7); // [7, 7, 7, 7, 7]
+```
 
 ### filter()
 
@@ -598,60 +616,6 @@ $reversed = $seq->reverse();
 
 echo $reversed[0]; // 'c'
 echo $seq[0];      // 'a' (unchanged)
-```
-
-### unique()
-
-```php
-public function unique(): self
-```
-
-Return a new Sequence containing only unique values.
-
-**Example:**
-```php
-$seq = new Sequence('int');
-$seq->append(1, 2, 2, 3, 3, 3, 4);
-$unique = $seq->unique();
-
-echo $unique->count(); // 4
-```
-
-### chunk()
-
-```php
-public function chunk(int $size): array
-```
-
-Split the Sequence into chunks of a given size. Returns an array of Sequences.
-
-**Example:**
-```php
-$seq = Sequence::range(1, 10);
-$chunks = $seq->chunk(3);
-
-echo count($chunks);     // 4
-echo $chunks[0]->count(); // 3
-echo $chunks[3]->count(); // 1 (remainder)
-```
-
-### fill()
-
-```php
-public function fill(int $startIndex, int $count, mixed $value): self
-```
-
-Fill a portion of the Sequence with a value. Returns `$this` for chaining.
-
-**Examples:**
-```php
-$seq = new Sequence('int');
-$seq->append(1, 2, 3, 4, 5);
-$seq->fill(1, 3, 99); // [1, 99, 99, 99, 5]
-
-// Fill with a specific value
-$seq = new Sequence('int', 0);
-$seq->fill(0, 5, 7); // [7, 7, 7, 7, 7]
 ```
 
 ## Aggregation Methods
@@ -725,7 +689,7 @@ echo $seq->sum(); // 15
 public function min(): int|float
 ```
 
-Find the minimum value in the Sequence. Throws `UnderflowException` if empty.
+Find the minimum value in the Sequence. Throws `ValueError` if empty.
 
 **Examples:**
 ```php
@@ -750,7 +714,7 @@ echo $seq->min(); // -10
 public function max(): int|float
 ```
 
-Find the maximum value in the Sequence. Throws `UnderflowException` if empty.
+Find the maximum value in the Sequence. Throws `ValueError` if empty.
 
 **Examples:**
 ```php
@@ -830,91 +794,77 @@ echo $counts['b']; // 2
 echo $counts['c']; // 1
 ```
 
-## Random Methods
+## Sorting Methods
 
-### chooseRand()
+### sort()
 
 ```php
-public function chooseRand(int $count = 1): array
+public function sort(int $flags = SORT_REGULAR): self
 ```
 
-Randomly choose one or more items from the Sequence (non-mutating). Returns an associative array with indexes as keys and values. Throws `OutOfRangeException` if empty, or count is invalid.
+Return a new Sequence with items sorted in ascending order (non-mutating).
 
 **Example:**
-```php
-$seq = Sequence::range(1, 10);
-$chosen = $seq->chooseRand(3);
-
-// Example result: [2 => 3, 7 => 8, 4 => 5]
-echo count($chosen); // 3
-```
-
-### removeRand()
-
-```php
-public function removeRand(int $count = 1): array
-```
-
-Randomly remove one or more items from the Sequence (mutating). Returns a list of removed values. Throws `OutOfRangeException` if empty, or count is invalid.
-
-**Example:**
-```php
-$seq = Sequence::range(1, 10);
-$removed = $seq->removeRand(2);
-
-echo count($removed);   // 2
-echo $seq->count();     // 8
-```
-
-## ArrayAccess Implementation
-
-Sequences support array-like access with square brackets:
-
 ```php
 $seq = new Sequence('int');
+$seq->append(5, 2, 8, 1, 9);
+$sorted = $seq->sort();
 
-// Append with []
-$seq[] = 10;
-$seq[] = 20;
-
-// Set at index
-$seq[0] = 15;
-
-// Get value
-echo $seq[1]; // 20
-
-// Check existence
-var_dump(isset($seq[1])); // true
-
-// Unset sets to default value (doesn't remove)
-unset($seq[0]);
-echo $seq[0]; // 0 (default for int)
-
-// Setting beyond range fills gaps
-$seq[5] = 99; // Indexes 2-4 filled with defaults
+echo $sorted[0]; // 1
+echo $seq[0];    // 5 (original unchanged)
 ```
 
-## Iteration
-
-Sequences support `foreach` iteration:
+### sortReverse()
 
 ```php
-$seq = new Sequence('string');
-$seq->append('a', 'b', 'c');
+public function sortReverse(int $flags = SORT_REGULAR): self
+```
 
-foreach ($seq as $value) {
-    echo $value; // 'a', 'b', 'c'
-}
+Return a new Sequence with items sorted in descending order (non-mutating).
 
-foreach ($seq as $index => $value) {
-    echo "$index: $value\n";
-    // 0: a
-    // 1: b
-    // 2: c
-}
+**Example:**
+```php
+$seq = new Sequence('int');
+$seq->append(5, 2, 8, 1, 9);
+$sorted = $seq->sortReverse();
+
+echo $sorted[0]; // 9
+```
+
+### sortBy()
+
+```php
+public function sortBy(callable $fn): self
+```
+
+Return a new Sequence sorted using a custom comparison function (non-mutating).
+
+**Example:**
+```php
+$seq = new Sequence('int');
+$seq->append(-5, 3, -1, 4, -2);
+
+// Sort by absolute value
+$sorted = $seq->sortBy(fn($a, $b) => abs($a) <=> abs($b));
+echo $sorted[0]; // -1
 ```
 
 ## Conversion Methods
+
+### __toString()
+
+```php
+public function __toString(): string
+```
+
+Convert the Sequence to a string representation.
+
+**Example:**
+```php
+$seq = new Sequence('int');
+$seq->append(1, 2, 3);
+echo $seq; // [1, 2, 3]
+```
 
 ### toArray()
 
@@ -968,19 +918,88 @@ $set = $seq->toSet();
 echo $set->count(); // 3
 ```
 
-### __toString()
+## Random Methods
+
+### chooseRand()
 
 ```php
-public function __toString(): string
+public function chooseRand(int $count = 1): array
 ```
 
-Convert the Sequence to a string representation.
+Randomly choose one or more items from the Sequence (non-mutating). Returns an associative array with indexes as keys and values. Throws `OutOfRangeException` if empty, or count is invalid.
 
 **Example:**
 ```php
+$seq = Sequence::range(1, 10);
+$chosen = $seq->chooseRand(3);
+
+// Example result: [2 => 3, 7 => 8, 4 => 5]
+echo count($chosen); // 3
+```
+
+### removeRand()
+
+```php
+public function removeRand(int $count = 1): array
+```
+
+Randomly remove one or more items from the Sequence (mutating). Returns a list of removed values. Throws `OutOfRangeException` if empty, or count is invalid.
+
+**Example:**
+```php
+$seq = Sequence::range(1, 10);
+$removed = $seq->removeRand(2);
+
+echo count($removed);   // 2
+echo $seq->count();     // 8
+```
+
+## ArrayAccess
+
+Sequences support array-like access with square brackets:
+
+```php
 $seq = new Sequence('int');
-$seq->append(1, 2, 3);
-echo $seq; // String representation
+
+// Append with []
+$seq[] = 10;
+$seq[] = 20;
+
+// Set at index
+$seq[0] = 15;
+
+// Get value
+echo $seq[1]; // 20
+
+// Check existence
+var_dump(isset($seq[1])); // true
+
+// Unset sets to default value (doesn't remove)
+unset($seq[0]);
+echo $seq[0]; // 0 (default for int)
+
+// Setting beyond range fills gaps
+$seq[5] = 99; // Indexes 2-4 filled with defaults
+```
+
+## Iteration
+
+Sequences support `foreach` iteration:
+
+```php
+$seq = new Sequence('string');
+$seq->append('a', 'b', 'c');
+
+foreach ($seq as $value) {
+    echo $value; // 'a', 'b', 'c'
+}
+
+foreach ($seq as $index => $value) {
+    echo "$index: $value\n";
+    // 0: a
+    // 1: b
+    // 2: c
+}
 ```
 
 ## Usage Examples
@@ -1003,7 +1022,7 @@ echo "Sum: $sum"; // 15
 ### Working with objects
 
 ```php
-$dates = new Sequence('DateTime', new DateTime());
+$dates = new Sequence('DateTime');
 $dates->append(new DateTime('2025-01-01'));
 $dates->append(new DateTime('2025-06-01'));
 $dates->append(new DateTime('2025-12-31'));
@@ -1028,10 +1047,10 @@ echo $result->sum(); // 56
 ### Gap-filling with defaults
 
 ```php
-$seq = new Sequence('int', 0);
+$seq = new Sequence('int');
 $seq[10] = 99;
 
-// Indexes 0-9 are filled with 0
+// Indexes 0-9 are filled with 0 (default for int)
 echo $seq[5];  // 0
 echo $seq[10]; // 99
 echo $seq->count(); // 11
@@ -1060,3 +1079,11 @@ $median = $sorted[$scores->count() / 2];
 echo "Average: $average"; // 88.17
 echo "Median: $median";   // 88.5
 ```
+
+## See Also
+
+- **[Collection](Collection.md)** - Abstract base class
+- **[Dictionary](Dictionary.md)** - Key-value collection
+- **[Set](Set.md)** - Unique value collection
+- **[TypeSet](TypeSet.md)** - Type constraint management
+- **[Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Equatable.md)** - Trait for implementing `equal()`

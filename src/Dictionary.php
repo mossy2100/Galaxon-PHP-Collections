@@ -40,7 +40,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Computed properties
+    // region Property hooks
 
     // PHP_CodeSniffer doesn't know about property hooks yet.
     // phpcs:disable PSR2.Classes.PropertyDeclaration
@@ -83,7 +83,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Constructor and factory methods
+    // region Constructor
 
     /**
      * Constructor.
@@ -129,6 +129,10 @@ final class Dictionary extends Collection implements ArrayAccess
             $this[$key] = $value;
         }
     }
+
+    // endregion
+
+    // region Factory methods
 
     /**
      * Create a new Dictionary by combining separate iterables of keys and values.
@@ -185,35 +189,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Private helper methods
-
-    /**
-     * Validate an key (a.k.a. offset) argument.
-     *
-     * @param mixed $key The key to validate.
-     * @return string The key as a corresponding index string.
-     * @throws TypeError If the key has a disallowed type.
-     * @throws OutOfBoundsException If the key does not exist in the Dictionary.
-     */
-    private function checkKey(mixed $key): string
-    {
-        // Check the key type is valid.
-        $this->keyTypes->check($key, 'key');
-
-        // Convert the key to an index.
-        $index = Types::getUniqueString($key);
-
-        // Check index (and thus key) exists in the Dictionary.
-        if (!array_key_exists($index, $this->items)) {
-            throw new OutOfBoundsException('Unknown key: ' . Stringify::abbrev($key) . '.');
-        }
-
-        return $index;
-    }
-
-    // endregion
-
-    // region Methods for adding and removing items
+    // region Modification methods
 
     /**
      * Add a key-value pair to the dictionary.
@@ -245,8 +221,8 @@ final class Dictionary extends Collection implements ArrayAccess
         }
 
         // Check the types are valid.
-        $this->keyTypes->check($key, 'key');
-        $this->valueTypes->check($value, 'value');
+        $this->keyTypes->checkValueType($key, 'key');
+        $this->valueTypes->checkValueType($value, 'value');
 
         // Leverage offsetSet() to generate the index and the pair.
         $this[$key] = $value;
@@ -311,7 +287,7 @@ final class Dictionary extends Collection implements ArrayAccess
     public function removeByValue(mixed $value): int
     {
         // Check the value type is valid.
-        $this->valueTypes->check($value, 'value');
+        $this->valueTypes->checkValueType($value, 'value');
 
         // Initialize the counter.
         $nRemoved = 0;
@@ -331,8 +307,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Comparison and inspection methods
-    // These are non-mutating and return bools.
+    // region Inspection methods
 
     /**
      * Check if the Dictionary contains a value.
@@ -353,6 +328,24 @@ final class Dictionary extends Collection implements ArrayAccess
         }
         return false;
     }
+
+    /**
+     * Check if the Dictionary contains a key.
+     *
+     * This is an alias for offsetExists(), which isn't normally called directly.
+     * This method has a better name, as the documentation uses "key" rather than "offset".
+     *
+     * @param mixed $key The key to check for.
+     * @return bool True if the Dictionary contains the key, false otherwise.
+     */
+    public function keyExists(mixed $key): bool
+    {
+        return $this->offsetExists($key);
+    }
+
+    // endregion
+
+    // region Comparison methods
 
     /**
      * Check if the Dictionary is equal to another Collection.
@@ -401,66 +394,9 @@ final class Dictionary extends Collection implements ArrayAccess
         return true;
     }
 
-    /**
-     * Check if the Dictionary contains a key.
-     *
-     * This is an alias for offsetExists(), which isn't normally called directly.
-     * This method has a better name, as the documentation uses "key" rather than "offset".
-     *
-     * @param mixed $key The key to check for.
-     * @return bool True if the Dictionary contains the key, false otherwise.
-     */
-    public function keyExists(mixed $key): bool
-    {
-        return $this->offsetExists($key);
-    }
-
     // endregion
 
-    // region Sorting methods
-
-    /**
-     * Sort the Dictionary by a custom callback function.
-     *
-     * @param callable $fn The callback function. This should take two arguments (the key-value pairs to compare) and
-     * return an integer equal to -1 (less than), 0 (equal), or 1 (greater than).
-     * @return $this The sorted Dictionary.
-     */
-    public function sort(callable $fn): self
-    {
-        uasort($this->items, $fn);
-        return $this;
-    }
-
-    /**
-     * Sort the Dictionary by key.
-     *
-     * The spaceship operator (<=>) is used to compare the keys, so it should be defined for the key types.
-     *
-     * @return $this The sorted Dictionary.
-     */
-    public function sortByKey(): self
-    {
-        $fn = static fn ($a, $b) => $a->key <=> $b->key;
-        return $this->sort($fn);
-    }
-
-    /**
-     * Sort the Dictionary by value.
-     *
-     * The spaceship operator (<=>) is used to compare the values, so it should be defined for the value types.
-     *
-     * @return $this The sorted Dictionary.
-     */
-    public function sortByValue(): self
-    {
-        $fn = static fn ($a, $b) => $a->value <=> $b->value;
-        return $this->sort($fn);
-    }
-
-    // endregion
-
-    // region Miscellaneous methods
+    // region Transformation methods
 
     /**
      * Filter a Dictionary using a callback function.
@@ -632,6 +568,63 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // endregion
 
+    // region Sorting methods
+
+    /**
+     * Sort the Dictionary by a custom callback function.
+     *
+     * @param callable $fn The callback function. This should take two arguments (the key-value pairs to compare) and
+     * return an integer equal to -1 (less than), 0 (equal), or 1 (greater than).
+     * @return $this The sorted Dictionary.
+     */
+    public function sort(callable $fn): self
+    {
+        uasort($this->items, $fn);
+        return $this;
+    }
+
+    /**
+     * Sort the Dictionary by key.
+     *
+     * The spaceship operator (<=>) is used to compare the keys, so it should be defined for the key types.
+     *
+     * @return $this The sorted Dictionary.
+     */
+    public function sortByKey(): self
+    {
+        $fn = static fn ($a, $b) => $a->key <=> $b->key;
+        return $this->sort($fn);
+    }
+
+    /**
+     * Sort the Dictionary by value.
+     *
+     * The spaceship operator (<=>) is used to compare the values, so it should be defined for the value types.
+     *
+     * @return $this The sorted Dictionary.
+     */
+    public function sortByValue(): self
+    {
+        $fn = static fn ($a, $b) => $a->value <=> $b->value;
+        return $this->sort($fn);
+    }
+
+    // endregion
+
+    // region Conversion methods
+
+    /**
+     * Convert the Dictionary to a Sequence of Pairs.
+     *
+     * @return Sequence The new Sequence.
+     */
+    public function toSequence(): Sequence
+    {
+        return new Sequence(source: $this->items);
+    }
+
+    // endregion
+
     // region ArrayAccess implementation
 
     /**
@@ -695,8 +688,8 @@ final class Dictionary extends Collection implements ArrayAccess
     public function offsetSet(mixed $offset, mixed $value): void
     {
         // Check the types are valid.
-        $this->keyTypes->check($offset, 'key');
-        $this->valueTypes->check($value, 'value');
+        $this->keyTypes->checkValueType($offset, 'key');
+        $this->valueTypes->checkValueType($value, 'value');
 
         // Convert the key to an index.
         $index = Types::getUniqueString($offset);
@@ -725,20 +718,6 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // endregion
 
-    // region Conversion methods
-
-    /**
-     * Convert the Dictionary to a Sequence of Pairs.
-     *
-     * @return Sequence The new Sequence.
-     */
-    public function toSequence(): Sequence
-    {
-        return new Sequence(source: $this->items);
-    }
-
-    // endregion
-
     // region IteratorAggregate implementation
 
     /**
@@ -754,6 +733,34 @@ final class Dictionary extends Collection implements ArrayAccess
             /** @var Pair $pair */
             yield $pair->key => $pair->value;
         }
+    }
+
+    // endregion
+
+    // region Helper methods
+
+    /**
+     * Validate an key (a.k.a. offset) argument.
+     *
+     * @param mixed $key The key to validate.
+     * @return string The key as a corresponding index string.
+     * @throws TypeError If the key has a disallowed type.
+     * @throws OutOfBoundsException If the key does not exist in the Dictionary.
+     */
+    private function checkKey(mixed $key): string
+    {
+        // Check the key type is valid.
+        $this->keyTypes->checkValueType($key, 'key');
+
+        // Convert the key to an index.
+        $index = Types::getUniqueString($key);
+
+        // Check index (and thus key) exists in the Dictionary.
+        if (!array_key_exists($index, $this->items)) {
+            throw new OutOfBoundsException('Unknown key: ' . Stringify::abbrev($key) . '.');
+        }
+
+        return $index;
     }
 
     // endregion

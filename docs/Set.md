@@ -2,7 +2,11 @@
 
 A type-safe collection of unique values with optional type constraints.
 
-## Features
+## Overview
+
+A Set is a collection that contains only unique values. Unlike Sequence (which allows duplicates and has ordered indexes) or Dictionary (which maps keys to values), a Set simply stores unique values.
+
+### Key Features
 
 - **Uniqueness enforced**: Duplicate values are automatically prevented
 - **Type constraints**: Optional runtime validation for values
@@ -12,9 +16,11 @@ A type-safe collection of unique values with optional type constraints.
 - **Type inference**: Automatically detect types from source data
 - **Iteration**: Full foreach support
 
-## What is a Set?
-
-A Set is a collection that contains only unique values. Unlike Sequence (which allows duplicates and has ordered indexes) or Dictionary (which maps keys to values), a Set simply stores unique values:
+Sets are ideal for:
+- Removing duplicates from data
+- Testing membership (`contains()`)
+- Mathematical set operations (union, intersection, difference)
+- Tracking unique items
 
 ```php
 $set = new Set('int');
@@ -22,11 +28,23 @@ $set->add(1, 2, 3, 2, 1); // Only 1, 2, 3 are stored
 echo $set->count(); // 3
 ```
 
-Sets are ideal for:
-- Removing duplicates from data
-- Testing membership (`contains()`)
-- Mathematical set operations (union, intersection, difference)
-- Tracking unique items
+## Properties
+
+### valueTypes
+
+```php
+protected(set) TypeSet $valueTypes
+```
+
+TypeSet managing allowed value types for the Set. Inherited from Collection.
+
+Example:
+
+```php
+$set = new Set('int|string');
+echo $set->valueTypes; // {int, string}
+var_dump($set->valueTypes->contains('int')); // true
+```
 
 ## Constructor
 
@@ -98,7 +116,7 @@ $set->add(new DateTime('2024-01-01'));
 $set->add(new DateTime('2024-01-02'));
 ```
 
-## Adding and Removing Items
+## Modification Methods
 
 ### add()
 
@@ -128,7 +146,7 @@ $set->add(8)->add(9)->add(10);
 ### import()
 
 ```php
-public function import(iterable $src): static
+public function import(iterable $source): static
 ```
 
 Import values from an iterable into the Set. Duplicates are automatically ignored. Returns `$this` for chaining. Throws `TypeError` for invalid value types.
@@ -162,6 +180,23 @@ echo $set->count(); // 2
 $removed = $set->remove('grape');
 echo $removed; // false (wasn't in set)
 echo $set->count(); // Still 2
+```
+
+### clear()
+
+```php
+public function clear(): static
+```
+
+Remove all items from the Set. Returns $this for chaining.
+
+**Example:**
+```php
+$set = new Set('int', [1, 2, 3]);
+echo $set->count(); // 3
+
+$set->clear();
+echo $set->count(); // 0
 ```
 
 ## Set Operations
@@ -226,7 +261,24 @@ $difference = $set1->diff($set2);
 echo $difference->count(); // 2
 ```
 
-## Comparison and Inspection Methods
+## Inspection Methods
+
+### empty()
+
+```php
+public function empty(): bool
+```
+
+Check if the Set is empty.
+
+**Example:**
+```php
+$set = new Set();
+var_dump($set->empty()); // true
+
+$set->add(1);
+var_dump($set->empty()); // false
+```
 
 ### contains()
 
@@ -245,10 +297,12 @@ var_dump($set->contains('2')); // false (different type)
 var_dump($set->contains(4));   // false (not in set)
 ```
 
+## Comparison Methods
+
 ### equal()
 
 ```php
-public function equal(Collection $other): bool
+public function equal(mixed $other): bool
 ```
 
 Check if two Sets are equal. Sets are equal if they have the same type (both Sets), same number of items, and same item values. Order doesn't matter. Type constraints are not considered.
@@ -358,7 +412,7 @@ var_dump($set1->disjoint($set2)); // true (no overlap)
 var_dump($set1->disjoint($set3)); // false (3 is in both)
 ```
 
-## Collection Methods
+## Aggregation Methods
 
 ### count()
 
@@ -374,39 +428,7 @@ $set = new Set('int', [1, 2, 3]);
 echo $set->count(); // 3
 ```
 
-### empty()
-
-```php
-public function empty(): bool
-```
-
-Check if the Set is empty.
-
-**Example:**
-```php
-$set = new Set();
-var_dump($set->empty()); // true
-
-$set->add(1);
-var_dump($set->empty()); // false
-```
-
-### clear()
-
-```php
-public function clear(): void
-```
-
-Remove all items from the Set.
-
-**Example:**
-```php
-$set = new Set('int', [1, 2, 3]);
-echo $set->count(); // 3
-
-$set->clear();
-echo $set->count(); // 0
-```
+## Transformation Methods
 
 ### filter()
 
@@ -434,6 +456,44 @@ echo $set->count(); // 6
 
 ## Conversion Methods
 
+### __toString()
+
+```php
+public function __toString(): string
+```
+
+Get a string representation of the Set using set notation `{}`.
+
+**Example:**
+```php
+$set = new Set('int', [1, 2, 3]);
+echo $set; // {1, 2, 3}
+
+$set = new Set('string', ['apple', 'banana']);
+echo $set; // {'apple', 'banana'}
+
+$empty = new Set();
+echo $empty; // {}
+```
+
+### toSequence()
+
+```php
+public function toSequence(): Sequence
+```
+
+Convert the Set to a Sequence. The values will maintain the same type constraints.
+
+**Example:**
+```php
+$set = new Set('int', [3, 1, 2]);
+$seq = $set->toSequence();
+
+// Result: Sequence with items in set order
+echo $seq->count(); // 3
+echo $seq[0]; // First item from set
+```
+
 ### toDictionary()
 
 ```php
@@ -456,24 +516,6 @@ echo $dict[0]; // 'apple'
 echo $dict->count(); // 3
 ```
 
-### toSequence()
-
-```php
-public function toSequence(): Sequence
-```
-
-Convert the Set to a Sequence. The values will maintain the same type constraints.
-
-**Example:**
-```php
-$set = new Set('int', [3, 1, 2]);
-$seq = $set->toSequence();
-
-// Result: Sequence with items in set order
-echo $seq->count(); // 3
-echo $seq[0]; // First item from set
-```
-
 ### toArray()
 
 ```php
@@ -488,26 +530,6 @@ $set = new Set('string', ['apple', 'banana', 'cherry']);
 $array = $set->toArray();
 
 var_dump($array); // ['apple', 'banana', 'cherry']
-```
-
-### __toString()
-
-```php
-public function __toString(): string
-```
-
-Get a string representation of the Set using set notation `{}`.
-
-**Example:**
-```php
-$set = new Set('int', [1, 2, 3]);
-echo $set; // {1, 2, 3}
-
-$set = new Set('string', ['apple', 'banana']);
-echo $set; // {'apple', 'banana'}
-
-$empty = new Set();
-echo $empty; // {}
 ```
 
 ## Iteration
@@ -535,7 +557,7 @@ foreach ($set as $key => $fruit) {
 // 2: cherry
 ```
 
-## Practical Examples
+## Usage Examples
 
 ### Remove duplicates from an array
 ```php
@@ -594,8 +616,7 @@ $visitors->add('alice@example.com'); // Duplicate ignored
 echo $visitors->count(); // 2 (unique visitors)
 ```
 
-## Type Safety Examples
-
+### Type Safety
 ```php
 // Strict type checking
 $set = new Set('int');
@@ -604,11 +625,11 @@ $set->add(1, 2, 3);
 
 // Union types
 $set = new Set('int|string');
-$set->add(1, 'two', 3, 'four'); // ✅ Works
+$set->add(1, 'two', 3, 'four'); // Works
 
 // Nullable types
 $set = new Set('?int');
-$set->add(1, 2, null, 3); // ✅ Works
+$set->add(1, 2, null, 3); // Works
 
 // Object types
 $set = new Set('DateTime');
@@ -618,5 +639,13 @@ $set->add(new DateTime('2024-01-02'));
 
 // No constraints
 $set = new Set();
-$set->add(1, 'two', 3.14, true, null, []); // ✅ All types allowed
+$set->add(1, 'two', 3.14, true, null, []); // All types allowed
 ```
+
+## See Also
+
+- **[Collection](Collection.md)** - Abstract base class
+- **[Dictionary](Dictionary.md)** - Key-value pair implementation
+- **[Sequence](Sequence.md)** - Ordered list collection
+- **[TypeSet](TypeSet.md)** - Type constraint management
+- **[Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Equatable.md)** - Trait for implementing `equal()`

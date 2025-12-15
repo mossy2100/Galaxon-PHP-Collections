@@ -2,26 +2,75 @@
 
 A type-safe key-value collection that accepts any PHP type for both keys and values.
 
-## Features
+## Overview
 
-- **Any type for keys**: Objects, arrays, resources, scalars, null - everything works
-- **Type constraints**: Optional runtime validation for both keys and values
-- **ArrayAccess**: Use familiar `$dict[$key]` syntax
-- **Iteration**: Full foreach support
-- **Type inference**: Automatically detect types from data
-- **Transformation methods**: filter, flip, map, merge, sort
+Dictionary provides a flexible key-value store that overcomes PHP array limitations. While PHP arrays only accept `string` or `int` keys, Dictionary lets you use values of any type.
 
-## Why Dictionary?
+### Key Features
 
-PHP arrays only accept `string` or `int` keys. Dictionary lets you use:
+- **Any type for keys** - Objects, arrays, resources, scalars, null - everything works
+- **Type constraints** - Optional runtime validation for both keys and values
+- **ArrayAccess** - Use familiar `$dict[$key]` syntax
+- **Type inference** - Automatically detect types from data
+- **Transformation methods** - filter, flip, map, merge, sort
+- **Iteration** - Full foreach support with original key types preserved
 
 ```php
 $dict = new Dictionary();
-$dict[new DateTime()] = 'event';        // ✅ Object keys
-$dict[[1, 2, 3]] = 'coordinates';       // ✅ Array keys
-$dict[fopen('file.txt', 'r')] = 'data'; // ✅ Resource keys
-$dict[true] = 'yes';                    // ✅ Boolean keys
-$dict[null] = 'empty';                  // ✅ Null key
+$dict[new DateTime()] = 'event';        // Object keys
+$dict[[1, 2, 3]] = 'coordinates';       // Array keys
+$dict[fopen('file.txt', 'r')] = 'data'; // Resource keys
+$dict[true] = 'yes';                    // Boolean keys
+$dict[null] = 'empty';                  // Null key
+```
+
+## Properties
+
+### keyTypes
+
+```php
+protected(set) TypeSet $keyTypes
+```
+
+TypeSet managing allowed key types for the Dictionary. Handles runtime type validation for keys.
+
+**Access:** Protected set (can only be set within the class), public read (accessible via `$dict->keyTypes`)
+
+**Example:**
+```php
+$dict = new Dictionary('string|int', 'mixed');
+
+echo $dict->keyTypes; // {string, int}
+var_dump($dict->keyTypes->contains('string')); // true
+var_dump($dict->keyTypes->contains('array'));  // false
+```
+
+### keys
+
+```php
+public array $keys { get }
+```
+
+Computed property that returns all keys as an array.
+
+**Example:**
+```php
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
+$keys = $dict->keys; // ['a', 'b', 'c']
+```
+
+### values
+
+```php
+public array $values { get }
+```
+
+Computed property that returns all values as an array.
+
+**Example:**
+```php
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
+$values = $dict->values; // [1, 2, 3]
 ```
 
 ## Constructor
@@ -65,11 +114,8 @@ $dict = new Dictionary(['int', 'string'], ['float', 'bool']);
 // DateTime keys, Customer values
 $dict = new Dictionary('DateTime', 'Customer');
 
-// Nullable values (using ?)
+// Nullable values
 $dict = new Dictionary('string', '?int');
-
-// Nullable values (using array)
-$dict = new Dictionary('string', ['int', 'null']);
 
 // Create from array with type inference (default)
 $dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
@@ -78,7 +124,6 @@ echo $dict->count(); // 3
 
 // Create from array with explicit types
 $dict = new Dictionary('string', 'int', ['a' => 1, 'b' => 2]);
-echo $dict->count(); // 2
 
 // Mixed types - infers union types
 $dict = new Dictionary(source: [1 => 'one', 'two' => 2, 3 => true]);
@@ -87,20 +132,12 @@ $dict = new Dictionary(source: [1 => 'one', 'two' => 2, 3 => true]);
 // No type constraints (any type allowed)
 $dict = new Dictionary(null, null, ['a' => 1, 'b' => 'text']);
 
-// From another Dictionary
-$original = new Dictionary('string', 'int');
-$original->add('x', 10);
-$copy = new Dictionary(source: $original);
-echo $copy->count(); // 1
-
 // From generator with type inference
 $generator = function() {
     yield 'a' => 10;
     yield 'b' => 20;
-    yield 'c' => 30;
 };
 $dict = new Dictionary(source: $generator());
-echo $dict->count(); // 3
 ```
 
 ## Factory Methods
@@ -118,17 +155,15 @@ public static function combine(
 Create a new Dictionary by combining separate iterables of keys and values.
 
 **Parameters:**
-- `$keys` - Iterable of keys
-- `$values` - Iterable of values
-- `$inferTypes` - Whether to infer key and value types from the data (default: `true`)
+- `$keys` (iterable) - Iterable of keys
+- `$values` (iterable) - Iterable of values
+- `$inferTypes` (bool) - Whether to infer key and value types from the data (default: `true`)
 
-**Type Inference:**
-- When `$inferTypes = true` (default), types are automatically inferred from the provided keys and values
-- When `$inferTypes = false`, no type constraints are applied (any type allowed)
+**Returns:** A new Dictionary with the combined keys and values.
 
 **Throws:**
-- `ValueError` if the iterables have different counts
-- `ValueError` if keys are not unique
+- `ValueError` - If the iterables have different counts
+- `ValueError` - If keys are not unique
 
 **Examples:**
 ```php
@@ -141,52 +176,24 @@ $dict = Dictionary::combine($keys, $values);
 // With object keys
 $date1 = new DateTime('2024-01-01');
 $date2 = new DateTime('2024-02-01');
-$keys = [$date1, $date2];
-$values = ['New Year', 'February'];
-$dict = Dictionary::combine($keys, $values);
+$dict = Dictionary::combine([$date1, $date2], ['New Year', 'February']);
 echo $dict[$date1]; // 'New Year'
 
-// With array keys
-$coords1 = [10, 20];
-$coords2 = [30, 40];
-$keys = [$coords1, $coords2];
-$values = ['Location A', 'Location B'];
-$dict = Dictionary::combine($keys, $values);
-echo $dict[[10, 20]]; // 'Location A'
-
 // Disable type inference for maximum flexibility
-$keys = ['a', 'b'];
-$values = [1, 2];
-$dict = Dictionary::combine($keys, $values, false);
+$dict = Dictionary::combine(['a', 'b'], [1, 2], false);
 // No type constraints - can add any types later
-$dict->add(123, 'text');      // ✅ Works
-$dict->add(true, [1, 2, 3]);  // ✅ Works
-
-// With generators
-$keysGen = function() {
-    yield 'key1';
-    yield 'key2';
-};
-$valuesGen = function() {
-    yield 100;
-    yield 200;
-};
-$dict = Dictionary::combine($keysGen(), $valuesGen());
+$dict->add(123, 'text'); // Works
 
 // Error: Mismatched counts
-$keys = ['a', 'b', 'c'];
-$values = [1, 2];
-$dict = Dictionary::combine($keys, $values);
+$dict = Dictionary::combine(['a', 'b', 'c'], [1, 2]);
 // ValueError: Cannot combine: keys count (3) does not match values count (2).
 
 // Error: Duplicate keys
-$keys = ['a', 'b', 'a'];
-$values = [1, 2, 3];
-$dict = Dictionary::combine($keys, $values);
+$dict = Dictionary::combine(['a', 'b', 'a'], [1, 2, 3]);
 // ValueError: Cannot combine: keys are not unique.
 ```
 
-## Adding and Removing Items
+## Modification Methods
 
 ### add()
 
@@ -197,6 +204,10 @@ public function add(Pair $pair): self
 ```
 
 Add a key-value pair. Returns `$this` for chaining.
+
+**Throws:**
+- `TypeError` - If the key or value has a disallowed type
+- `ArgumentCountError` - If the wrong number of parameters is supplied
 
 **Examples:**
 ```php
@@ -214,10 +225,12 @@ $dict->add('min', 10)->add('max', 90);
 ### import()
 
 ```php
-public function import(iterable $src): static
+public function import(iterable $source): static
 ```
 
-Import multiple key-value pairs. Returns `$this` for chaining.
+Import multiple key-value pairs from an iterable. Returns `$this` for chaining.
+
+**Throws:** `TypeError` - If any keys or values have disallowed types.
 
 **Example:**
 ```php
@@ -231,14 +244,18 @@ $dict->import(['a' => 1, 'b' => 2, 'c' => 3]);
 public function removeByKey(mixed $key): mixed
 ```
 
-Remove item by key. Returns the value of the removed item.
+Remove an item by key. Returns the value of the removed item.
+
+**Throws:**
+- `TypeError` - If the key has a disallowed type
+- `OutOfBoundsException` - If the key does not exist
 
 **Example:**
 ```php
 $dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
 $value = $dict->removeByKey('b');
 echo $value; // 2
-echo $dict->count(); // 2 (item removed)
+echo $dict->count(); // 2
 ```
 
 ### removeByValue()
@@ -247,7 +264,9 @@ echo $dict->count(); // 2 (item removed)
 public function removeByValue(mixed $value): int
 ```
 
-Remove all items with matching value. Returns the count of items removed.
+Remove all items with a matching value. Returns the count of items removed.
+
+**Throws:** `TypeError` - If the value has a disallowed type.
 
 **Example:**
 ```php
@@ -263,63 +282,13 @@ echo $dict->count(); // 1 (only 'b' remains)
 public function clear(): static
 ```
 
-Remove all items.
+Remove all items from the Dictionary. Returns `$this` for chaining.
 
 **Example:**
 ```php
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
 $dict->clear();
-```
-
-## Accessing Items
-
-### ArrayAccess
-
-Use familiar array syntax:
-
-```php
-$dict = new Dictionary('string', 'int');
-
-// Set
-$dict['count'] = 42;
-
-// Get
-echo $dict['count']; // 42
-
-// Check
-if (isset($dict['count'])) { ... }
-
-// Unset
-unset($dict['count']);
-```
-
-**Important:** `$dict[]` syntax uses `null` as the key (not append like arrays).
-
-### keys
-
-```php
-public array $keys
-```
-
-Get all keys as an array.
-
-**Example:**
-```php
-$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
-$keys = $dict->keys; // ['a', 'b']
-```
-
-### values
-
-```php
-public array $values
-```
-
-Get all values as an array.
-
-**Example:**
-```php
-$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
-$values = $dict->values; // [1, 2]
+echo $dict->count(); // 0
 ```
 
 ## Inspection Methods
@@ -330,13 +299,14 @@ $values = $dict->values; // [1, 2]
 public function contains(mixed $value): bool
 ```
 
-Check if Dictionary contains a value (strict equality).
+Check if the Dictionary contains a value (strict equality).
 
 **Example:**
 ```php
-if ($dict->contains(42)) {
-    echo "Found 42";
-}
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
+var_dump($dict->contains(1));   // true
+var_dump($dict->contains('1')); // false (strict equality)
+var_dump($dict->contains(3));   // false
 ```
 
 ### keyExists()
@@ -345,13 +315,13 @@ if ($dict->contains(42)) {
 public function keyExists(mixed $key): bool
 ```
 
-Check if a key exists.
+Check if a key exists in the Dictionary.
 
 **Example:**
 ```php
-if ($dict->keyExists('username')) {
-    echo $dict['username'];
-}
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
+var_dump($dict->keyExists('a')); // true
+var_dump($dict->keyExists('c')); // false
 ```
 
 ### empty()
@@ -360,13 +330,15 @@ if ($dict->keyExists('username')) {
 public function empty(): bool
 ```
 
-Check if Dictionary is empty.
+Check if the Dictionary is empty.
 
 **Example:**
 ```php
-if ($dict->empty()) {
-    echo "No data";
-}
+$dict = new Dictionary();
+var_dump($dict->empty()); // true
+
+$dict->add('key', 'value');
+var_dump($dict->empty()); // false
 ```
 
 ### count()
@@ -375,35 +347,31 @@ if ($dict->empty()) {
 public function count(): int
 ```
 
-Get number of key-value pairs.
+Get the number of key-value pairs. Implements the `Countable` interface.
 
 **Example:**
 ```php
-echo count($dict);        // Countable interface
-echo $dict->count();      // Direct method
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
+echo $dict->count(); // 3
+echo count($dict);   // 3 (Countable interface)
 ```
 
 ### equal()
 
 ```php
-public function equal(Collection $other): bool
+public function equal(mixed $other): bool
 ```
 
-Check equality. Dictionaries are equal if they:
-- Are both Dictionary instances
-- Have same number of items
-- Have same keys (strict equality)
-- Have same values (strict equality)
-- Have same order
-
-Type constraints are ignored.
+Check if two Dictionaries are equal. Dictionaries are equal if they have the same type, count, keys, values, and order. Type constraints are not considered.
 
 **Example:**
 ```php
 $dict1 = new Dictionary(source: ['a' => 1, 'b' => 2]);
 $dict2 = new Dictionary(source: ['a' => 1, 'b' => 2]);
+$dict3 = new Dictionary(source: ['b' => 2, 'a' => 1]); // Different order
 
 var_dump($dict1->equal($dict2)); // true
+var_dump($dict1->equal($dict3)); // false (order matters)
 ```
 
 ### all()
@@ -412,14 +380,13 @@ var_dump($dict1->equal($dict2)); // true
 public function all(callable $fn): bool
 ```
 
-Check if all items pass a test.
+Check if all items pass a test. The callback receives `Pair` objects.
 
 **Example:**
 ```php
-$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
-
-// Note: Callback receives Pair objects
-$allPositive = $dict->all(fn($pair) => $pair->value > 0);
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
+var_dump($dict->all(fn($pair) => $pair->value > 0)); // true
+var_dump($dict->all(fn($pair) => $pair->value > 2)); // false
 ```
 
 ### any()
@@ -428,11 +395,13 @@ $allPositive = $dict->all(fn($pair) => $pair->value > 0);
 public function any(callable $fn): bool
 ```
 
-Check if any item passes a test.
+Check if any item passes a test. The callback receives `Pair` objects.
 
 **Example:**
 ```php
-$hasLargeValue = $dict->any(fn($pair) => $pair->value > 100);
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
+var_dump($dict->any(fn($pair) => $pair->value > 2)); // true
+var_dump($dict->any(fn($pair) => $pair->value > 5)); // false
 ```
 
 ## Sorting Methods
@@ -443,12 +412,13 @@ $hasLargeValue = $dict->any(fn($pair) => $pair->value > 100);
 public function sort(callable $fn): self
 ```
 
-Sort by custom comparison function (mutating). Returns `$this`.
+Sort by custom comparison function (mutating). Returns `$this` for chaining.
 
 **Example:**
 ```php
-// Sort by value
+$dict = new Dictionary(source: ['a' => 30, 'b' => 10, 'c' => 20]);
 $dict->sort(fn($a, $b) => $a->value <=> $b->value);
+// Order by value: 10, 20, 30
 ```
 
 ### sortByKey()
@@ -457,7 +427,7 @@ $dict->sort(fn($a, $b) => $a->value <=> $b->value);
 public function sortByKey(): self
 ```
 
-Sort by keys using spaceship operator (mutating). Returns `$this`.
+Sort by keys using the spaceship operator (mutating). Returns `$this` for chaining.
 
 **Example:**
 ```php
@@ -472,7 +442,7 @@ $dict->sortByKey();
 public function sortByValue(): self
 ```
 
-Sort by values using spaceship operator (mutating). Returns `$this`.
+Sort by values using the spaceship operator (mutating). Returns `$this` for chaining.
 
 **Example:**
 ```php
@@ -489,9 +459,11 @@ $dict->sortByValue();
 public function filter(callable $callback): static
 ```
 
-Return new Dictionary with items that pass the test.
+Return a new Dictionary with items that pass the test. The callback receives the key and value as separate parameters.
 
-**Example:**
+**Throws:** `TypeError` - If the callback doesn't return a bool.
+
+**Examples:**
 ```php
 $dict = new Dictionary(source: [
     'apple' => 5,
@@ -514,9 +486,9 @@ $aFruits = $dict->filter(fn($key, $value) => str_starts_with($key, 'a'));
 public function flip(): self
 ```
 
-Swap keys with values. All values in the Dictionary must be unique.
+Swap keys with values. Returns a new Dictionary. All values must be unique.
 
-**Throws:** `RuntimeException` if the original Dictionary contains duplicate values.
+**Throws:** `RuntimeException` - If the Dictionary contains duplicate values.
 
 **Example:**
 ```php
@@ -525,12 +497,8 @@ $flipped = $dict->flip();
 // Result: [1 => 'a', 2 => 'b', 3 => 'c']
 
 // Duplicate values cause an error
-$dict = new Dictionary(source: ['a' => 1, 'b' => 1, 'c' => 2]);
-try {
-    $flipped = $dict->flip();
-} catch (ValueError $e) {
-    echo $e->getMessage(); // "Cannot flip Dictionary: values are not unique."
-}
+$dict = new Dictionary(source: ['a' => 1, 'b' => 1]);
+$flipped = $dict->flip(); // RuntimeException
 ```
 
 ### map()
@@ -539,45 +507,30 @@ try {
 public function map(callable $fn): self
 ```
 
-Transform each key-value pair using a callback function. The callback receives a Pair object and must return a new Pair. Both keys and values can be transformed, and types can change. The result Dictionary automatically infers types from the callback results.
-
-**Callback signature:** `callable(Pair): Pair`
+Transform each key-value pair. The callback receives a `Pair` and must return a new `Pair`. Types are automatically inferred from results.
 
 **Throws:**
-- `TypeError` if the callback doesn't return a Pair
-- `RuntimeException` if the callback produces duplicate keys
+- `TypeError` - If the callback doesn't return a Pair
+- `RuntimeException` - If the callback produces duplicate keys
 
 **Examples:**
 ```php
 $dict = new Dictionary(source: [
     'apple' => 5,
-    'banana' => 3,
-    'cherry' => 8
+    'banana' => 3
 ]);
 
 // Double all values
 $doubled = $dict->map(fn($pair) => new Pair($pair->key, $pair->value * 2));
-// Result: ['apple' => 10, 'banana' => 6, 'cherry' => 16]
+// Result: ['apple' => 10, 'banana' => 6]
 
 // Transform keys to uppercase
 $upper = $dict->map(fn($pair) => new Pair(strtoupper($pair->key), $pair->value));
-// Result: ['APPLE' => 5, 'BANANA' => 3, 'CHERRY' => 8]
+// Result: ['APPLE' => 5, 'BANANA' => 3]
 
 // Swap keys and values
 $swapped = $dict->map(fn($pair) => new Pair($pair->value, $pair->key));
-// Result: [5 => 'apple', 3 => 'banana', 8 => 'cherry']
-
-// Complex transformation - change both key and value
-$transformed = $dict->map(fn($pair) => new Pair(
-    strtoupper($pair->key),
-    $pair->value * 2 + 10
-));
-// Result: ['APPLE' => 20, 'BANANA' => 16, 'CHERRY' => 26]
-
-// Convert to price list (changes types)
-$prices = $dict->map(fn($pair) => new Pair($pair->key, "\${$pair->value}.00"));
-// Result: ['apple' => '$5.00', 'banana' => '$3.00', 'cherry' => '$8.00']
-// Types: string => string (inferred from callback results)
+// Result: [5 => 'apple', 3 => 'banana']
 ```
 
 ### merge()
@@ -586,7 +539,7 @@ $prices = $dict->map(fn($pair) => new Pair($pair->key, "\${$pair->value}.00"));
 public function merge(self $other): self
 ```
 
-Return new Dictionary with items from both. Duplicate keys keep value from second Dictionary.
+Return a new Dictionary with items from both. Duplicate keys keep the value from the second Dictionary.
 
 **Example:**
 ```php
@@ -596,9 +549,77 @@ $merged = $dict1->merge($dict2);
 // Result: ['a' => 1, 'b' => 20, 'c' => 3]
 ```
 
+## Conversion Methods
+
+### __toString()
+
+```php
+public function __toString(): string
+```
+
+Convert to a string representation. Implements the `Stringable` interface.
+
+**Example:**
+```php
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
+echo $dict; // String representation of the Dictionary
+```
+
+### toArray()
+
+```php
+public function toArray(): array
+```
+
+Convert to an array of `Pair` objects.
+
+**Example:**
+```php
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
+$pairs = $dict->toArray();
+// Array of Pair objects, not ['a' => 1, 'b' => 2]
+```
+
+### toSequence()
+
+```php
+public function toSequence(): Sequence
+```
+
+Convert to a Sequence of `Pair` objects.
+
+**Example:**
+```php
+$dict = new Dictionary(source: ['a' => 1, 'b' => 2]);
+$seq = $dict->toSequence();
+echo $seq->count(); // 2
+```
+
+## ArrayAccess
+
+Dictionary implements `ArrayAccess` for familiar array-style syntax:
+
+```php
+$dict = new Dictionary('string', 'int');
+
+// Set
+$dict['count'] = 42;
+
+// Get
+echo $dict['count']; // 42
+
+// Check existence
+if (isset($dict['count'])) { ... }
+
+// Unset
+unset($dict['count']);
+```
+
+**Important:** Using `$dict[] = $value` syntax uses `null` as the key (not append like arrays).
+
 ## Iteration
 
-Full foreach support with original keys:
+Dictionary supports `foreach` with original key types preserved:
 
 ```php
 $dict = new Dictionary(source: ['name' => 'Alice', 'age' => 30]);
@@ -609,34 +630,6 @@ foreach ($dict as $key => $value) {
 // Output:
 // name: Alice
 // age: 30
-```
-
-## Conversion Methods
-
-### toArray()
-
-```php
-public function toArray(): array
-```
-
-Convert to array of Pair objects.
-
-**Example:**
-```php
-$pairs = $dict->toArray();
-```
-
-### toSequence()
-
-```php
-public function toSequence(): Sequence
-```
-
-Convert to Sequence of Pairs.
-
-**Example:**
-```php
-$seq = $dict->toSequence();
 ```
 
 ## Usage Examples
@@ -663,19 +656,6 @@ $cache[$timestamp] = 'New Year Data';
 echo $cache[$timestamp]; // 'New Year Data'
 ```
 
-### Resource tracking
-
-```php
-$files = new Dictionary('resource', 'string');
-$handle = fopen('data.txt', 'r');
-$files[$handle] = 'data.txt';
-
-// Later...
-if ($files->keyExists($handle)) {
-    echo "File: " . $files[$handle];
-}
-```
-
 ### Data transformation pipeline
 
 ```php
@@ -685,79 +665,49 @@ $sales = new Dictionary(source: [
     'Product C' => 800
 ]);
 
-// Filter high-value products
+// Filter and sort
 $highValue = $sales->filter(fn($k, $v) => $v > 1000);
-
-// Sort by value
 $highValue->sortByValue();
-
-foreach ($highValue as $product => $amount) {
-    echo "$product: $" . number_format($amount) . "\n";
-}
 
 // Transform to formatted strings
 $formatted = $sales->map(fn($pair) => new Pair(
     $pair->key,
     "$" . number_format($pair->value)
 ));
-// Result: ['Product A' => '$1,500', 'Product B' => '$3,200', 'Product C' => '$800']
+// Result: ['Product A' => '$1,500', ...]
 ```
 
-### Grouping data
-
-```php
-$users = new Dictionary(source: [
-    'alice@example.com' => 'Alice',
-    'bob@example.com' => 'Bob',
-    'charlie@test.com' => 'Charlie'
-]);
-
-// Group by domain
-$byDomain = $users->filter(fn($k, $v) => str_ends_with($k, '@example.com'));
-```
-
-## Comparison with Other PHP Collections
+## Comparison with PHP Alternatives
 
 ### Dictionary vs WeakMap
 
-**WeakMap:**
-- ✅ Automatic garbage collection (weak references)
-- ✅ Prevents memory leaks for object keys
-- ❌ Object keys only
-- ❌ No type safety for values
-- ❌ No ArrayAccess support
-- **Use when:** You need object keys with automatic cleanup
+| Feature            | Dictionary | WeakMap               |
+|--------------------|------------|-----------------------|
+| Key types          | Any type   | Objects only          |
+| Type safety        | Yes        | No                    |
+| ArrayAccess        | Yes        | No                    |
+| Garbage collection | Manual     | Automatic (weak refs) |
 
-**Dictionary:**
-- ✅ Any type for keys (objects, arrays, resources, scalars, null)
-- ✅ Type safety for both keys and values
-- ✅ ArrayAccess support (`$dict[$key]`)
-- ✅ Rich transformation methods (filter, sort, merge)
-- ❌ Strong references (manual memory management)
-- **Use when:** You need flexible key types, type safety, or non-object keys
+**Use WeakMap when:** You need object keys with automatic cleanup.
+
+**Use Dictionary when:** You need flexible key types, type safety, or non-object keys.
 
 ### Dictionary vs SplObjectStorage
 
-**SplObjectStorage:**
-- ✅ Object keys
-- ✅ Attach arbitrary data to objects
-- ❌ Object keys only
-- ❌ No type safety
-- ❌ Awkward API (`attach()`, `detach()` instead of array syntax)
-- **Use when:** PHP 5.x compatibility needed
+| Feature     | Dictionary   | SplObjectStorage |
+|-------------|--------------|------------------|
+| Key types   | Any type     | Objects only     |
+| Type safety | Yes          | No               |
+| API style   | Array syntax | attach/detach    |
+| PHP version | 8.4+         | 5.x+             |
 
-**Dictionary:**
-- ✅ Any type for keys
-- ✅ Type safety for both keys and values
-- ✅ Modern, intuitive API with ArrayAccess
-- ✅ Better iteration (preserves key-value semantics)
-- **Use when:** Building modern PHP 8.4+ applications
+**Use Dictionary when:** Building modern PHP 8.4+ applications with type safety needs.
 
-### Quick Decision Guide
+## See Also
 
-- **Need weak references?** → Use `WeakMap`
-- **Only object keys, no other features?** → Use `WeakMap` or `SplObjectStorage`
-- **Need array, resource, or scalar keys?** → Use `Dictionary`
-- **Need type safety?** → Use `Dictionary`
-- **Need transformation methods?** → Use `Dictionary`
-- **Building new PHP 8.4+ code?** → Use `Dictionary`
+- **[Collection](Collection.md)** - Abstract base class
+- **[Pair](Pair.md)** - Key-value pair container used by Dictionary
+- **[Sequence](Sequence.md)** - Ordered list collection
+- **[Set](Set.md)** - Unique value collection
+- **[TypeSet](TypeSet.md)** - Type constraint management
+- **[Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Equatable.md)** - Trait for implementing `equal()`

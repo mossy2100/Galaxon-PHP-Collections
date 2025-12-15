@@ -103,7 +103,65 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
 
     // endregion
 
-    // region Main API
+    // region Modification methods
+
+    /**
+     * Add types to the TypeSet.
+     *
+     * @param string|iterable<string> $types The types to add to the TypeSet.
+     * @return $this The modified TypeSet.
+     * @throws TypeError If a type is not provided as a string.
+     * @throws ValueError If a type name is invalid.
+     */
+    public function add(string|iterable $types): self
+    {
+        // Convert a type string, including union type syntax (e.g. 'string|int'), into an array of type names.
+        if (is_string($types)) {
+            $types = explode('|', $types);
+        }
+
+        // Add types to the set.
+        foreach ($types as $type) {
+            // Check the type.
+            if (!is_string($type)) {
+                throw new TypeError('Types must be provided as strings.');
+            }
+
+            // Trim in case the user did something like 'string | int'.
+            // Even thought _add() will trim the type, we need to do this before checking if the question mark notation
+            // has been used.
+            $type = trim($type);
+
+            // Check for question mark nullable notation (e.g. '?string').
+            if (strlen($type) > 1 && $type[0] === '?') {
+                // Add null and the type being made nullable.
+                $this->addType('null');
+                $this->addType(substr($type, 1));
+            } else {
+                // Add the type.
+                $this->addType($type);
+            }
+        }
+
+        // Return $this for chaining.
+        return $this;
+    }
+
+    /**
+     * Get the type name from a value and add it to the TypeSet.
+     *
+     * @param mixed $value The value to get the type name from.
+     * @return $this The modified set.
+     * @throws ValueError If the type name is invalid.
+     */
+    public function addValueType(mixed $value): self
+    {
+        return $this->addType(get_debug_type($value));
+    }
+
+    // endregion
+
+    // region Inspection methods
 
     /**
      * Check if a value matches one of the types in the TypeSet.
@@ -182,19 +240,101 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
     }
 
     /**
+     * Check if the TypeSet contains the given type.
+     *
+     * @param string $type The type to check for.
+     * @return bool If the TypeSet contains the given type.
+     */
+    public function contains(string $type): bool
+    {
+        return in_array(self::normalizeTypeName($type), $this->types, true);
+    }
+
+    /**
+     * Check if the set contains all the given types.
+     *
+     * @param string ...$types The types to check for.
+     * @return bool If the set contains all the given types.
+     */
+    public function containsAll(string ...$types): bool
+    {
+        return array_all($types, fn ($type) => $this->contains($type));
+    }
+
+    /**
+     * Check if the set contains any of the given types.
+     *
+     * @param string ...$types The types to check for.
+     * @return bool If the set contains any of the given types.
+     */
+    public function containsAny(string ...$types): bool
+    {
+        return array_any($types, fn ($type) => $this->contains($type));
+    }
+
+    /**
+     * Check if the set contains only the given types.
+     *
+     * @param string ...$types The types to check for.
+     * @return bool If the set contains only the given types.
+     */
+    public function containsOnly(string ...$types): bool
+    {
+        return count($types) === count($this->types) && $this->containsAll(...$types);
+    }
+
+    /**
+     * Check if the set is empty.
+     *
+     * @return bool True if the set is empty, false otherwise.
+     */
+    public function empty(): bool
+    {
+        return empty($this->types);
+    }
+
+    /**
+     * Check if the TypeSet allows values of any type.
+     *
+     * @return bool True if the TypeSet allows values of any types, false otherwise.
+     */
+    public function anyOk(): bool
+    {
+        return $this->empty() || $this->contains('mixed');
+    }
+
+    /**
+     * Check if the TypeSet allows nulls.
+     *
+     * @return bool True if the TypeSet allows nulls, false otherwise.
+     */
+    public function nullOk(): bool
+    {
+        return $this->contains('null') || $this->anyOk();
+    }
+
+    // endregion
+
+    // region Validation methods
+
+    /**
      * Checks if the given value matches the set of types.
      *
      * @param mixed $value The value to check.
      * @param string $label Optional label to include in error message (e.g., 'key', 'value').
      * @throws TypeError If the type is not allowed by the TypeSet.
      */
-    public function check(mixed $value, string $label = ''): void
+    public function checkValueType(mixed $value, string $label = ''): void
     {
         if (!$this->match($value)) {
             $msg = 'Disallowed ' . ($label ? $label . ' ' : '') . 'type: ' . get_debug_type($value) . '.';
             throw new TypeError($msg);
         }
     }
+
+    // endregion
+
+    // region Extraction methods
 
     /**
      * Get the default value for this type set.
@@ -227,7 +367,49 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
 
     // endregion
 
-    // region Type name validation (private static methods)
+    // region Aggregation methods
+
+    /**
+     * Get the number of types in the set.
+     *
+     * @return int
+     */
+    public function count(): int
+    {
+        return count($this->types);
+    }
+
+    // endregion
+
+    // region Conversion methods
+
+    /**
+     * Get a string representation of the TypeSet. Uses set notation.
+     *
+     * @return string The string representation of the TypeSet.
+     */
+    public function __toString(): string
+    {
+        return '{' . implode(', ', $this->types) . '}';
+    }
+
+    // endregion
+
+    // region IteratorAggregate implementation
+
+    /**
+     * Get iterator for foreach loops.
+     *
+     * @return Traversable<string> The iterator.
+     */
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator($this->types);
+    }
+
+    // endregion
+
+    // region Helper methods
 
     /**
      * Normalize a type name by trimming whitespace and backslashes from the start and end.
@@ -317,10 +499,6 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
                 self::isClassType($type));
     }
 
-    // endregions
-
-    // region Add methods
-
     /**
      * Add a type to the TypeSet.
      *
@@ -348,180 +526,6 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
 
         // Return $this for chaining.
         return $this;
-    }
-
-    /**
-     * Add types to the TypeSet.
-     *
-     * @param string|iterable<string> $types The types to add to the TypeSet.
-     * @return $this The modified TypeSet.
-     * @throws TypeError If a type is not provided as a string.
-     * @throws ValueError If a type name is invalid.
-     */
-    public function add(string|iterable $types): self
-    {
-        // Convert a type string, including union type syntax (e.g. 'string|int'), into an array of type names.
-        if (is_string($types)) {
-            $types = explode('|', $types);
-        }
-
-        // Add types to the set.
-        foreach ($types as $type) {
-            // Check the type.
-            if (!is_string($type)) {
-                throw new TypeError('Types must be provided as strings.');
-            }
-
-            // Trim in case the user did something like 'string | int'.
-            // Even thought _add() will trim the type, we need to do this before checking if the question mark notation
-            // has been used.
-            $type = trim($type);
-
-            // Check for question mark nullable notation (e.g. '?string').
-            if (strlen($type) > 1 && $type[0] === '?') {
-                // Add null and the type being made nullable.
-                $this->addType('null');
-                $this->addType(substr($type, 1));
-            } else {
-                // Add the type.
-                $this->addType($type);
-            }
-        }
-
-        // Return $this for chaining.
-        return $this;
-    }
-
-    /**
-     * Get the type name from a value and add it to the TypeSet.
-     *
-     * @param mixed $value The value to get the type name from.
-     * @return $this The modified set.
-     * @throws ValueError If the type name is invalid.
-     */
-    public function addValueType(mixed $value): self
-    {
-        return $this->addType(get_debug_type($value));
-    }
-
-    // endregion
-
-    // region Inspection methods (return bool)
-
-    /**
-     * Check if the TypeSet contains the given type.
-     *
-     * @param string $type The type to check for.
-     * @return bool If the TypeSet contains the given type.
-     */
-    public function contains(string $type): bool
-    {
-        return in_array(self::normalizeTypeName($type), $this->types, true);
-    }
-
-    /**
-     * Check if the set contains all the given types.
-     *
-     * @param string ...$types The types to check for.
-     * @return bool If the set contains all the given types.
-     */
-    public function containsAll(string ...$types): bool
-    {
-        return array_all($types, fn ($type) => $this->contains($type));
-    }
-
-    /**
-     * Check if the set contains any of the given types.
-     *
-     * @param string ...$types The types to check for.
-     * @return bool If the set contains any of the given types.
-     */
-    public function containsAny(string ...$types): bool
-    {
-        return array_any($types, fn ($type) => $this->contains($type));
-    }
-
-    /**
-     * Check if the set contains only the given types.
-     *
-     * @param string ...$types The types to check for.
-     * @return bool If the set contains only the given types.
-     */
-    public function containsOnly(string ...$types): bool
-    {
-        return count($types) === count($this->types) && $this->containsAll(...$types);
-    }
-
-    /**
-     * Check if the set is empty.
-     *
-     * @return bool True if the set is empty, false otherwise.
-     */
-    public function empty(): bool
-    {
-        return empty($this->types);
-    }
-
-    /**
-     * Check if the TypeSet allows values of any type.
-     *
-     * @return bool True if the TypeSet allows values of any types, false otherwise.
-     */
-    public function anyOk(): bool
-    {
-        return $this->empty() || $this->contains('mixed');
-    }
-
-    /**
-     * Check if the TypeSet allows nulls.
-     *
-     * @return bool True if the TypeSet allows nulls, false otherwise.
-     */
-    public function nullOk(): bool
-    {
-        return $this->contains('null') || $this->anyOk();
-    }
-
-    // endregion
-
-    // region Countable implementation
-
-    /**
-     * Get the number of types in the set.
-     *
-     * @return int
-     */
-    public function count(): int
-    {
-        return count($this->types);
-    }
-
-    // endregion
-
-    // region Stringable implementation
-
-    /**
-     * Get a string representation of the TypeSet. Uses set notation.
-     *
-     * @return string The string representation of the TypeSet.
-     */
-    public function __toString(): string
-    {
-        return '{' . implode(', ', $this->types) . '}';
-    }
-
-    // endregion
-
-    // region IteratorAggregate implementation
-
-    /**
-     * Get iterator for foreach loops.
-     *
-     * @return Traversable<string> The iterator.
-     */
-    public function getIterator(): Traversable
-    {
-        return new ArrayIterator($this->types);
     }
 
     // endregion

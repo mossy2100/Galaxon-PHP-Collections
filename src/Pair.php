@@ -13,6 +13,8 @@ namespace Galaxon\Collections;
  */
 readonly class Pair
 {
+    // region Constructor
+
     /**
      * Create a new Pair.
      *
@@ -22,4 +24,6 @@ readonly class Pair
     public function __construct(public mixed $key, public mixed $value)
     {
     }
+
+    // endregion
 }

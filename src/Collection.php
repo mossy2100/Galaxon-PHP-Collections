@@ -41,7 +41,7 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
 
     // endregion
 
-    // region Constructor and factory methods
+    // region Constructor
 
     /**
      * Constructor.
@@ -161,6 +161,31 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
 
     // endregion
 
+    // region Conversion methods
+
+    /**
+     * Convert the Collection to a string.
+     *
+     * @return string The string.
+     */
+    #[Override]
+    public function __toString(): string
+    {
+        return Stringify::stringifyObject($this);
+    }
+
+    /**
+     * Convert the Collection to an array.
+     *
+     * @return mixed[] The array.
+     */
+    public function toArray(): array
+    {
+        return array_values($this->items);
+    }
+
+    // endregion
+
     // region IteratorAggregate implementation
 
     /**
@@ -184,31 +209,6 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
     public function count(): int
     {
         return count($this->items);
-    }
-
-    // endregion
-
-    // region Stringable implementation and other conversion methods
-
-    /**
-     * Convert the Collection to a string.
-     *
-     * @return string The string.
-     */
-    #[Override]
-    public function __toString(): string
-    {
-        return Stringify::stringifyObject($this);
-    }
-
-    /**
-     * Convert the Collection to an array.
-     *
-     * @return mixed[] The array.
-     */
-    public function toArray(): array
-    {
-        return array_values($this->items);
     }
 
     // endregion

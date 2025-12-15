@@ -489,11 +489,11 @@ class TypeSetTest extends TestCase
      */
     public function testCheckPassesForValidType(): void
     {
-        $ts = new TypeSet('int');
+        $this->expectNotToPerformAssertions();
 
         // Should not throw
-        $ts->check(42);
-        $this->assertTrue(true); // Test passed if no exception
+        $ts = new TypeSet('int');
+        $ts->checkValueType(42);
     }
 
     /**
@@ -504,7 +504,7 @@ class TypeSetTest extends TestCase
         $ts = new TypeSet('int');
 
         $this->expectException(TypeError::class);
-        $ts->check('hello');
+        $ts->checkValueType('hello');
     }
 
     /**
@@ -515,7 +515,7 @@ class TypeSetTest extends TestCase
         $ts = new TypeSet('int');
 
         try {
-            $ts->check('hello', 'value');
+            $ts->checkValueType('hello', 'value');
             $this->fail('Expected TypeError was not thrown');
         } catch (TypeError $e) {
             $this->assertStringContainsString('value', $e->getMessage());

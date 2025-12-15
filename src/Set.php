@@ -17,7 +17,7 @@ use ValueError;
  */
 final class Set extends Collection
 {
-    // region Constructor and factory methods
+    // region Constructor
 
     /**
      * Constructor.
@@ -56,7 +56,7 @@ final class Set extends Collection
 
     // endregion
 
-    // region Methods for adding and removing members
+    // region Modification methods
 
     /**
      * Add one or more items to the Set.
@@ -72,7 +72,7 @@ final class Set extends Collection
         // Add each item.
         foreach ($items as $item) {
             // Check if the item is allowed in the set.
-            $this->valueTypes->check($item);
+            $this->valueTypes->checkValueType($item);
 
             // Add the item if new.
             $index = Types::getUniqueString($item);
@@ -127,7 +127,7 @@ final class Set extends Collection
 
     // endregion
 
-    // region Classic set operations
+    // region Set operations
     // These are non-mutating and return new sets.
 
     /**
@@ -200,7 +200,7 @@ final class Set extends Collection
 
     // endregion
 
-    // region Comparison and inspection methods
+    // region Inspection methods
     // These are non-mutating and return bools.
 
     /**
@@ -216,6 +216,10 @@ final class Set extends Collection
     {
         return array_key_exists(Types::getUniqueString($value), $this->items);
     }
+
+    // endregion
+
+    // region Comparison methods
 
     /**
      * Check if the Set is equal to another Collection.
@@ -303,7 +307,43 @@ final class Set extends Collection
 
     // endregion
 
-    // region Collection methods
+    // region Conversion methods
+
+    /**
+     * Generate a string representation of the Set.
+     *
+     * @return string
+     * @throws ValueError If any values cannot be stringified.
+     * @throws TypeError If any values have an unknown type.
+     */
+    public function __toString(): string
+    {
+        $items = array_map(static fn ($item) => Stringify::stringify($item), $this->items);
+        return '{' . implode(', ', $items) . '}';
+    }
+
+    /**
+     * Convert the Set to a Sequence.
+     *
+     * @return Sequence The new Sequence.
+     */
+    public function toSequence(): Sequence
+    {
+        // Construct the new Sequence, using the same value types as the Set.
+        $seq = new Sequence($this->valueTypes);
+
+        // Copy the items into the new Sequence.
+        foreach ($this->items as $value) {
+            $seq->append($value);
+        }
+
+        // Return the new Sequence.
+        return $seq;
+    }
+
+    // endregion
+
+    // region Parent class methods
 
     /**
      * Filter a Set using a callback function.
@@ -344,46 +384,6 @@ final class Set extends Collection
         }
 
         return $result;
-    }
-
-    // endregion
-
-    // region Stringable implementation
-
-    /**
-     * Generate a string representation of the Set.
-     *
-     * @return string
-     * @throws ValueError If any values cannot be stringified.
-     * @throws TypeError If any values have an unknown type.
-     */
-    public function __toString(): string
-    {
-        $items = array_map(static fn ($item) => Stringify::stringify($item), $this->items);
-        return '{' . implode(', ', $items) . '}';
-    }
-
-    // endregion
-
-    // region Conversion methods
-
-    /**
-     * Convert the Set to a Sequence.
-     *
-     * @return Sequence The new Sequence.
-     */
-    public function toSequence(): Sequence
-    {
-        // Construct the new Sequence, using the same value types as the Set.
-        $seq = new Sequence($this->valueTypes);
-
-        // Copy the items into the new Sequence.
-        foreach ($this->items as $value) {
-            $seq->append($value);
-        }
-
-        // Return the new Sequence.
-        return $seq;
     }
 
     // endregion
