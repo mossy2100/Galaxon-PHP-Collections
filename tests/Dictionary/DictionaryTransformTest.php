@@ -6,10 +6,11 @@ namespace Galaxon\Collections\Tests\Dictionary;
 
 use Galaxon\Collections\Dictionary;
 use Galaxon\Collections\Pair;
+use OutOfBoundsException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use TypeError;
+use UnexpectedValueException;
 
 /**
  * Tests for Dictionary transformation methods (flip, merge, filter, map).
@@ -183,7 +184,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('d', 4);
 
         // Test filtering for even values.
-        $filtered = $dict->filter(static fn ($key, $value) => $value % 2 === 0);
+        $filtered = $dict->filter(static fn ($pair) => $pair->value % 2 === 0);
 
         // Test only even values are kept.
         $this->assertCount(2, $filtered);
@@ -205,7 +206,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('avocado', 7);
 
         // Test filtering based on key starting with 'a'.
-        $filtered = $dict->filter(static fn ($key, $value) => str_starts_with($key, 'a'));
+        $filtered = $dict->filter(static fn ($pair) => str_starts_with($pair->key, 'a'));
 
         // Test only items with keys starting with 'a' are kept.
         $this->assertCount(2, $filtered);
@@ -223,7 +224,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('b', 2);
 
         // Test filtering with no matches.
-        $filtered = $dict->filter(static fn ($key, $value) => $value > 10);
+        $filtered = $dict->filter(static fn ($pair) => $pair->value > 10);
 
         // Test result is empty.
         $this->assertCount(0, $filtered);
@@ -238,7 +239,7 @@ class DictionaryTransformTest extends TestCase
         $dict = new Dictionary();
 
         // Test filtering empty dictionary.
-        $filtered = $dict->filter(static fn ($key, $value) => true);
+        $filtered = $dict->filter(static fn ($pair) => true);
 
         // Test result is empty.
         $this->assertCount(0, $filtered);
@@ -255,7 +256,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('c', 3);
 
         // Test filtering creates dictionary with same types.
-        $filtered = $dict->filter(static fn ($key, $value) => $value > 1);
+        $filtered = $dict->filter(static fn ($pair) => $pair->value > 1);
 
         // Test type constraints are preserved - we can add items with same types.
         $filtered->add('d', 4);
@@ -270,9 +271,9 @@ class DictionaryTransformTest extends TestCase
         $dict = new Dictionary('string', 'int');
         $dict->add('a', 1);
 
-        // Test callback returning non-bool throws TypeError.
-        $this->expectException(TypeError::class);
-        $dict->filter(static fn ($key, $value) => $value); // Returns int, not bool
+        // Test callback returning non-bool throws InvalidArgumentException.
+        $this->expectException(UnexpectedValueException::class);
+        $dict->filter(static fn ($pair) => $pair->value); // Returns int, not bool
     }
 
     /**
@@ -287,7 +288,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('fourth', 4);
 
         // Test filtering preserves order.
-        $filtered = $dict->filter(static fn ($key, $value) => $value % 2 === 0);
+        $filtered = $dict->filter(static fn ($pair) => $pair->value % 2 === 0);
 
         // Test order is preserved.
         $keys = $filtered->keys;
@@ -305,7 +306,7 @@ class DictionaryTransformTest extends TestCase
         $dict->add('c', 3);
 
         // Test filtering with always-true callback.
-        $filtered = $dict->filter(static fn ($key, $value) => true);
+        $filtered = $dict->filter(static fn ($pair) => true);
 
         // Test all items are kept.
         $this->assertCount(3, $filtered);
@@ -421,26 +422,26 @@ class DictionaryTransformTest extends TestCase
         $dict = new Dictionary('string', 'int');
         $dict->add('a', 1);
 
-        // Test callback returning non-Pair throws TypeError.
-        $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Map callback must return a Pair');
+        // Test callback returning non-Pair throws UnexpectedValueException.
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Callback must return a Pair, got int.');
         // @phpstan-ignore binaryOp.invalid
         $dict->map(static fn ($pair) => $pair->value * 2); // Returns int, not Pair
     }
 
     /**
-     * Test map with duplicate keys throws RuntimeException.
+     * Test map with duplicate keys throws OutOfBoundsException.
      */
-    public function testMapWithDuplicateKeysThrowsRuntimeException(): void
+    public function testMapWithDuplicateKeysThrowsOutOfBoundsException(): void
     {
         $dict = new Dictionary('string', 'int');
         $dict->add('a', 1);
         $dict->add('b', 2);
         $dict->add('c', 3);
 
-        // Test mapping to same key throws RuntimeException.
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Map callback produced a duplicate key');
+        // Test mapping to same key throws OutOfBoundsException.
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Callback produced a duplicate key: "same".');
         $dict->map(static fn ($pair) => new Pair('same', $pair->value));
     }
 

@@ -6,13 +6,13 @@ namespace Galaxon\Collections\Tests;
 
 use ArrayObject;
 use DateTime;
+use DomainException;
 use Galaxon\Collections\TypeSet;
+use InvalidArgumentException;
+use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use stdClass;
-use TypeError;
-use ValueError;
 
 // Test fixtures for inheritance and trait testing
 class ParentClass
@@ -110,11 +110,11 @@ class TypeSetTest extends TestCase
     }
 
     /**
-     * Test constructor with invalid type throws ValueError.
+     * Test constructor with invalid type throws DomainException.
      */
-    public function testConstructorWithInvalidTypeThrowsValueError(): void
+    public function testConstructorWithInvalidTypeThrowsDomainException(): void
     {
-        $this->expectException(ValueError::class);
+        $this->expectException(DomainException::class);
         new TypeSet('invalid-type-name');
     }
 
@@ -209,24 +209,24 @@ class TypeSetTest extends TestCase
     }
 
     /**
-     * Test add() with invalid type throws ValueError.
+     * Test add() with invalid type throws DomainException.
      */
-    public function testAddInvalidTypeThrowsValueError(): void
+    public function testAddInvalidTypeThrowsDomainException(): void
     {
         $ts = new TypeSet();
 
-        $this->expectException(ValueError::class);
+        $this->expectException(DomainException::class);
         $ts->add('123invalid');
     }
 
     /**
-     * Test add() with non-string type throws TypeError.
+     * Test add() with non-string type throws InvalidArgumentException.
      */
-    public function testAddNonStringThrowsTypeError(): void
+    public function testAddNonStringThrowsInvalidArgumentException(): void
     {
         $ts = new TypeSet();
 
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
         $ts->add([123]); // Array with integer instead of string
     }
 
@@ -497,13 +497,13 @@ class TypeSetTest extends TestCase
     }
 
     /**
-     * Test check() throws TypeError for invalid type.
+     * Test check() throws InvalidArgumentException for invalid type.
      */
-    public function testCheckThrowsTypeErrorForInvalidType(): void
+    public function testCheckThrowsInvalidArgumentExceptionForInvalidType(): void
     {
         $ts = new TypeSet('int');
 
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
         $ts->checkValueType('hello');
     }
 
@@ -516,8 +516,8 @@ class TypeSetTest extends TestCase
 
         try {
             $ts->checkValueType('hello', 'value');
-            $this->fail('Expected TypeError was not thrown');
-        } catch (TypeError $e) {
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
             $this->assertStringContainsString('value', $e->getMessage());
         }
     }
@@ -647,11 +647,11 @@ class TypeSetTest extends TestCase
     }
 
     /**
-     * Test getDefaultValue() throws RuntimeException for types without defaults.
+     * Test getDefaultValue() throws LogicException for types without defaults.
      */
     public function testGetDefaultValueThrowsForDateTime(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('No default value could be determined for this TypeSet');
 
         $ts = new TypeSet('DateTime');
@@ -659,11 +659,11 @@ class TypeSetTest extends TestCase
     }
 
     /**
-     * Test getDefaultValue() throws RuntimeException for callable.
+     * Test getDefaultValue() throws LogicException for callable.
      */
     public function testGetDefaultValueThrowsForCallable(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('No default value could be determined for this TypeSet');
 
         $ts = new TypeSet('callable');

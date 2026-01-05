@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Galaxon\Collections;
 
 use Countable;
+use DomainException;
 use Galaxon\Core\Stringify;
 use Galaxon\Core\Traits\Equatable;
+use InvalidArgumentException;
 use IteratorAggregate;
 use Override;
 use Stringable;
 use Traversable;
-use TypeError;
-use ValueError;
 
 /**
  * Base class for all collections in this package.
@@ -28,7 +28,7 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
     /**
      * Array of items in the collection.
      *
-     * @var mixed[]
+     * @var array<array-key, mixed>
      */
     protected array $items = [];
 
@@ -47,8 +47,8 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
      * Constructor.
      *
      * @param null|string|iterable<string> $types Optional value type constraint for collection items.
-     * @throws TypeError If a type is not specified as a string.
-     * @throws ValueError If a type name is invalid.
+     * @throws InvalidArgumentException If a type is not specified as a string.
+     * @throws DomainException If a type name is invalid.
      */
     public function __construct(null|string|iterable $types = null)
     {
@@ -65,7 +65,7 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
      *
      * @param iterable<mixed> $source A source iterable.
      * @return $this The calling object.
-     * @throws TypeError If any of the values have a disallowed type.
+     * @throws InvalidArgumentException If any of the values have a disallowed type.
      */
     abstract public function import(iterable $source): static;
 
@@ -155,7 +155,6 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
      *
      * @param callable $callback A callback function that accepts an item and returns a bool.
      * @return static A new Collection with the kept items.
-     * @throws TypeError If the callback's parameter types don't match the Collection's key and/or value types.
      */
     abstract public function filter(callable $callback): static;
 
@@ -177,7 +176,7 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
     /**
      * Convert the Collection to an array.
      *
-     * @return mixed[] The array.
+     * @return list<mixed> The array.
      */
     public function toArray(): array
     {

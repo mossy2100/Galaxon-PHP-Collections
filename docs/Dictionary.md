@@ -162,8 +162,8 @@ Create a new Dictionary by combining separate iterables of keys and values.
 **Returns:** A new Dictionary with the combined keys and values.
 
 **Throws:**
-- `ValueError` - If the iterables have different counts
-- `ValueError` - If keys are not unique
+- `LengthException` - If the iterables have different counts
+- `OutOfBoundsException` - If keys are not unique
 
 **Examples:**
 ```php
@@ -186,11 +186,11 @@ $dict->add(123, 'text'); // Works
 
 // Error: Mismatched counts
 $dict = Dictionary::combine(['a', 'b', 'c'], [1, 2]);
-// ValueError: Cannot combine: keys count (3) does not match values count (2).
+// LengthException: Cannot combine: keys count (3) does not match values count (2).
 
 // Error: Duplicate keys
 $dict = Dictionary::combine(['a', 'b', 'a'], [1, 2, 3]);
-// ValueError: Cannot combine: keys are not unique.
+// OutOfBoundsException: Cannot combine: keys are not unique.
 ```
 
 ## Modification Methods
@@ -206,7 +206,7 @@ public function add(Pair $pair): self
 Add a key-value pair. Returns `$this` for chaining.
 
 **Throws:**
-- `TypeError` - If the key or value has a disallowed type
+- `InvalidArgumentException` - If the key or value has a disallowed type
 - `ArgumentCountError` - If the wrong number of parameters is supplied
 
 **Examples:**
@@ -230,7 +230,7 @@ public function import(iterable $source): static
 
 Import multiple key-value pairs from an iterable. Returns `$this` for chaining.
 
-**Throws:** `TypeError` - If any keys or values have disallowed types.
+**Throws:** `InvalidArgumentException` - If any keys or values have disallowed types.
 
 **Example:**
 ```php
@@ -247,7 +247,7 @@ public function removeByKey(mixed $key): mixed
 Remove an item by key. Returns the value of the removed item.
 
 **Throws:**
-- `TypeError` - If the key has a disallowed type
+- `InvalidArgumentException` - If the key has a disallowed type
 - `OutOfBoundsException` - If the key does not exist
 
 **Example:**
@@ -266,7 +266,7 @@ public function removeByValue(mixed $value): int
 
 Remove all items with a matching value. Returns the count of items removed.
 
-**Throws:** `TypeError` - If the value has a disallowed type.
+**Throws:** `InvalidArgumentException` - If the value has a disallowed type.
 
 **Example:**
 ```php
@@ -459,9 +459,9 @@ $dict->sortByValue();
 public function filter(callable $callback): static
 ```
 
-Return a new Dictionary with items that pass the test. The callback receives the key and value as separate parameters.
+Return a new Dictionary with items that pass the test. The callback receives a Pair argument and must return a bool.
 
-**Throws:** `TypeError` - If the callback doesn't return a bool.
+**Throws:** `UnexpectedValueException` - If the callback doesn't return a bool.
 
 **Examples:**
 ```php
@@ -472,11 +472,11 @@ $dict = new Dictionary(source: [
 ]);
 
 // Filter by value
-$expensive = $dict->filter(fn($key, $value) => $value > 4);
+$expensive = $dict->filter(fn($pair) => $pair->value > 4);
 // Result: ['apple' => 5, 'cherry' => 8]
 
 // Filter by key
-$aFruits = $dict->filter(fn($key, $value) => str_starts_with($key, 'a'));
+$aFruits = $dict->filter(fn($pair) => str_starts_with($pair->key, 'a'));
 // Result: ['apple' => 5]
 ```
 
@@ -488,7 +488,7 @@ public function flip(): self
 
 Swap keys with values. Returns a new Dictionary. All values must be unique.
 
-**Throws:** `RuntimeException` - If the Dictionary contains duplicate values.
+**Throws:** `OutOfBoundsException` - If the Dictionary contains duplicate values.
 
 **Example:**
 ```php
@@ -498,7 +498,7 @@ $flipped = $dict->flip();
 
 // Duplicate values cause an error
 $dict = new Dictionary(source: ['a' => 1, 'b' => 1]);
-$flipped = $dict->flip(); // RuntimeException
+$flipped = $dict->flip(); // OutOfBoundsException
 ```
 
 ### map()
@@ -510,8 +510,8 @@ public function map(callable $fn): self
 Transform each key-value pair. The callback receives a `Pair` and must return a new `Pair`. Types are automatically inferred from results.
 
 **Throws:**
-- `TypeError` - If the callback doesn't return a Pair
-- `RuntimeException` - If the callback produces duplicate keys
+- `UnexpectedValueException` - If the callback doesn't return a Pair
+- `OutOfBoundsException` - If the callback produces duplicate keys
 
 **Examples:**
 ```php
@@ -642,7 +642,7 @@ $config['debug'] = true;
 $config['maxItems'] = 100;
 $config['apiKey'] = 'abc123';
 
-// This would throw TypeError:
+// This would throw InvalidArgumentException:
 // $config['timeout'] = 3.14; // float not allowed
 ```
 
@@ -666,7 +666,7 @@ $sales = new Dictionary(source: [
 ]);
 
 // Filter and sort
-$highValue = $sales->filter(fn($k, $v) => $v > 1000);
+$highValue = $sales->filter(fn($pair) => $pair->value > 1000);
 $highValue->sortByValue();
 
 // Transform to formatted strings

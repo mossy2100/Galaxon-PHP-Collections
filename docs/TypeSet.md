@@ -384,7 +384,7 @@ $ts->checkValueType('text', 'age');    // TypeError: Disallowed age type: string
 public function getDefaultValue(): mixed
 ```
 
-Get a sensible default value based on the types in the TypeSet. Throws `RuntimeException` if no default can be determined.
+Get a sensible default value based on the types in the TypeSet. Throws `DomainException` if no default can be determined.
 
 **Default Value Rules (in priority order):**
 
@@ -416,7 +416,7 @@ $default = $ts->getDefaultValue(); // new stdClass()
 
 $ts = new TypeSet('DateTime');
 $default = $ts->getDefaultValue();
-// RuntimeException: No default value could be determined for this TypeSet.
+// DomainException: No default value could be determined for this TypeSet.
 ```
 
 ## Aggregation Methods

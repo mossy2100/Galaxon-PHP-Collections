@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Galaxon\Collections;
 
+use DomainException;
 use Galaxon\Core\Stringify;
 use Galaxon\Core\Types;
+use InvalidArgumentException;
 use Override;
 use Traversable;
-use TypeError;
-use ValueError;
+use UnexpectedValueException;
 
 /**
  * Implements a set of values with optional type constraints.
@@ -32,8 +33,9 @@ final class Set extends Collection
      *
      * @param null|string|iterable<string>|true $types Allowed value types (default true, for infer).
      * @param iterable<mixed> $source A source iterable to import values from (optional).
-     * @throws ValueError If a type name is invalid.
-     * @throws TypeError If a type is not specified as a string, or any imported values have disallowed types.
+     * @throws DomainException If a type name is invalid.
+     * @throws InvalidArgumentException If a type is not specified as a string, or any imported values have disallowed
+     * types.
      */
     public function __construct(null|string|iterable|true $types = true, iterable $source = [])
     {
@@ -65,7 +67,7 @@ final class Set extends Collection
      *
      * @param mixed ...$items The items to add to the Set.
      * @return $this The modified Set.
-     * @throws TypeError If any of the items have an invalid type.
+     * @throws InvalidArgumentException If any of the values have a disallowed type.
      */
     public function add(mixed ...$items): self
     {
@@ -92,7 +94,7 @@ final class Set extends Collection
      *
      * @param iterable<mixed> $source The source iterable.
      * @return $this The calling object.
-     * @throws TypeError If any of the values have a disallowed type.
+     * @throws InvalidArgumentException If any of the values have a disallowed type.
      */
     #[Override]
     public function import(iterable $source): static
@@ -312,9 +314,8 @@ final class Set extends Collection
     /**
      * Generate a string representation of the Set.
      *
-     * @return string
-     * @throws ValueError If any values cannot be stringified.
-     * @throws TypeError If any values have an unknown type.
+     * @return string The string representation of the Set.
+     * @throws DomainException If any value cannot be stringified.
      */
     public function __toString(): string
     {
@@ -357,9 +358,7 @@ final class Set extends Collection
      *
      * @param callable $callback A callback function that accepts a value and returns a bool.
      * @return self A new Set with the kept values.
-     * @throws TypeError If the callback's parameter types don't match the Set's value types.
-     * Note also that the callback could throw other kinds of exceptions, or it could throw a TypeError for some
-     * other reason.
+     * @throws UnexpectedValueException If the callback returns a value that is not a boolean.
      */
     #[Override]
     public function filter(callable $callback): static
@@ -374,7 +373,9 @@ final class Set extends Collection
 
             // Validate the result of the callback.
             if (!is_bool($keep)) {
-                throw new TypeError('The filter callback must return a bool, got ' . Types::getBasicType($keep) . '.');
+                throw new UnexpectedValueException(
+                    'The filter callback must return a bool, got ' . Types::getBasicType($keep) . '.'
+                );
             }
 
             // Add item to the result Set.

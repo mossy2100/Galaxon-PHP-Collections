@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Sequence;
 
 use Galaxon\Collections\Sequence;
+use InvalidArgumentException;
+use LengthException;
 use OutOfRangeException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
-use UnderflowException;
 
 /**
  * Tests for Sequence modification methods (add and remove items).
@@ -64,12 +64,12 @@ class SequenceModificationTest extends TestCase
     }
 
     /**
-     * Test append throws TypeError for invalid type.
+     * Test append throws InvalidArgumentException for invalid type.
      */
-    public function testAppendThrowsTypeError(): void
+    public function testAppendThrowsInvalidArgumentException(): void
     {
         // Test: Attempt to append wrong type
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $seq = new Sequence('int');
         $seq->append('string');
@@ -263,12 +263,12 @@ class SequenceModificationTest extends TestCase
     }
 
     /**
-     * Test removeFirst throws UnderflowException on empty Sequence.
+     * Test removeFirst throws LengthException on empty Sequence.
      */
-    public function testRemoveFirstThrowsUnderflow(): void
+    public function testRemoveFirstThrowsLengthException(): void
     {
         // Test: Attempt to remove first from empty Sequence
-        $this->expectException(UnderflowException::class);
+        $this->expectException(LengthException::class);
         $this->expectExceptionMessage('No items in the Sequence');
 
         $seq = new Sequence('int');
@@ -292,12 +292,12 @@ class SequenceModificationTest extends TestCase
     }
 
     /**
-     * Test removeLast throws UnderflowException on empty Sequence.
+     * Test removeLast throws LengthException on empty Sequence.
      */
-    public function testRemoveLastThrowsUnderflow(): void
+    public function testRemoveLastThrowsLengthException(): void
     {
         // Test: Attempt to remove last from empty Sequence
-        $this->expectException(UnderflowException::class);
+        $this->expectException(LengthException::class);
         $this->expectExceptionMessage('No items in the Sequence');
 
         $seq = new Sequence('int');

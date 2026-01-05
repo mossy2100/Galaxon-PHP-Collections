@@ -59,7 +59,7 @@ These are official PHP extensions that provide efficient data structure implemen
 // Restrict types at runtime
 $numbers = new Sequence('int');
 $numbers->append(1, 2, 3);    // ✅ Works
-$numbers->append('four');      // ❌ TypeError
+$numbers->append('four');      // ❌ InvalidArgumentException
 
 // Union types
 $mixed = new Sequence('int|string');
@@ -180,7 +180,7 @@ $dict[[10, 20]] = 'coordinates';
 // Type constraints
 $typed = new Dictionary('string', 'int');
 $typed['count'] = 42;      // ✅ Works
-$typed['count'] = 'text';  // ❌ TypeError
+$typed['count'] = 'text';  // ❌ InvalidArgumentException
 
 // Check and access
 if ($dict->keyExists('a')) {

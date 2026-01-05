@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Set;
 
 use Galaxon\Collections\Set;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * Tests for Set constructor and factory methods.
@@ -172,11 +172,11 @@ class SetConstructorTest extends TestCase
     }
 
     /**
-     * Test constructor throws TypeError when explicit type doesn't match values.
+     * Test constructor throws InvalidArgumentException when explicit type doesn't match values.
      */
-    public function testConstructorThrowsTypeErrorForMismatchedExplicitType(): void
+    public function testConstructorThrowsInvalidArgumentExceptionForMismatchedExplicitType(): void
     {
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         new Set('string', [1, 2, 3]);
     }
@@ -216,7 +216,15 @@ class SetConstructorTest extends TestCase
      */
     public function testConstructorInfersMultipleTypes(): void
     {
-        $set = new Set(source: [1, 'hello', 3.14, true, false, null, []]);
+        $set = new Set(source: [
+            1,
+            'hello',
+            3.14,
+            true,
+            false,
+            null,
+            [],
+        ]);
 
         $this->assertTrue($set->valueTypes->containsOnly('int', 'string', 'float', 'bool', 'null', 'array'));
     }

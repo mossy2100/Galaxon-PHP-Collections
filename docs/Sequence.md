@@ -65,7 +65,7 @@ When gaps are created in the Sequence (via `offsetSet()` or `insert()`), they ar
 - `array` or `iterable` → `[]` (empty array)
 - `object` → `new stdClass()`
 
-For types where no suitable default can be determined (like `DateTime`), a `RuntimeException` will be thrown if an attempt is made to generate a default value (e.g., when gap-filling). This is uncommon; to avoid it, include `'null'` in the allowed types.
+For types where no suitable default can be determined (like `DateTime`), a `LogicException` will be thrown if an attempt is made to generate a default value (e.g., when gap-filling). This is uncommon; to avoid it, include `'null'` in the allowed types.
 
 **Examples:**
 ```php
@@ -119,7 +119,7 @@ echo $seq[5];  // 99
 public static function range(int|float $start, int|float $end, int|float $step = 1): self
 ```
 
-Generate a Sequence of numbers spanning a given range. Throws `ValueError` for invalid step sizes.
+Generate a Sequence of numbers spanning a given range. Throws `DomainException` for invalid step sizes.
 
 **Examples:**
 ```php
@@ -141,7 +141,7 @@ $seq = Sequence::range(0.0, 1.0, 0.2); // [0.0, 0.2, 0.4, ..., 1.0]
 public function append(mixed ...$items): self
 ```
 
-Add one or more items to the end of the Sequence. Returns `$this` for chaining. Throws `TypeError` for invalid item types.
+Add one or more items to the end of the Sequence. Returns `$this` for chaining. Throws `InvalidArgumentException` for invalid item types.
 
 **Examples:**
 ```php
@@ -199,7 +199,7 @@ $seq->insert(5, 10); // [1, 2, 0, 0, 0, 10]
 public function import(iterable $source): static
 ```
 
-Import values from an iterable into the Sequence. Returns `$this` for chaining. Throws `TypeError` for invalid value types.
+Import values from an iterable into the Sequence. Returns `$this` for chaining. Throws `InvalidArgumentException` for invalid value types.
 
 **Example:**
 ```php
@@ -268,7 +268,7 @@ echo $seq->count(); // 3
 public function removeFirst(): mixed
 ```
 
-Remove and return the first item. Throws `UnderflowException` if empty.
+Remove and return the first item. Throws `LengthException` if empty.
 
 **Example:**
 ```php
@@ -285,7 +285,7 @@ echo $seq[0]; // 'b'
 public function removeLast(): mixed
 ```
 
-Remove and return the last item. Throws `UnderflowException` if empty.
+Remove and return the last item. Throws `LengthException` if empty.
 
 **Example:**
 ```php
@@ -411,7 +411,7 @@ var_dump($seq1->equal($seq3)); // false
 public function first(): mixed
 ```
 
-Get the first item. Throws `OutOfRangeException` if empty.
+Get the first item. Throws `LengthException` if empty.
 
 **Example:**
 ```php
@@ -426,7 +426,7 @@ echo $seq->first(); // 'a'
 public function last(): mixed
 ```
 
-Get the last item. Throws `OutOfRangeException` if empty.
+Get the last item. Throws `LengthException` if empty.
 
 **Example:**
 ```php
@@ -689,7 +689,7 @@ echo $seq->sum(); // 15
 public function min(): int|float
 ```
 
-Find the minimum value in the Sequence. Throws `ValueError` if empty.
+Find the minimum value in the Sequence. Throws `LengthException` if empty.
 
 **Examples:**
 ```php
@@ -714,7 +714,7 @@ echo $seq->min(); // -10
 public function max(): int|float
 ```
 
-Find the maximum value in the Sequence. Throws `ValueError` if empty.
+Find the maximum value in the Sequence. Throws `LengthException` if empty.
 
 **Examples:**
 ```php
@@ -739,7 +739,7 @@ echo $seq->max(); // -1
 public function average(): int|float
 ```
 
-Calculate the average (arithmetic mean) of all values. Throws `UnderflowException` if empty.
+Calculate the average (arithmetic mean) of all values. Throws `LengthException` if empty.
 
 **Examples:**
 ```php
@@ -926,7 +926,7 @@ echo $set->count(); // 3
 public function chooseRand(int $count = 1): array
 ```
 
-Randomly choose one or more items from the Sequence (non-mutating). Returns an associative array with indexes as keys and values. Throws `OutOfRangeException` if empty, or count is invalid.
+Randomly choose one or more items from the Sequence (non-mutating). Returns an associative array with indexes as keys and values. Throws `DomainException` if count is negative, `LengthException` if empty or count exceeds length.
 
 **Example:**
 ```php
@@ -943,7 +943,7 @@ echo count($chosen); // 3
 public function removeRand(int $count = 1): array
 ```
 
-Randomly remove one or more items from the Sequence (mutating). Returns a list of removed values. Throws `OutOfRangeException` if empty, or count is invalid.
+Randomly remove one or more items from the Sequence (mutating). Returns a list of removed values. Throws `DomainException` if count is negative, `LengthException` if empty or count exceeds length.
 
 **Example:**
 ```php
@@ -1015,7 +1015,7 @@ $doubled = $numbers->map(fn($x) => $x * 2);
 $sum = $numbers->sum();
 echo "Sum: $sum"; // 15
 
-// This would throw TypeError
+// This would throw InvalidArgumentException
 // $numbers->append('string');
 ```
 

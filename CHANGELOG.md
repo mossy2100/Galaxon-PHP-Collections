@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.0.0] - 2026-01-05
+
+### First Stable Release
+
+This is the first stable release of Galaxon Collections, ready for publication on Packagist.
+
+### Breaking Changes
+
+- **Exception types standardized** - All exceptions now use SPL exception types consistently:
+  - `TypeError` → `InvalidArgumentException` (wrong type passed)
+  - `ValueError` → `DomainException` (invalid value)
+  - `RuntimeException` → `OutOfBoundsException` (duplicate keys in flip/map)
+  - `UnderflowException` → `LengthException` (empty collection operations)
+  - `OutOfRangeException` → `LengthException` (empty sequence first/last/min/max)
+  - Added `UnexpectedValueException` for callback return type errors
+
+- **Dictionary::filter()** - Callback signature changed from `fn($key, $value)` to `fn($pair)` for consistency with other Dictionary methods
+
+### Changed
+
+- **composer.json** - Updated for Packagist publication:
+  - Added keywords for discoverability
+  - Added author information
+  - Added homepage and support URLs
+  - Updated dependencies to use Packagist versions (galaxon/core ^1.0)
+  - Improved description
+
+### Documentation
+
+- Updated all class documentation to reflect new exception types
+- Updated Dictionary filter() examples to use new callback signature
+
 ## [0.3.0] - 2025-12-08
 
 ### Changed

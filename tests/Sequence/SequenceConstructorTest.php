@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Galaxon\Collections\Tests\Sequence;
 
+use DomainException;
 use Galaxon\Collections\Sequence;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
-use ValueError;
 
 /**
  * Tests for Sequence constructor and factory methods.
@@ -210,7 +210,15 @@ class SequenceConstructorTest extends TestCase
     public function testConstructorInfersMultipleTypes(): void
     {
         // Test: Create Sequence with various types
-        $seq = new Sequence(source: [1, 'hello', 3.14, true, false, null, []]);
+        $seq = new Sequence(source: [
+            1,
+            'hello',
+            3.14,
+            true,
+            false,
+            null,
+            [],
+        ]);
 
         // Test: Verify all unique types were inferred
         $this->assertTrue($seq->valueTypes->containsOnly('int', 'string', 'float', 'bool', 'null', 'array'));
@@ -232,12 +240,12 @@ class SequenceConstructorTest extends TestCase
     }
 
     /**
-     * Test constructor throws TypeError when explicit type doesn't match values.
+     * Test constructor throws InvalidArgumentException when explicit type doesn't match values.
      */
-    public function testConstructorThrowsTypeErrorForMismatchedExplicitType(): void
+    public function testConstructorThrowsInvalidArgumentExceptionForMismatchedExplicitType(): void
     {
         // Test: Attempt to create Sequence with mismatched type
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         new Sequence('string', [1, 2, 3]);
     }
@@ -332,36 +340,36 @@ class SequenceConstructorTest extends TestCase
     }
 
     /**
-     * Test range method throws ValueError for zero step.
+     * Test range method throws DomainException for zero step.
      */
-    public function testRangeThrowsValueErrorForZeroStep(): void
+    public function testRangeThrowsDomainExceptionForZeroStep(): void
     {
         // Test: Attempt to create range with zero step
-        $this->expectException(ValueError::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('The step size cannot be zero');
 
         Sequence::range(1, 10, 0);
     }
 
     /**
-     * Test range method throws ValueError for invalid positive step.
+     * Test range method throws DomainException for invalid positive step.
      */
-    public function testRangeThrowsValueErrorForInvalidPositiveStep(): void
+    public function testRangeThrowsDomainExceptionForInvalidPositiveStep(): void
     {
         // Test: Attempt descending range with positive step
-        $this->expectException(ValueError::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('The step size must be negative for a decreasing range');
 
         Sequence::range(10, 1, 1);
     }
 
     /**
-     * Test range method throws ValueError for invalid negative step.
+     * Test range method throws DomainException for invalid negative step.
      */
-    public function testRangeThrowsValueErrorForInvalidNegativeStep(): void
+    public function testRangeThrowsDomainExceptionForInvalidNegativeStep(): void
     {
         // Test: Attempt ascending range with negative step
-        $this->expectException(ValueError::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('The step size must be positive for an increasing range');
 
         Sequence::range(1, 10, -1);

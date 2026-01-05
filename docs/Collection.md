@@ -70,8 +70,8 @@ Create a new Collection with optional type constraints.
 - `$types` (null|string|iterable) - Type constraints (null for any type, string for single/union/nullable types, iterable for array of types)
 
 **Throws:**
-- `TypeError` - If a type is not specified as a string
-- `ValueError` - If a type name is invalid
+- `InvalidArgumentException` - If a type is not specified as a string
+- `DomainException` - If a type name is invalid
 
 **Note:** This is called by concrete collection constructors. You cannot instantiate Collection directly.
 
@@ -87,7 +87,7 @@ abstract public function import(iterable $source): static
 
 Import values from an iterable into the Collection. Returns `$this` for chaining.
 
-**Must throw:** `TypeError` if any values have disallowed types.
+**Must throw:** `InvalidArgumentException` if any values have disallowed types.
 
 **Implementations:**
 - **Sequence:** Appends values to the end
@@ -127,8 +127,6 @@ abstract public function filter(callable $callback): static
 ```
 
 Filter the Collection using a callback function. Returns a new Collection with only items where the callback returns `true`.
-
-**Must throw:** `TypeError` if callback parameter types don't match collection types.
 
 **Implementations:**
 - **Sequence:** Filters values, maintains order

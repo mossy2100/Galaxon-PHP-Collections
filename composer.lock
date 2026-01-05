@@ -4,22 +4,28 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1ccc2d96cca1a5673f449d9f9bd5dfe7",
+    "content-hash": "35fd8348872938cae88f95fa32557282",
     "packages": [
         {
             "name": "galaxon/core",
-            "version": "dev-main",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mossy2100/Galaxon-PHP-Core.git",
+                "reference": "2ecf0beeca7fb442e2d717b61778644a1633db57"
+            },
             "dist": {
-                "type": "path",
-                "url": "../Core",
-                "reference": "b80db2ebbb219880ffb0ffe186fb4aba2b26bd00"
+                "type": "zip",
+                "url": "https://api.github.com/repos/mossy2100/Galaxon-PHP-Core/zipball/2ecf0beeca7fb442e2d717b61778644a1633db57",
+                "reference": "2ecf0beeca7fb442e2d717b61778644a1633db57",
+                "shasum": ""
             },
             "require": {
                 "php": "^8.4"
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-                "galaxon/coding-standard": "@dev",
+                "galaxon/coding-standard": "^1.0",
                 "phpstan/phpstan": "^2.1",
                 "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0",
                 "squizlabs/php_codesniffer": "^4.0"
@@ -33,42 +39,38 @@
                     "Galaxon\\Core\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Galaxon\\Core\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "fix": [
-                    "vendor/bin/phpcbf"
-                ],
-                "check": [
-                    "vendor/bin/phpcs -s"
-                ],
-                "analyze": [
-                    "vendor/bin/phpstan analyze -l 9"
-                ],
-                "test": [
-                    "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html build/coverage --coverage-clover build/logs/clover.xml --do-not-cache-result"
-                ],
-                "coverage": [
-                    "php scripts/coverage-check.php"
-                ],
-                "quality": [
-                    "@fix",
-                    "@check",
-                    "@analyze",
-                    "@test",
-                    "@coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
-            "description": "Base package containing utility classes and methods for use by other packages.",
-            "transport-options": {
-                "relative": true
-            }
+            "authors": [
+                {
+                    "name": "Shaun Moss",
+                    "email": "shaun@astromultimedia.com"
+                }
+            ],
+            "description": "Core PHP utilities for floats, integers, arrays, types, and string conversion with IEEE-754 support.",
+            "homepage": "https://github.com/mossy2100/Galaxon-PHP-Core",
+            "keywords": [
+                "arrays",
+                "comparable",
+                "equatable",
+                "floats",
+                "ieee-754",
+                "integers",
+                "math",
+                "numbers",
+                "php",
+                "stringify",
+                "traits",
+                "types",
+                "utilities"
+            ],
+            "support": {
+                "issues": "https://github.com/mossy2100/Galaxon-PHP-Core/issues",
+                "source": "https://github.com/mossy2100/Galaxon-PHP-Core"
+            },
+            "time": "2026-01-04T10:46:42+00:00"
         }
     ],
     "packages-dev": [
@@ -170,11 +172,17 @@
         },
         {
             "name": "galaxon/coding-standard",
-            "version": "dev-main",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mossy2100/Galaxon-PHP-Coding-Standard",
+                "reference": "fb877bbc0879e732a14830037aeb27755707d7db"
+            },
             "dist": {
-                "type": "path",
-                "url": "../CodingStandard",
-                "reference": "c0a21d2d273a699f1a2eb537cc381c25b14e7398"
+                "type": "zip",
+                "url": "https://api.github.com/repos/mossy2100/Galaxon-PHP-Coding-Standard/zipball/fb877bbc0879e732a14830037aeb27755707d7db",
+                "reference": "fb877bbc0879e732a14830037aeb27755707d7db",
+                "shasum": ""
             },
             "require": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
@@ -189,29 +197,32 @@
             "extra": {
                 "phpcodesniffer-search-depth": 3
             },
-            "scripts": {
-                "fix": [
-                    "vendor/bin/phpcbf"
-                ],
-                "check": [
-                    "vendor/bin/phpcs -s"
-                ],
-                "analyze": [
-                    "vendor/bin/phpstan analyze -l 9"
-                ],
-                "quality": [
-                    "@fix",
-                    "@check",
-                    "@analyze"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
-            "description": "Galaxon PHP Coding Standard, based on PSR-12 plus some extra rules.",
-            "transport-options": {
-                "relative": true
-            }
+            "authors": [
+                {
+                    "name": "Shaun Moss",
+                    "email": "shaun@astromultimedia.com"
+                }
+            ],
+            "description": "PHP_CodeSniffer coding standard extending PSR-12 with lowerCamelCase naming and modern PHP 8.4+ rules.",
+            "homepage": "https://github.com/mossy2100/Galaxon-PHP-Coding-Standard",
+            "keywords": [
+                "code-style",
+                "codesniffer",
+                "coding-standard",
+                "linting",
+                "php",
+                "phpcs",
+                "psr-12"
+            ],
+            "support": {
+                "issues": "https://github.com/mossy2100/Galaxon-PHP-Coding-Standard/issues",
+                "source": "https://github.com/mossy2100/Galaxon-PHP-Coding-Standard"
+            },
+            "time": "2026-01-04T05:17:16+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -551,16 +562,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "12.5.1",
+            "version": "12.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "c467c59a4f6e04b942be422844e7a6352fa01b57"
+                "reference": "4a9739b51cbcb355f6e95659612f92e282a7077b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/c467c59a4f6e04b942be422844e7a6352fa01b57",
-                "reference": "c467c59a4f6e04b942be422844e7a6352fa01b57",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/4a9739b51cbcb355f6e95659612f92e282a7077b",
+                "reference": "4a9739b51cbcb355f6e95659612f92e282a7077b",
                 "shasum": ""
             },
             "require": {
@@ -575,7 +586,7 @@
                 "sebastian/environment": "^8.0.3",
                 "sebastian/lines-of-code": "^4.0",
                 "sebastian/version": "^6.0",
-                "theseer/tokenizer": "^2.0"
+                "theseer/tokenizer": "^2.0.1"
             },
             "require-dev": {
                 "phpunit/phpunit": "^12.5.1"
@@ -616,7 +627,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.5.1"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.5.2"
             },
             "funding": [
                 {
@@ -636,7 +647,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-08T07:17:58+00:00"
+            "time": "2025-12-24T07:03:04+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -885,16 +896,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.2",
+            "version": "12.5.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "06713c2633d6d832f2fe98a70511ecaa7cb92c1a"
+                "reference": "4ba0e923f9d3fc655de22f9547c01d15a41fc93a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/06713c2633d6d832f2fe98a70511ecaa7cb92c1a",
-                "reference": "06713c2633d6d832f2fe98a70511ecaa7cb92c1a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/4ba0e923f9d3fc655de22f9547c01d15a41fc93a",
+                "reference": "4ba0e923f9d3fc655de22f9547c01d15a41fc93a",
                 "shasum": ""
             },
             "require": {
@@ -962,7 +973,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.2"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.4"
             },
             "funding": [
                 {
@@ -986,7 +997,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-08T07:22:32+00:00"
+            "time": "2025-12-15T06:05:34+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1887,20 +1898,20 @@
         },
         {
             "name": "slevomat/coding-standard",
-            "version": "8.25.1",
+            "version": "8.26.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/slevomat/coding-standard.git",
-                "reference": "4caa5ec5a30b84b2305e80159c710d437f40cc40"
+                "reference": "d247cdc04b91956bdcfaa0b1313c01960b189d3c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/slevomat/coding-standard/zipball/4caa5ec5a30b84b2305e80159c710d437f40cc40",
-                "reference": "4caa5ec5a30b84b2305e80159c710d437f40cc40",
+                "url": "https://api.github.com/repos/slevomat/coding-standard/zipball/d247cdc04b91956bdcfaa0b1313c01960b189d3c",
+                "reference": "d247cdc04b91956bdcfaa0b1313c01960b189d3c",
                 "shasum": ""
             },
             "require": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.6.2 || ^0.7 || ^1.2.0",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7 || ^1.2.0",
                 "php": "^7.4 || ^8.0",
                 "phpstan/phpdoc-parser": "^2.3.0",
                 "squizlabs/php_codesniffer": "^4.0.1"
@@ -1908,11 +1919,11 @@
             "require-dev": {
                 "phing/phing": "3.0.1|3.1.0",
                 "php-parallel-lint/php-parallel-lint": "1.4.0",
-                "phpstan/phpstan": "2.1.32",
+                "phpstan/phpstan": "2.1.33",
                 "phpstan/phpstan-deprecation-rules": "2.0.3",
-                "phpstan/phpstan-phpunit": "2.0.8",
+                "phpstan/phpstan-phpunit": "2.0.11",
                 "phpstan/phpstan-strict-rules": "2.0.7",
-                "phpunit/phpunit": "9.6.8|10.5.48|11.4.4|11.5.36|12.4.4"
+                "phpunit/phpunit": "9.6.31|10.5.60|11.4.4|11.5.46|12.5.4"
             },
             "type": "phpcodesniffer-standard",
             "extra": {
@@ -1936,7 +1947,7 @@
             ],
             "support": {
                 "issues": "https://github.com/slevomat/coding-standard/issues",
-                "source": "https://github.com/slevomat/coding-standard/tree/8.25.1"
+                "source": "https://github.com/slevomat/coding-standard/tree/8.26.0"
             },
             "funding": [
                 {
@@ -1948,7 +1959,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-11-25T18:01:43+00:00"
+            "time": "2025-12-21T18:01:15+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
@@ -2134,10 +2145,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "galaxon/coding-standard": 20,
-        "galaxon/core": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Dictionary;
 
 use Galaxon\Collections\Dictionary;
+use InvalidArgumentException;
+use LengthException;
+use OutOfBoundsException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
-use ValueError;
 
 /**
  * Tests for Dictionary constructor and factory methods.
@@ -141,7 +142,11 @@ class DictionaryConstructorTest extends TestCase
      */
     public function testConstructorWithSourceArray(): void
     {
-        $arr = ['a' => 1, 'b' => 2, 'c' => 3];
+        $arr = [
+            'a' => 1,
+            'b' => 2,
+            'c' => 3,
+        ];
         $dict = new Dictionary(source: $arr);
 
         // Test all items were copied.
@@ -172,7 +177,8 @@ class DictionaryConstructorTest extends TestCase
         $arr = [
             1     => 'one',
             'two' => 2,
-            3     => true
+            3     => true,
+
         ];
         $dict = new Dictionary(source: $arr);
 
@@ -215,7 +221,10 @@ class DictionaryConstructorTest extends TestCase
      */
     public function testConstructorInfersTypes(): void
     {
-        $arr = ['key1' => 10, 'key2' => 20];
+        $arr = [
+            'key1' => 10,
+            'key2' => 20,
+        ];
         $dict = new Dictionary(source: $arr);
 
         // Test the dictionary works with the inferred types.
@@ -232,7 +241,10 @@ class DictionaryConstructorTest extends TestCase
     public function testConstructorWithExplicitTypesAndSource(): void
     {
         // Test: Create Dictionary with explicit type constraints
-        $arr = ['a' => 1, 'b' => 2];
+        $arr = [
+            'a' => 1,
+            'b' => 2,
+        ];
         $dict = new Dictionary('string', 'int', $arr);
 
         // Test: Verify type constraints applied
@@ -241,14 +253,17 @@ class DictionaryConstructorTest extends TestCase
     }
 
     /**
-     * Test constructor throws TypeError when explicit types don't match values.
+     * Test constructor throws InvalidArgumentException when explicit types don't match values.
      */
-    public function testConstructorThrowsTypeErrorForMismatchedExplicitTypes(): void
+    public function testConstructorThrowsInvalidArgumentExceptionForMismatchedExplicitTypes(): void
     {
         // Test: Attempt to create Dictionary with mismatched explicit types
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
-        $arr = ['a' => 1, 'b' => 2];
+        $arr = [
+            'a' => 1,
+            'b' => 2,
+        ];
         new Dictionary('string', 'string', $arr); // Values are int, not string
     }
 
@@ -258,7 +273,10 @@ class DictionaryConstructorTest extends TestCase
     public function testConstructorWithNullTypeParameters(): void
     {
         // Test: Create Dictionary with null type parameters
-        $arr = ['a' => 1, 'b' => 'two'];
+        $arr = [
+            'a' => 1,
+            'b' => 'two',
+        ];
         $dict = new Dictionary(null, null, $arr);
 
         // Test: Verify any types allowed
@@ -297,7 +315,11 @@ class DictionaryConstructorTest extends TestCase
     public function testConstructorInfersNullableValueTypes(): void
     {
         // Test: Create Dictionary with null values (types inferred)
-        $arr = ['a' => 1, 'b' => null, 'c' => 3];
+        $arr = [
+            'a' => 1,
+            'b' => null,
+            'c' => 3,
+        ];
         $dict = new Dictionary(source: $arr);
 
         // Test: Verify all items preserved
@@ -341,7 +363,8 @@ class DictionaryConstructorTest extends TestCase
             'c' => 3.14,
             'd' => true,
             'e' => null,
-            'f' => []
+            'f' => [],
+
         ];
         $dict = new Dictionary(source: $arr);
 
@@ -373,7 +396,11 @@ class DictionaryConstructorTest extends TestCase
     public function testConstructorWithOnlyNullValues(): void
     {
         // Test: Create Dictionary containing only nulls
-        $arr = ['a' => null, 'b' => null, 'c' => null];
+        $arr = [
+            'a' => null,
+            'b' => null,
+            'c' => null,
+        ];
         $dict = new Dictionary(source: $arr);
 
         // Test: Verify null value type inferred
@@ -389,7 +416,10 @@ class DictionaryConstructorTest extends TestCase
     public function testConstructorWithExplicitTypesDisablesInference(): void
     {
         // Test: Create Dictionary with explicit types
-        $arr = ['a' => 1, 'b' => 2];
+        $arr = [
+            'a' => 1,
+            'b' => 2,
+        ];
         $dict = new Dictionary('string', 'int', $arr);
 
         // Test: Verify only explicit types, no additional inference
@@ -403,7 +433,10 @@ class DictionaryConstructorTest extends TestCase
     public function testConstructorWithUnionTypeStringForKeys(): void
     {
         // Test: Create Dictionary with union type for keys
-        $arr = [1 => 'one', 'two' => 2];
+        $arr = [
+            1     => 'one',
+            'two' => 2,
+        ];
         $dict = new Dictionary('int|string', 'int|string', $arr);
 
         // Test: Verify both key types accepted
@@ -491,8 +524,12 @@ class DictionaryConstructorTest extends TestCase
      */
     public function testCombineWithObjectKeys(): void
     {
-        $obj1 = (object)['id' => 1];
-        $obj2 = (object)['id' => 2];
+        $obj1 = (object)[
+            'id' => 1,
+        ];
+        $obj2 = (object)[
+            'id' => 2,
+        ];
         $keys = [$obj1, $obj2];
         $values = ['first', 'second'];
 
@@ -546,43 +583,45 @@ class DictionaryConstructorTest extends TestCase
     }
 
     /**
-     * Test combine() throws ValueError for mismatched counts.
+     * Test combine() throws LengthException for mismatched counts.
      */
-    public function testCombineThrowsValueErrorForMismatchedCounts(): void
+    public function testCombineThrowsLengthExceptionForMismatchedCounts(): void
     {
         $keys = ['a', 'b', 'c'];
         $values = [1, 2]; // One less value
 
-        $this->expectException(ValueError::class);
+        $this->expectException(LengthException::class);
         $this->expectExceptionMessage('Cannot combine: keys count (3) does not match values count (2).');
 
         Dictionary::combine($keys, $values);
     }
 
     /**
-     * Test combine() throws ValueError for duplicate keys.
+     * Test combine() throws OutOfBoundsException for duplicate keys.
      */
-    public function testCombineThrowsValueErrorForDuplicateKeys(): void
+    public function testCombineThrowsOutOfBoundsExceptionForDuplicateKeys(): void
     {
         $keys = ['a', 'b', 'a']; // Duplicate 'a'
         $values = [1, 2, 3];
 
-        $this->expectException(ValueError::class);
+        $this->expectException(OutOfBoundsException::class);
         $this->expectExceptionMessage('Cannot combine: keys are not unique.');
 
         Dictionary::combine($keys, $values);
     }
 
     /**
-     * Test combine() throws ValueError for duplicate object keys.
+     * Test combine() throws OutOfBoundsException for duplicate object keys.
      */
-    public function testCombineThrowsValueErrorForDuplicateObjectKeys(): void
+    public function testCombineThrowsOutOfBoundsExceptionForDuplicateObjectKeys(): void
     {
-        $obj = (object)['id' => 1];
+        $obj = (object)[
+            'id' => 1,
+        ];
         $keys = [$obj, $obj]; // Same object twice
         $values = ['first', 'second'];
 
-        $this->expectException(ValueError::class);
+        $this->expectException(OutOfBoundsException::class);
         $this->expectExceptionMessage('Cannot combine: keys are not unique.');
 
         Dictionary::combine($keys, $values);
@@ -614,7 +653,11 @@ class DictionaryConstructorTest extends TestCase
      */
     public function testCombineWithArrayKeys(): void
     {
-        $keys = [[1, 2], [3, 4], [5, 6]];
+        $keys = [
+            [1, 2],
+            [3, 4],
+            [5, 6],
+        ];
         $values = ['first', 'second', 'third'];
 
         $dict = Dictionary::combine($keys, $values);
@@ -667,7 +710,7 @@ class DictionaryConstructorTest extends TestCase
         $this->assertTrue($dict->valueTypes->containsOnly('int'));
 
         // Test: Adding different types should fail
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
         $dict->add(123, 999); // int key not allowed
     }
 
@@ -686,7 +729,7 @@ class DictionaryConstructorTest extends TestCase
         $this->assertCount(3, $dict);
 
         // Test: Adding wrong value type fails
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
         $dict->add('d', 'string'); // string value not allowed
     }
 }

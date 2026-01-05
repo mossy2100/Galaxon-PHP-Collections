@@ -147,9 +147,18 @@ class SequenceEqualityTest extends TestCase
     public function testSequencesWithArraysUseStrictComparison(): void
     {
         // Test: Compare sequences containing arrays
-        $seq1 = new Sequence(source: [[1, 2], [3, 4]]);
-        $seq2 = new Sequence(source: [[1, 2], [3, 4]]);
-        $seq3 = new Sequence(source: [[1, 2], [3, 5]]);
+        $seq1 = new Sequence(source: [
+            [1, 2],
+            [3, 4],
+        ]);
+        $seq2 = new Sequence(source: [
+            [1, 2],
+            [3, 4],
+        ]);
+        $seq3 = new Sequence(source: [
+            [1, 2],
+            [3, 5],
+        ]);
 
         // Test: Verify strict array comparison
         $this->assertTrue($seq1->equal($seq2));

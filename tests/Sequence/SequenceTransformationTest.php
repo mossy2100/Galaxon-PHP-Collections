@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Galaxon\Collections\Tests\Sequence;
 
+use DomainException;
 use Galaxon\Collections\Sequence;
+use LengthException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use TypeError;
-use UnderflowException;
-use ValueError;
 
 /**
  * Tests for Sequence transformation and utility methods.
@@ -235,7 +235,7 @@ class SequenceTransformationTest extends TestCase
         $seq->append(1, 2, 3, 4, 5, 6, 7, 8);
 
         // Check for exception.
-        $this->expectException(ValueError::class);
+        $this->expectException(DomainException::class);
         $chunks = $seq->chunk(0);
     }
 
@@ -533,13 +533,13 @@ class SequenceTransformationTest extends TestCase
     }
 
     /**
-     * Test min method throws UnderflowException on empty Sequence.
+     * Test min method throws LengthException on empty Sequence.
      */
-    public function testMinThrowsValueErrorOnEmpty(): void
+    public function testMinThrowsLengthExceptionOnEmpty(): void
     {
         // Test: Attempt to find min of empty Sequence
-        $this->expectException(ValueError::class);
-        $this->expectExceptionMessage('Cannot find the minimum value of empty Sequence.');
+        $this->expectException(LengthException::class);
+        $this->expectExceptionMessage('Cannot find the minimum value of an empty Sequence.');
 
         $seq = new Sequence('int');
         $seq->min();
@@ -585,12 +585,12 @@ class SequenceTransformationTest extends TestCase
     }
 
     /**
-     * Test max method throws UnderflowException on empty Sequence.
+     * Test max method throws LengthException on empty Sequence.
      */
-    public function testMaxThrowsValueErrorOnEmpty(): void
+    public function testMaxThrowsLengthExceptionOnEmpty(): void
     {
         // Test: Attempt to find max of empty Sequence
-        $this->expectException(ValueError::class);
+        $this->expectException(LengthException::class);
         $this->expectExceptionMessage('Cannot find the maximum value of empty Sequence.');
 
         $seq = new Sequence('int');
@@ -650,12 +650,12 @@ class SequenceTransformationTest extends TestCase
     }
 
     /**
-     * Test average method throws UnderflowException on empty Sequence.
+     * Test average method throws LengthException on empty Sequence.
      */
-    public function testAverageThrowsUnderflowOnEmpty(): void
+    public function testAverageThrowsLengthExceptionOnEmpty(): void
     {
         // Test: Attempt to find average of empty Sequence
-        $this->expectException(UnderflowException::class);
+        $this->expectException(LengthException::class);
         $this->expectExceptionMessage('Cannot calculate the average value of empty Sequence.');
 
         $seq = new Sequence('int');
@@ -723,8 +723,8 @@ class SequenceTransformationTest extends TestCase
         $seq = new Sequence('object');
         $seq->append(new stdClass(), new stdClass());
 
-        // Test: Verify ValueError is thrown for non-stringable objects
-        $this->expectException(ValueError::class);
+        // Test: Verify DomainException is thrown for non-stringable objects
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage(
             'Cannot join Sequence: contains an object of class stdClass, which does not implement Stringable.'
         );

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Galaxon\Collections\Tests\Sequence;
 
+use DomainException;
 use Galaxon\Collections\Sequence;
+use InvalidArgumentException;
+use LengthException;
 use OutOfRangeException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * Tests for Sequence ArrayAccess implementation and random methods.
@@ -65,24 +67,24 @@ class SequenceArrayAccessTest extends TestCase
     }
 
     /**
-     * Test offsetSet throws TypeError for invalid type.
+     * Test offsetSet throws InvalidArgumentException for invalid type.
      */
-    public function testOffsetSetThrowsTypeError(): void
+    public function testOffsetSetThrowsInvalidArgumentException(): void
     {
         // Test: Attempt to set wrong type
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $seq = new Sequence('int');
         $seq[0] = 'Some string';
     }
 
     /**
-     * Test offsetSet throws TypeError for non-integer index.
+     * Test offsetSet throws InvalidArgumentException for non-integer index.
      */
-    public function testOffsetSetThrowsTypeErrorForNonIntegerIndex(): void
+    public function testOffsetSetThrowsInvalidArgumentExceptionForNonIntegerIndex(): void
     {
         // Test: Attempt to use string as index
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $seq = new Sequence('int');
         $seq['key'] = 10;
@@ -142,12 +144,12 @@ class SequenceArrayAccessTest extends TestCase
     }
 
     /**
-     * Test offsetExists throws TypeError for non-integer index.
+     * Test offsetExists throws InvalidArgumentException for non-integer index.
      */
-    public function testOffsetExistsThrowsTypeError(): void
+    public function testOffsetExistsThrowsInvalidArgumentException(): void
     {
         // Test: Attempt to check string index
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $seq = new Sequence('int');
         $exists = isset($seq['key']);
@@ -259,12 +261,12 @@ class SequenceArrayAccessTest extends TestCase
     }
 
     /**
-     * Test chooseRand throws UnderflowException on empty Sequence.
+     * Test chooseRand throws DomainException when count is negative.
      */
-    public function testChooseRandThrowsOutOfRangeWhenCountNegative(): void
+    public function testChooseRandThrowsDomainExceptionWhenCountNegative(): void
     {
-        // Test: Attempt to choose from empty Sequence
-        $this->expectException(OutOfRangeException::class);
+        // Test: Attempt to choose with negative count
+        $this->expectException(DomainException::class);
 
         $seq = new Sequence('int');
         $seq->append(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
@@ -272,24 +274,24 @@ class SequenceArrayAccessTest extends TestCase
     }
 
     /**
-     * Test chooseRand throws UnderflowException on empty Sequence.
+     * Test chooseRand throws LengthException on empty Sequence.
      */
-    public function testChooseRandThrowsExceptionOnEmpty(): void
+    public function testChooseRandThrowsLengthExceptionOnEmpty(): void
     {
         // Test: Attempt to choose from empty Sequence
-        $this->expectException(OutOfRangeException::class);
+        $this->expectException(LengthException::class);
 
         $seq = new Sequence('int');
         $seq->chooseRand();
     }
 
     /**
-     * Test chooseRand throws OutOfRangeException when count too large.
+     * Test chooseRand throws LengthException when count too large.
      */
-    public function testChooseRandThrowsOutOfRangeWhenCountTooLarge(): void
+    public function testChooseRandThrowsLengthExceptionWhenCountTooLarge(): void
     {
         // Test: Attempt to choose more items than available
-        $this->expectException(OutOfRangeException::class);
+        $this->expectException(LengthException::class);
 
         $seq = new Sequence('int');
         $seq->append(1, 2, 3);

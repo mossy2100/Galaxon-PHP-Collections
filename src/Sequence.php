@@ -6,16 +6,15 @@ namespace Galaxon\Collections;
 
 use ArrayAccess;
 use ArrayIterator;
+use DomainException;
 use Galaxon\Core\Numbers;
-use Galaxon\Core\Types;
+use InvalidArgumentException;
+use LengthException;
+use LogicException;
 use OutOfRangeException;
 use Override;
-use RuntimeException;
 use Stringable;
 use Traversable;
-use TypeError;
-use UnderflowException;
-use ValueError;
 
 /**
  * A type-specific list implementation.
@@ -42,7 +41,7 @@ use ValueError;
  * - object → new stdClass()
  * For other types (i.e. objects of a specific class, resource, interface, callable), a default value cannot be
  * inferred. Therefore, if you require one, it's recommended you include 'null' in the TypeSet.
- * If a default value is required, but one cannot be inferred, a RuntimeException will be thrown.
+ * If a default value is required, but one cannot be inferred, a DomainException will be thrown.
  *
  * 4. Array-like access using square brackets [] and iteration using foreach is supported via the ArrayAccess and
  * Iterator interfaces.
@@ -93,8 +92,9 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param null|string|iterable<string>|true $types Allowed value types (default true, for infer).
      * @param iterable<mixed> $source A source iterable to import values from (optional).
-     * @throws ValueError If a type name is invalid.
-     * @throws TypeError If a type is not specified as a string, or any imported values have disallowed types.
+     * @throws DomainException If a type name is invalid.
+     * @throws InvalidArgumentException If a type is not specified as a string, or any imported values have a disallowed
+     * type.
      */
     public function __construct(null|string|iterable|true $types = true, iterable $source = [])
     {
@@ -140,19 +140,19 @@ final class Sequence extends Collection implements ArrayAccess
      * @param int|float $end The end of the range.
      * @param int|float $step The step size (default 1).
      * @return self The new Sequence.
-     * @throws ValueError If the step size is invalid for the range specified.
+     * @throws DomainException If the step size is invalid for the range specified.
      */
     public static function range(int|float $start, int|float $end, int|float $step = 1): self
     {
         // Validate step size. Use loose comparison here to validate either an int or float argument.
         if (Numbers::equal($step, 0)) {
-            throw new ValueError('The step size cannot be zero.');
+            throw new DomainException('The step size cannot be zero.');
         }
         if ($start <= $end && $step < 0) {
-            throw new ValueError('The step size must be positive for an increasing range.');
+            throw new DomainException('The step size must be positive for an increasing range.');
         }
         if ($start >= $end && $step > 0) {
-            throw new ValueError('The step size must be negative for a decreasing range.');
+            throw new DomainException('The step size must be negative for a decreasing range.');
         }
 
         // If any of the arguments are floats, generate a Sequence of floats; otherwise, ints.
@@ -194,7 +194,7 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param mixed ...$items The items to add to the Sequence.
      * @return $this The Sequence instance.
-     * @throws TypeError If any of the provided items have an invalid type.
+     * @throws InvalidArgumentException If any of the provided items have a disallowed type.
      *
      * @example
      * $sequence->append($item);
@@ -258,6 +258,8 @@ final class Sequence extends Collection implements ArrayAccess
      * @param mixed $item The item to insert.
      * @return $this The Sequence instance.
      * @throws OutOfRangeException If the index is less than 0.
+     * @throws InvalidArgumentException If the item has a disallowed type.
+     * @throws LogicException If no default value could be determined for this type set.
      */
     public function insert(int $index, mixed $item): self
     {
@@ -292,7 +294,7 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param iterable<mixed> $source The source iterable.
      * @return $this The calling object.
-     * @throws TypeError If any of the values have a disallowed type.
+     * @throws InvalidArgumentException If any of the values have a disallowed type.
      */
     #[Override]
     public function import(iterable $source): static
@@ -357,13 +359,13 @@ final class Sequence extends Collection implements ArrayAccess
      * NB: This is a mutating method.
      *
      * @return mixed The removed item.
-     * @throws UnderflowException If the Sequence is empty.
+     * @throws LengthException If the Sequence is empty.
      */
     public function removeFirst(): mixed
     {
         // Check for an empty Sequence.
         if (count($this->items) === 0) {
-            throw new UnderflowException('No items in the Sequence.');
+            throw new LengthException('No items in the Sequence.');
         }
 
         // Remove and return the first item.
@@ -376,13 +378,13 @@ final class Sequence extends Collection implements ArrayAccess
      * NB: This is a mutating method.
      *
      * @return mixed The removed item.
-     * @throws UnderflowException If the Sequence is empty.
+     * @throws LengthException If the Sequence is empty.
      */
     public function removeLast(): mixed
     {
         // Check for an empty Sequence.
         if (count($this->items) === 0) {
-            throw new UnderflowException('No items in the Sequence.');
+            throw new LengthException('No items in the Sequence.');
         }
 
         // Remove and return the last item.
@@ -463,13 +465,13 @@ final class Sequence extends Collection implements ArrayAccess
      * Get the first item from the Sequence.
      *
      * @return mixed The first item.
-     * @throws OutOfRangeException If the Sequence is empty.
+     * @throws LengthException If the Sequence is empty.
      */
     public function first(): mixed
     {
         // Guard against empty Sequences.
         if ($this->empty()) {
-            throw new OutOfRangeException('No items in the Sequence.');
+            throw new LengthException('No items in the Sequence.');
         }
 
         // Get the first item.
@@ -480,13 +482,13 @@ final class Sequence extends Collection implements ArrayAccess
      * Get the last item from the Sequence.
      *
      * @return mixed The last item.
-     * @throws OutOfRangeException If the Sequence is empty.
+     * @throws LengthException If the Sequence is empty.
      */
     public function last(): mixed
     {
         // Guard against empty Sequences.
         if ($this->empty()) {
-            throw new OutOfRangeException('No items in the Sequence.');
+            throw new LengthException('No items in the Sequence.');
         }
 
         // Get the last item.
@@ -578,14 +580,14 @@ final class Sequence extends Collection implements ArrayAccess
      * @see https://www.php.net/manual/en/function.array-chunk.php
      *
      * @param int $size The size of each chunk.
-     * @return self[] An array of Sequences representing the chunks.
-     * @throws ValueError If the chunk size is less than 1.
+     * @return list<self> An array of Sequences representing the chunks.
+     * @throws DomainException If the chunk size is less than 1.
      */
     public function chunk(int $size): array
     {
         // Guard against invalid chunk sizes.
         if ($size <= 0) {
-            throw new ValueError('Chunk size must be at least 1.');
+            throw new DomainException('Chunk size must be at least 1.');
         }
 
         // Break the array of items into chunks.
@@ -732,7 +734,6 @@ final class Sequence extends Collection implements ArrayAccess
      * Find the product of the values in the Sequence.
      *
      * @return int|float The product of the values in the Sequence.
-     * @throws TypeError If the Sequence contains non-numeric values.
      */
     public function product(): int|float
     {
@@ -748,7 +749,6 @@ final class Sequence extends Collection implements ArrayAccess
      * Find the sum of the values in the Sequence.
      *
      * @return int|float The sum of the values in the Sequence.
-     * @throws TypeError If the Sequence contains non-numeric values.
      */
     public function sum(): int|float
     {
@@ -764,14 +764,13 @@ final class Sequence extends Collection implements ArrayAccess
      * Find the minimum value in a Sequence of numbers.
      *
      * @return int|float The minimum value in the Sequence.
-     * @throws ValueError If the Sequence is empty.
-     * @throws TypeError If the Sequence contains non-numeric values.
+     * @throws LengthException If the Sequence is empty.
      */
     public function min(): int|float
     {
         // Check we have items.
         if (empty($this->items)) {
-            throw new ValueError('Cannot find the minimum value of empty Sequence.');
+            throw new LengthException('Cannot find the minimum value of an empty Sequence.');
         }
 
         // Use a custom reducer to find the minimum value instead of min(), because that function will allow
@@ -786,14 +785,13 @@ final class Sequence extends Collection implements ArrayAccess
      * Find the maximum value in a Sequence of numbers.
      *
      * @return int|float The maximum value in the Sequence.
-     * @throws ValueError If the Sequence is empty.
-     * @throws TypeError If the Sequence contains non-numeric values.
+     * @throws LengthException If the Sequence is empty.
      */
     public function max(): int|float
     {
         // Check we have items.
         if (empty($this->items)) {
-            throw new ValueError('Cannot find the maximum value of empty Sequence.');
+            throw new LengthException('Cannot find the maximum value of empty Sequence.');
         }
 
         // Use a custom reducer to find the maximum value instead of max(), because that function will allow
@@ -808,13 +806,13 @@ final class Sequence extends Collection implements ArrayAccess
      * Find the average value in the Sequence.
      *
      * @return int|float The average value in the Sequence.
-     * @throws UnderflowException If the Sequence is empty.
+     * @throws LengthException If the Sequence is empty.
      */
     public function average(): int|float
     {
         // Check we have items.
         if ($this->empty()) {
-            throw new UnderflowException('Cannot calculate the average value of empty Sequence.');
+            throw new LengthException('Cannot calculate the average value of empty Sequence.');
         }
 
         // Find the average value.
@@ -829,16 +827,16 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param string $glue The string to separate the values with (default empty string).
      * @return string The concatenation of the values in the Sequence.
-     * @throws ValueError If the Sequence contains an object that does not implement Stringable.
+     * @throws DomainException If the Sequence contains an object that does not implement Stringable.
      */
     public function join(string $glue = ''): string
     {
         // Validate all items can be converted to strings.
         foreach ($this->items as $item) {
             if (is_object($item) && !$item instanceof Stringable) {
-                throw new ValueError(
-                    'Cannot join Sequence: contains an object of class ' . $item::class .
-                        ', which does not implement Stringable.'
+                throw new DomainException(
+                    'Cannot join Sequence: contains an object of class ' . $item::class . ', which does not ' .
+                    'implement Stringable.'
                 );
             }
         }
@@ -960,8 +958,8 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param int $count The number of items to choose (default: 1).
      * @return array<int, mixed> An array containing the chosen items (indexes and values) in random order.
-     * @throws OutOfRangeException If the Sequence is empty, the count is out of range or the Sequence doesn't
-     * have enough items to choose the specified count.
+     * @throws LengthException If the Sequence is empty or doesn't have enough items.
+     * @throws DomainException If the count is non-positive.
      * @example
      * $seq = Sequence::range(1, 10);
      * $items = $seq->chooseRand(3);
@@ -988,8 +986,8 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param int $count The number of items to remove (default: 1).
      * @return list<mixed> An array containing the removed values in random order.
-     * @throws OutOfRangeException If the Sequence is empty, the count is out of range, or the Sequence doesn't have
-     * enough items to remove the specified count.
+     * @throws LengthException If the Sequence is empty or doesn't have enough items.
+     * @throws DomainException If the count is non-positive.
      */
     public function removeRand(int $count = 1): array
     {
@@ -1025,14 +1023,14 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param mixed $offset The Sequence index position.
      * @return bool If the given index is an integer and within the current valid range for the Sequence.
-     * @throws TypeError If the index is not an integer.
+     * @throws InvalidArgumentException If the index is not an integer.
      */
     #[Override]
     public function offsetExists(mixed $offset): bool
     {
         // Check the index is an integer.
         if (!is_int($offset)) {
-            throw Types::createError('offset', 'int', $offset);
+            throw new InvalidArgumentException('Index must be an integer, ' . get_debug_type($offset) . ' given.');
         }
 
         return array_key_exists($offset, $this->items);
@@ -1043,7 +1041,7 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param mixed $offset The zero-based index position to get.
      * @return mixed The value at the specified index.
-     * @throws TypeError If the index is not an integer.
+     * @throws InvalidArgumentException If the index is not an integer.
      * @throws OutOfRangeException If the index is outside the valid range for the Sequence.
      */
     #[Override]
@@ -1062,13 +1060,13 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * If the index is out of range, the Sequence will be increased in size to accommodate it.
      * Any intermediate positions will be filled with the default value, if one can be inferred.
-     * If a default value cannot be inferred, a RuntimeException will be thrown.
+     * If a default value cannot be inferred, a DomainException will be thrown.
      *
      * @param mixed $offset The zero-based index position to set, or null to append.
      * @param mixed $value The value to set.
-     * @throws TypeError If the index is neither null nor an integer.
+     * @throws InvalidArgumentException If the index is neither null nor an integer.
      * @throws OutOfRangeException If the index is negative.
-     * @throws RuntimeException If a default value is required but could not be inferred.
+     * @throws LogicException If a default value is required but could not be inferred.
      */
     #[Override]
     public function offsetSet(mixed $offset, mixed $value): void
@@ -1077,13 +1075,11 @@ final class Sequence extends Collection implements ArrayAccess
         $this->valueTypes->checkValueType($value);
 
         if ($offset === null) {
-            // Called from $sequence[] = $value
-
+            // Called from: $sequence[] = $value
             // Append a new item to the Sequence.
             $this->append($value);
         } else {
-            // Called from $sequence[$key] = $value
-
+            // Called from: $sequence[$key] = $value
             // Check the index is valid.
             $this->checkIndex($offset, false);
 
@@ -1114,9 +1110,9 @@ final class Sequence extends Collection implements ArrayAccess
      * To remove an item from the Sequence, use one of the remove*() methods.
      *
      * @param mixed $offset The zero-based index position to unset.
-     * @throws TypeError If the index is not an integer.
+     * @throws InvalidArgumentException If the index is not an integer.
      * @throws OutOfRangeException If the index is outside the valid range for the Sequence.
-     * @throws RuntimeException If a default value could not be determined for the TypeSet.
+     * @throws LogicException If a default value could not be determined for the TypeSet.
      */
     #[Override]
     public function offsetUnset(mixed $offset): void
@@ -1153,14 +1149,14 @@ final class Sequence extends Collection implements ArrayAccess
      *
      * @param mixed $index The index to validate.
      * @param bool $checkUpperBound Whether to check if an index is within array bounds.
-     * @throws TypeError If the index is not an integer.
+     * @throws InvalidArgumentException If the index is not an integer.
      * @throws OutOfRangeException If the index is outside the valid range for the Sequence.
      */
     private function checkIndex(mixed $index, bool $checkUpperBound = true): void
     {
         // Check the index is an integer.
         if (!is_int($index)) {
-            throw Types::createError('index', 'int', $index);
+            throw new InvalidArgumentException('Index must be an integer, ' . get_debug_type($index) . ' given.');
         }
 
         // Check the index isn't negative.
@@ -1193,21 +1189,21 @@ final class Sequence extends Collection implements ArrayAccess
      * NB: This is a private helper method called from chooseRand() and removeRand(), and not part of the public API.
      *
      * @param int $count The number of indexes to choose (default: 1).
-     * @return int[] An array containing the chosen indexes.
-     * @throws OutOfRangeException If the Sequence is empty, or the count is non-positive, or the Sequence doesn't
-     * have enough items to choose the requested number of items.
+     * @return list<int> An array containing the chosen indexes.
+     * @throws LengthException If the Sequence is empty or doesn't have enough items.
+     * @throws DomainException If the count is non-positive.
      */
     private function chooseRandIndexes(int $count = 1): array
     {
         // Guards.
         if ($this->empty()) {
-            throw new OutOfRangeException('Cannot choose items from an empty Sequence.');
+            throw new LengthException('Cannot choose items from an empty Sequence.');
         }
         if ($count <= 0) {
-            throw new OutOfRangeException('Count must be greater than 0.');
+            throw new DomainException('Count must be greater than 0.');
         }
         if ($count > $this->count()) {
-            throw new OutOfRangeException("Cannot choose $count items from a Sequence with {$this->count()} items.");
+            throw new LengthException("Cannot choose $count items from a Sequence with {$this->count()} items.");
         }
 
         // Randomly choose one or more indexes.
@@ -1219,7 +1215,7 @@ final class Sequence extends Collection implements ArrayAccess
             $indexes = [$indexes];
         }
 
-        /** @var int[] $indexes */
+        /** @var list<int> $indexes */
         return $indexes;
     }
 

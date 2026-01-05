@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Set;
 
 use Galaxon\Collections\Set;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * Tests for Set add and remove methods.
@@ -56,13 +56,13 @@ class SetAddRemoveTest extends TestCase
     }
 
     /**
-     * Test add with invalid type throws TypeError.
+     * Test add with invalid type throws InvalidArgumentException.
      */
     public function testAddWithInvalidType(): void
     {
         $set = new Set('int');
 
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
         $set->add('apple');
     }
 
@@ -144,13 +144,13 @@ class SetAddRemoveTest extends TestCase
     }
 
     /**
-     * Test import throws TypeError for invalid types.
+     * Test import throws InvalidArgumentException for invalid types.
      */
-    public function testImportThrowsTypeError(): void
+    public function testImportThrowsInvalidArgumentException(): void
     {
         $set = new Set('int');
 
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
         $set->import([1, 'string', 3]);
     }
 

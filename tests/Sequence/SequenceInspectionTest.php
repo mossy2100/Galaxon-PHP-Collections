@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Sequence;
 
 use Galaxon\Collections\Sequence;
-use OutOfRangeException;
+use LengthException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -111,12 +111,12 @@ class SequenceInspectionTest extends TestCase
     }
 
     /**
-     * Test first method throws exception on empty Sequence.
+     * Test first method throws LengthException on empty Sequence.
      */
-    public function testFirstThrowsExceptionOnEmptySequence(): void
+    public function testFirstThrowsLengthExceptionOnEmptySequence(): void
     {
         // Test: Attempt to get first from empty Sequence
-        $this->expectException(OutOfRangeException::class);
+        $this->expectException(LengthException::class);
 
         $seq = new Sequence('int');
         $seq->first();
@@ -136,12 +136,12 @@ class SequenceInspectionTest extends TestCase
     }
 
     /**
-     * Test last method throws exception on empty Sequence.
+     * Test last method throws LengthException on empty Sequence.
      */
-    public function testLastThrowsExceptionOnEmptySequence(): void
+    public function testLastThrowsLengthExceptionOnEmptySequence(): void
     {
         // Test: Attempt to get last from empty Sequence
-        $this->expectException(OutOfRangeException::class);
+        $this->expectException(LengthException::class);
 
         $seq = new Sequence('int');
         $seq->last();

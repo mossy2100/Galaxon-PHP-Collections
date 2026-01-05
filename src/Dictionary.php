@@ -6,14 +6,15 @@ namespace Galaxon\Collections;
 
 use ArgumentCountError;
 use ArrayAccess;
+use DomainException;
 use Galaxon\Core\Stringify;
 use Galaxon\Core\Types;
+use InvalidArgumentException;
+use LengthException;
 use OutOfBoundsException;
 use Override;
-use RuntimeException;
 use Traversable;
-use TypeError;
-use ValueError;
+use UnexpectedValueException;
 
 /**
  * Dictionary class that permits keys and values of any type, including scalar, complex, nullable,
@@ -49,7 +50,7 @@ final class Dictionary extends Collection implements ArrayAccess
     /**
      * Get all the keys as an array.
      *
-     * @var mixed[]
+     * @var list<mixed>
      */
     public array $keys {
         get {
@@ -65,7 +66,7 @@ final class Dictionary extends Collection implements ArrayAccess
     /**
      * Get all the values as an array.
      *
-     * @var mixed[]
+     * @var list<mixed>
      */
     public array $values {
         get {
@@ -99,8 +100,9 @@ final class Dictionary extends Collection implements ArrayAccess
      * @param null|string|iterable<string>|true $keyTypes Allowed key types (default true, for infer).
      * @param null|string|iterable<string>|true $valueTypes Allowed value types (default true, for infer).
      * @param iterable<mixed, mixed> $source A source iterable to import key-value pairs from (optional).
-     * @throws ValueError If a type name is invalid.
-     * @throws TypeError If a type name is not specified as a string, or any imported keys/values have disallowed types.
+     * @throws DomainException If a type name is invalid.
+     * @throws InvalidArgumentException If a type name is not specified as a string, or any imported keys/values have
+     * disallowed types.
      */
     public function __construct(
         null|string|iterable|true $keyTypes = true,
@@ -144,7 +146,8 @@ final class Dictionary extends Collection implements ArrayAccess
      * @param iterable<mixed> $values The values for the Dictionary.
      * @param bool $inferTypes Whether to infer the key and value types (default true).
      * @return self A new Dictionary with the combined keys and values.
-     * @throws ValueError If the iterables have different counts or if keys are not unique.
+     * @throws LengthException If the iterables have different counts.
+     * @throws OutOfBoundsException If the keys are not unique.
      */
     public static function combine(iterable $keys, iterable $values, bool $inferTypes = true): self
     {
@@ -156,7 +159,9 @@ final class Dictionary extends Collection implements ArrayAccess
         $keyCount = count($keysArray);
         $valueCount = count($valuesArray);
         if ($keyCount !== $valueCount) {
-            throw new ValueError("Cannot combine: keys count ($keyCount) does not match values count ($valueCount).");
+            throw new LengthException(
+                "Cannot combine: keys count ($keyCount) does not match values count ($valueCount)."
+            );
         }
 
         // Create a new Dictionary and add items, checking for duplicate keys along the way.
@@ -167,7 +172,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Check for duplicate keys.
             if (isset($dict[$key])) {
-                throw new ValueError('Cannot combine: keys are not unique.');
+                throw new OutOfBoundsException('Cannot combine: keys are not unique.');
             }
 
             // Get the value.
@@ -199,21 +204,20 @@ final class Dictionary extends Collection implements ArrayAccess
      * @param mixed $keyOrPair The key (two-param form), or a Pair (one-param form).
      * @param mixed $value The value (two-param form), or null (one-param form).
      * @return $this The modified Dictionary.
-     * @throws TypeError If the key or value has a disallowed type.
+     * @throws InvalidArgumentException If the one-param form is used, and the argument is not a Pair; or if the key
+     * or value has a disallowed type.
      * @throws ArgumentCountError If the wrong number of parameters is supplied.
-     * @throws TypeError If the one-param form is used and the argument is not a valid Pair.
      */
     public function add(mixed $keyOrPair, mixed $value = null): self
     {
         // Support calling the method with one parameter only (a Pair).
         $nArgs = func_num_args();
         if ($nArgs === 1) {
-            if ($keyOrPair instanceof Pair) {
-                $key = $keyOrPair->key;
-                $value = $keyOrPair->value;
-            } else {
-                throw new TypeError('Invalid key-value pair: ' . Stringify::abbrev($keyOrPair));
+            if (!$keyOrPair instanceof Pair) {
+                throw new InvalidArgumentException('Pair object expected, got ' . get_debug_type($keyOrPair) . '.');
             }
+            $key = $keyOrPair->key;
+            $value = $keyOrPair->value;
         } elseif ($nArgs === 2) {
             $key = $keyOrPair;
         } else {
@@ -236,7 +240,6 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * @param iterable<mixed, mixed> $source The source iterable.
      * @return $this The calling object.
-     * @throws TypeError If any of the keys or values have a disallowed type.
      */
     #[Override]
     public function import(iterable $source): static
@@ -255,7 +258,7 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * @param mixed $key The key to remove.
      * @return mixed The value of the removed item.
-     * @throws TypeError If the key has a disallowed type.
+     * @throws InvalidArgumentException If the key has a disallowed type.
      * @throws OutOfBoundsException If the Dictionary does not contain the given key.
      */
     public function removeByKey(mixed $key): mixed
@@ -282,7 +285,7 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * @param mixed $value The value to remove.
      * @return int The number of items removed.
-     * @throws TypeError If the value has a disallowed type.
+     * @throws InvalidArgumentException If the value has a disallowed type.
      */
     public function removeByValue(mixed $value): int
     {
@@ -404,15 +407,11 @@ final class Dictionary extends Collection implements ArrayAccess
      * The resulting Dictionary will have the same type constraints, and will only contain the key-value pairs that
      * the filter callback returns true for.
      *
-     * The callback must accept two parameters, for the key and the value, and return a bool.
-     * It can accept more than two parameters, but any additional parameters must be optional.
-     * Also, the callback's parameter types should match the dictionary's allowed key and value types.
+     * The callback must accept one parameter, a Pair, and return a bool.
      *
-     * @param callable $callback A callback function that accepts a key and a value, and returns a bool.
+     * @param callable $callback A callback function that accepts a Pair and returns a bool.
      * @return self A new dictionary with the kept key-value pairs.
-     * @throws TypeError If the callback's parameter types don't match the dictionary's key and value types.
-     * Note also that the callback could throw other kinds of exceptions, or it could throw a TypeError for some
-     * other reason.
+     * @throws UnexpectedValueException If the callback doesn't return a bool.
      */
     #[Override]
     public function filter(callable $callback): static
@@ -425,11 +424,13 @@ final class Dictionary extends Collection implements ArrayAccess
             /** @var Pair $pair */
 
             // See if we want to keep this pair.
-            $keep = $callback($pair->key, $pair->value);
+            $keep = $callback($pair);
 
             // Validate the result of the callback.
             if (!is_bool($keep)) {
-                throw new TypeError('The filter callback must return a bool, got ' . Types::getBasicType($keep) . '.');
+                throw new UnexpectedValueException(
+                    'Callback must return a bool, got ' . Types::getBasicType($keep) . '.'
+                );
             }
 
             // Add pair to keep to the result dictionary.
@@ -447,7 +448,7 @@ final class Dictionary extends Collection implements ArrayAccess
      * All values in the Dictionary must be unique for flip to succeed.
      *
      * @return self A new Dictionary with keys and values swapped.
-     * @throws RuntimeException If the Dictionary contains duplicate values.
+     * @throws OutOfBoundsException If the Dictionary contains duplicate values.
      */
     public function flip(): self
     {
@@ -460,7 +461,7 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Check if this value already exists as a key in the result.
             if ($result->keyExists($pair->value)) {
-                throw new RuntimeException('Cannot flip Dictionary: values are not unique.');
+                throw new OutOfBoundsException('Cannot flip Dictionary: values are not unique.');
             }
 
             // Add the flipped key-value pair to the result. Calls offsetSet().
@@ -483,8 +484,8 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * @param callable(Pair): Pair $fn The callback function to apply to each item.
      * @return self A new Dictionary containing the transformed key-value pairs.
-     * @throws TypeError If the callback doesn't return a Pair.
-     * @throws RuntimeException If the callback produces duplicate keys.
+     * @throws UnexpectedValueException If the callback doesn't return a Pair.
+     * @throws OutOfBoundsException If the callback produces duplicate keys.
      *
      * @example
      *   $dict = new Dictionary('string', 'int');
@@ -515,13 +516,16 @@ final class Dictionary extends Collection implements ArrayAccess
 
             // Validate the result is a Pair.
             if (!$newPair instanceof Pair) {
-                throw new TypeError('Map callback must return a Pair, got ' . Types::getBasicType($newPair) . '.');
+                throw new UnexpectedValueException(
+                    'Callback must return a Pair, got ' . Types::getBasicType($newPair) . '.'
+                );
             }
 
             // Check for duplicate keys.
             if ($result->keyExists($newPair->key)) {
-                throw new RuntimeException('Map callback produced a duplicate key: ' .
-                                           Stringify::abbrev($newPair->key) . '.');
+                throw new OutOfBoundsException(
+                    'Callback produced a duplicate key: ' . Stringify::abbrev($newPair->key) . '.'
+                );
             }
 
             // Add the types.
@@ -648,7 +652,7 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * @param mixed $offset The key to get.
      * @return mixed The value of the item.
-     * @throws TypeError If the offset (key) has a disallowed type.
+     * @throws InvalidArgumentException If the offset (key) has a disallowed type.
      * @throws OutOfBoundsException If the Dictionary does not contain the given key.
      */
     #[Override]
@@ -670,19 +674,21 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * If a key is in use, the corresponding key-value pair will be replaced.
      * If not, a new key-value pair will be added to the dictionary.
-     * Both the key and value types will be checked, and if either is invalid, a TypeError will be thrown.
+     * Both the key and value types will be checked, and if either is invalid, a InvalidArgumentException will be
+     * thrown.
      *
      * NB: If no offset is specified (e.g. $dict[] = $value), the $offset parameter value will be null.
      * There's no way to know if the offset was not provided (i.e. $dict[]) or was null (i.e. $dict[null]).
      * Thus, if no offset is given, the Dictionary key is taken to be null, if null is an allowed key type.
-     * If not, a TypeError will be thrown.
+     * If not, a InvalidArgumentException will be thrown.
      * This behavior means if multiple $dict[] = $value expressions are used, the effect will not be to append
      * multiple values to the dictionary, as with an ordinary PHP array.
      * Rather, it will keep setting the value for the null key.
+     * if this is a problem for users we could disallow null keys, but for now we'll allow them.
      *
      * @param mixed $offset The key to set.
      * @param mixed $value The value to set.
-     * @throws TypeError If the offset (key) or value has a disallowed type.
+     * @throws InvalidArgumentException If the offset (key) or value has a disallowed type.
      */
     #[Override]
     public function offsetSet(mixed $offset, mixed $value): void
@@ -703,7 +709,7 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * @param mixed $offset The key to unset.
      * @return void
-     * @throws TypeError If the offset (key) has a disallowed type.
+     * @throws InvalidArgumentException If the offset (key) has a disallowed type.
      * @throws OutOfBoundsException If the Dictionary does not contain the given key.
      */
     #[Override]
@@ -744,7 +750,7 @@ final class Dictionary extends Collection implements ArrayAccess
      *
      * @param mixed $key The key to validate.
      * @return string The key as a corresponding index string.
-     * @throws TypeError If the key has a disallowed type.
+     * @throws InvalidArgumentException If the key has a disallowed type.
      * @throws OutOfBoundsException If the key does not exist in the Dictionary.
      */
     private function checkKey(mixed $key): string

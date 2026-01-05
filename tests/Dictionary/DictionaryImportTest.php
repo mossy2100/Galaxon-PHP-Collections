@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Dictionary;
 
 use Galaxon\Collections\Dictionary;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * Tests for Dictionary import() method.
@@ -23,7 +23,10 @@ class DictionaryImportTest extends TestCase
         // Test: Import items from an array
         $dict = new Dictionary('string', 'int');
         $dict->add('a', 1);
-        $result = $dict->import(['b' => 2, 'c' => 3]);
+        $result = $dict->import([
+            'b' => 2,
+            'c' => 3,
+        ]);
 
         // Test: Verify items were imported
         $this->assertSame($dict, $result); // Returns $this for chaining
@@ -82,7 +85,10 @@ class DictionaryImportTest extends TestCase
         $dict = new Dictionary('string', 'int');
         $dict->add('a', 1);
         $dict->add('b', 2);
-        $dict->import(['c' => 3, 'd' => 4]);
+        $dict->import([
+            'c' => 3,
+            'd' => 4,
+        ]);
 
         // Test: Verify existing items preserved
         $this->assertCount(4, $dict);
@@ -99,9 +105,18 @@ class DictionaryImportTest extends TestCase
     {
         // Test: Chain multiple import calls
         $dict = new Dictionary('string', 'int');
-        $dict->import(['a' => 1, 'b' => 2])
-            ->import(['c' => 3, 'd' => 4])
-            ->import(['e' => 5, 'f' => 6]);
+        $dict->import([
+            'a' => 1,
+            'b' => 2,
+        ])
+            ->import([
+                'c' => 3,
+                'd' => 4,
+            ])
+            ->import([
+                'e' => 5,
+                'f' => 6,
+            ]);
 
         // Test: Verify all items imported
         $this->assertCount(6, $dict);
@@ -110,27 +125,31 @@ class DictionaryImportTest extends TestCase
     }
 
     /**
-     * Test import throws TypeError for invalid value types.
+     * Test import throws InvalidArgumentException for invalid value types.
      */
-    public function testImportThrowsTypeErrorForInvalidValueTypes(): void
+    public function testImportThrowsInvalidArgumentExceptionForInvalidValueTypes(): void
     {
         // Test: Attempt to import items with wrong value type
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $dict = new Dictionary('string', 'int');
-        $dict->import(['key' => 'invalid']); // String value, int expected
+        $dict->import([
+            'key' => 'invalid',
+        ]); // String value, int expected
     }
 
     /**
-     * Test import throws TypeError for invalid key types.
+     * Test import throws InvalidArgumentException for invalid key types.
      */
-    public function testImportThrowsTypeErrorForInvalidKeyTypes(): void
+    public function testImportThrowsInvalidArgumentExceptionForInvalidKeyTypes(): void
     {
         // Test: Attempt to import items with wrong key type
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $dict = new Dictionary('string', 'int');
-        $dict->import([123 => 1]); // Int key, string expected
+        $dict->import([
+            123 => 1,
+        ]); // Int key, string expected
     }
 
     /**
@@ -143,7 +162,10 @@ class DictionaryImportTest extends TestCase
         $dict->add('a', 1);
         $dict->add('b', 2);
 
-        $dict->import(['b' => 20, 'c' => 3]);
+        $dict->import([
+            'b' => 20,
+            'c' => 3,
+        ]);
 
         // Test: Verify overlapping key has updated value
         $this->assertCount(3, $dict);
@@ -179,16 +201,20 @@ class DictionaryImportTest extends TestCase
     /**
      * Test import stops on first type error.
      */
-    public function testImportStopsOnFirstTypeError(): void
+    public function testImportStopsOnFirstInvalidArgumentException(): void
     {
         // Test: Verify import stops at first invalid type
         $dict = new Dictionary('string', 'int');
         $dict->add('a', 1);
 
         try {
-            $dict->import(['b' => 2, 'c' => 'invalid', 'd' => 4]);
-            $this->fail('Expected TypeError was not thrown');
-        } catch (TypeError) {
+            $dict->import([
+                'b' => 2,
+                'c' => 'invalid',
+                'd' => 4,
+            ]);
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException) {
             // Test: Verify only valid items before error were imported
             $this->assertCount(2, $dict); // 'a', 'b'
             $this->assertSame(2, $dict['b']);
@@ -205,10 +231,11 @@ class DictionaryImportTest extends TestCase
         // Test: Import into Dictionary with union type constraints
         $dict = new Dictionary('int|string', 'int|string');
         $dict->import([
-            1 => 'one',
-            'two' => 2,
-            3 => 'three',
-            'four' => 4
+            1      => 'one',
+            'two'  => 2,
+            3      => 'three',
+            'four' => 4,
+
         ]);
 
         // Test: Verify both key and value types accepted
@@ -226,7 +253,11 @@ class DictionaryImportTest extends TestCase
     {
         // Test: Import into a new empty Dictionary
         $dict = new Dictionary('string', 'int');
-        $dict->import(['a' => 10, 'b' => 20, 'c' => 30]);
+        $dict->import([
+            'a' => 10,
+            'b' => 20,
+            'c' => 30,
+        ]);
 
         // Test: Verify items imported
         $this->assertCount(3, $dict);
@@ -243,8 +274,9 @@ class DictionaryImportTest extends TestCase
         $dict = new Dictionary('string', 'string');
         $dict->import([
             'first_name' => 'John',
-            'last_name' => 'Doe',
-            'email' => 'john@example.com'
+            'last_name'  => 'Doe',
+            'email'      => 'john@example.com',
+
         ]);
 
         // Test: Verify all key-value pairs imported
@@ -262,7 +294,10 @@ class DictionaryImportTest extends TestCase
         // Test: Import items and verify order
         $dict = new Dictionary('string', 'int');
         $dict->add('first', 1);
-        $dict->import(['second' => 2, 'third' => 3]);
+        $dict->import([
+            'second' => 2,
+            'third'  => 3,
+        ]);
 
         // Test: Verify order is maintained
         $keys = $dict->keys;

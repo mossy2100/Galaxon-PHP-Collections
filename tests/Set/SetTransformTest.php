@@ -7,7 +7,7 @@ namespace Galaxon\Collections\Tests\Set;
 use Galaxon\Collections\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
+use UnexpectedValueException;
 
 /**
  * Tests for Set transformation methods.
@@ -81,8 +81,8 @@ class SetTransformTest extends TestCase
         $set = new Set('int');
         $set->add(1, 2, 3);
 
-        // Test callback returning non-bool throws TypeError.
-        $this->expectException(TypeError::class);
+        // Test callback returning non-bool throws UnexpectedValueException.
+        $this->expectException(UnexpectedValueException::class);
         $set->filter(static fn ($value) => $value); // Returns int, not bool
     }
 

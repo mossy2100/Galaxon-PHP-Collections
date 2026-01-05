@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Sequence;
 
 use Galaxon\Collections\Sequence;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * Tests for Sequence import() method.
@@ -129,12 +129,12 @@ class SequenceImportTest extends TestCase
     }
 
     /**
-     * Test import throws TypeError for invalid types.
+     * Test import throws InvalidArgumentException for invalid types.
      */
-    public function testImportThrowsTypeErrorForInvalidTypes(): void
+    public function testImportThrowsInvalidArgumentExceptionForInvalidTypes(): void
     {
         // Test: Attempt to import items with wrong type
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $seq = new Sequence('int');
         $seq->import(['string', 'values']);
@@ -161,7 +161,7 @@ class SequenceImportTest extends TestCase
     /**
      * Test import stops on first type error.
      */
-    public function testImportStopsOnFirstTypeError(): void
+    public function testImportStopsOnFirstInvalidArgumentException(): void
     {
         // Test: Verify import stops at first invalid type
         $seq = new Sequence('int');
@@ -169,8 +169,8 @@ class SequenceImportTest extends TestCase
 
         try {
             $seq->import([3, 4, 'invalid', 5, 6]);
-            $this->fail('Expected TypeError was not thrown');
-        } catch (TypeError) {
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException) {
             // Test: Verify only valid items before error were imported
             $this->assertCount(4, $seq); // 1, 2, 3, 4
             $this->assertSame(4, $seq[3]);
@@ -201,7 +201,11 @@ class SequenceImportTest extends TestCase
     {
         // Test: Import from associative array
         $seq = new Sequence('string');
-        $seq->import(['a' => 'apple', 'b' => 'banana', 'c' => 'cherry']);
+        $seq->import([
+            'a' => 'apple',
+            'b' => 'banana',
+            'c' => 'cherry',
+        ]);
 
         // Test: Verify values imported with sequential indexes
         $this->assertCount(3, $seq);

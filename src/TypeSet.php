@@ -6,15 +6,15 @@ namespace Galaxon\Collections;
 
 use ArrayIterator;
 use Countable;
+use DomainException;
 use Galaxon\Core\Numbers;
 use Galaxon\Core\Types;
+use InvalidArgumentException;
 use IteratorAggregate;
-use RuntimeException;
+use LogicException;
 use stdClass;
 use Stringable;
 use Traversable;
-use TypeError;
-use ValueError;
 
 /**
  * Encapsulates a set of types, represented as strings.
@@ -90,8 +90,8 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      * - iterable = Array or other collection of type names, e.g. ['string', 'int']
      *
      * @param null|string|iterable<string> $types The types to add to the TypeSet (default null).
-     * @throws TypeError If a type is not specified as a string.
-     * @throws ValueError If a type name is invalid.
+     * @throws InvalidArgumentException If a type is not specified as a string.
+     * @throws DomainException If a type name is invalid.
      */
     public function __construct(null|string|iterable $types = null)
     {
@@ -110,8 +110,8 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      *
      * @param string|iterable<string> $types The types to add to the TypeSet.
      * @return $this The modified TypeSet.
-     * @throws TypeError If a type is not provided as a string.
-     * @throws ValueError If a type name is invalid.
+     * @throws InvalidArgumentException If a type is not provided as a string.
+     * @throws DomainException If a type name is invalid.
      */
     public function add(string|iterable $types): self
     {
@@ -124,7 +124,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
         foreach ($types as $type) {
             // Check the type.
             if (!is_string($type)) {
-                throw new TypeError('Types must be provided as strings.');
+                throw new InvalidArgumentException('Types must be provided as strings.');
             }
 
             // Trim in case the user did something like 'string | int'.
@@ -151,8 +151,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      * Get the type name from a value and add it to the TypeSet.
      *
      * @param mixed $value The value to get the type name from.
-     * @return $this The modified set.
-     * @throws ValueError If the type name is invalid.
+     * @return $this The modified TypeSet.
      */
     public function addValueType(mixed $value): self
     {
@@ -322,13 +321,14 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      *
      * @param mixed $value The value to check.
      * @param string $label Optional label to include in error message (e.g., 'key', 'value').
-     * @throws TypeError If the type is not allowed by the TypeSet.
+     * @throws InvalidArgumentException If the value's type is not allowed by the TypeSet.
      */
     public function checkValueType(mixed $value, string $label = ''): void
     {
         if (!$this->match($value)) {
-            $msg = 'Disallowed ' . ($label ? $label . ' ' : '') . 'type: ' . get_debug_type($value) . '.';
-            throw new TypeError($msg);
+            throw new InvalidArgumentException(
+                'Disallowed ' . ($label ? $label . ' ' : '') . 'type: ' . get_debug_type($value) . '.'
+            );
         }
     }
 
@@ -340,27 +340,39 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      * Get the default value for this type set.
      *
      * @return mixed The default value.
-     * @throws RuntimeException If no default value could be determined for this type set.
+     * @throws LogicException If no default value could be determined for this type set.
      */
     public function getDefaultValue(): mixed
     {
         if ($this->nullOk()) {
             return null;
-        } elseif ($this->contains('bool')) {
+        }
+
+        if ($this->contains('bool')) {
             return false;
-        } elseif ($this->containsAny('int', 'number', 'scalar')) {
+        }
+
+        if ($this->containsAny('int', 'number', 'scalar')) {
             return 0;
-        } elseif ($this->contains('float')) {
+        }
+
+        if ($this->contains('float')) {
             return 0.0;
-        } elseif ($this->contains('string')) {
+        }
+
+        if ($this->contains('string')) {
             return '';
-        } elseif ($this->containsAny('array', 'iterable')) {
+        }
+
+        if ($this->containsAny('array', 'iterable')) {
             return [];
-        } elseif ($this->contains('object')) {
+        }
+
+        if ($this->contains('object')) {
             return new stdClass();
         }
 
-        throw new RuntimeException(
+        throw new LogicException(
             "No default value could be determined for this TypeSet. Consider adding 'null' to the TypeSet."
         );
     }
@@ -505,8 +517,8 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
      * This is a private helper method called from add().
      *
      * @param string $type The type to add to the set.
-     * @return $this The modified set.
-     * @throws ValueError If the type name is invalid.
+     * @return $this The modified TypeSet.
+     * @throws DomainException If the type name is invalid.
      * @see TypeSet::isValid()
      */
     private function addType(string $type): self
@@ -516,7 +528,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
 
         // Check if the type string is valid. This isn't bulletproof, but it will prevent most incorrect strings.
         if (!self::isValid($type)) {
-            throw new ValueError("Invalid type: $type.");
+            throw new DomainException("Invalid type: $type.");
         }
 
         // Add the type if new.

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Galaxon\Collections\Tests\Dictionary;
 
 use Galaxon\Collections\Dictionary;
+use InvalidArgumentException;
 use OutOfBoundsException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * Tests for Dictionary ArrayAccess implementation.
@@ -63,38 +63,38 @@ class DictionaryArrayAccessTest extends TestCase
     }
 
     /**
-     * Test offsetSet with null key when null is not allowed throws TypeError.
+     * Test offsetSet with null key when null is not allowed throws InvalidArgumentException.
      */
     public function testOffsetSetWithNullKeyNotAllowed(): void
     {
         $dict = new Dictionary('string', 'int');
 
-        // Test setting with null key throws TypeError.
-        $this->expectException(TypeError::class);
+        // Test setting with null key throws InvalidArgumentException.
+        $this->expectException(InvalidArgumentException::class);
         $dict[] = 123;
     }
 
     /**
-     * Test offsetSet with invalid key type throws TypeError.
+     * Test offsetSet with invalid key type throws InvalidArgumentException.
      */
     public function testOffsetSetInvalidKeyType(): void
     {
         $dict = new Dictionary('string', 'int');
 
-        // Test setting with invalid key type throws TypeError.
-        $this->expectException(TypeError::class);
+        // Test setting with invalid key type throws InvalidArgumentException.
+        $this->expectException(InvalidArgumentException::class);
         $dict[123] = 456;
     }
 
     /**
-     * Test offsetSet with invalid value type throws TypeError.
+     * Test offsetSet with invalid value type throws InvalidArgumentException.
      */
     public function testOffsetSetInvalidValueType(): void
     {
         $dict = new Dictionary('string', 'int');
 
-        // Test setting with invalid value type throws TypeError.
-        $this->expectException(TypeError::class);
+        // Test setting with invalid value type throws InvalidArgumentException.
+        $this->expectException(InvalidArgumentException::class);
         $dict['key'] = 'not an int';
     }
 

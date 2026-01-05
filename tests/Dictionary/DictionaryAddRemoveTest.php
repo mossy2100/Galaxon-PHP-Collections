@@ -7,10 +7,10 @@ namespace Galaxon\Collections\Tests\Dictionary;
 use ArgumentCountError;
 use Galaxon\Collections\Dictionary;
 use Galaxon\Collections\Pair;
+use InvalidArgumentException;
 use OutOfBoundsException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 /**
  * Tests for Dictionary add and remove methods.
@@ -53,14 +53,14 @@ class DictionaryAddRemoveTest extends TestCase
     }
 
     /**
-     * Test adding with invalid single parameter throws TypeError.
+     * Test adding with invalid single parameter throws InvalidArgumentException.
      */
     public function testAddWithInvalidSingleParameter(): void
     {
         $dict = new Dictionary();
 
-        // Test adding with an invalid single parameter throws TypeError.
-        $this->expectException(TypeError::class);
+        // Test adding with an invalid single parameter throws InvalidArgumentException.
+        $this->expectException(InvalidArgumentException::class);
         $dict->add('invalid');
     }
 
@@ -77,26 +77,26 @@ class DictionaryAddRemoveTest extends TestCase
     }
 
     /**
-     * Test adding with invalid key type throws TypeError.
+     * Test adding with invalid key type throws InvalidArgumentException.
      */
     public function testAddWithInvalidKeyType(): void
     {
         $dict = new Dictionary('string', 'int');
 
-        // Test adding with invalid key type throws TypeError.
-        $this->expectException(TypeError::class);
+        // Test adding with invalid key type throws InvalidArgumentException.
+        $this->expectException(InvalidArgumentException::class);
         $dict->add(123, 456);
     }
 
     /**
-     * Test adding with invalid value type throws TypeError.
+     * Test adding with invalid value type throws InvalidArgumentException.
      */
     public function testAddWithInvalidValueType(): void
     {
         $dict = new Dictionary('string', 'int');
 
-        // Test adding with invalid value type throws TypeError.
-        $this->expectException(TypeError::class);
+        // Test adding with invalid value type throws InvalidArgumentException.
+        $this->expectException(InvalidArgumentException::class);
         $dict->add('key', 'not an int');
     }
 
@@ -168,7 +168,7 @@ class DictionaryAddRemoveTest extends TestCase
     }
 
     /**
-     * Test removeByKey with key with disallowed type throws TypeError.
+     * Test removeByKey with key with disallowed type throws InvalidArgumentException.
      */
     public function testRemoveByKeyDisallowedType(): void
     {
@@ -176,7 +176,7 @@ class DictionaryAddRemoveTest extends TestCase
         $dict->add('a', 1);
 
         // Test removing a key with an invalid type throws exception.
-        $this->expectException(TypeError::class);
+        $this->expectException(InvalidArgumentException::class);
         $dict->removeByKey(3.14);
     }
 

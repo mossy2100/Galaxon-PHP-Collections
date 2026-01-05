@@ -81,7 +81,7 @@ class DictionaryConversionTest extends TestCase
         $dict->add('third', 3);
 
         // Test array entries are in insertion order.
-        /** @var Pair[] $array */
+        /** @var list<Pair> $array */
         $array = $dict->toArray();
 
         $this->assertEquals('first', $array[0]->key);
@@ -249,7 +249,11 @@ class DictionaryConversionTest extends TestCase
 
         // Test associative array is created.
         $this->assertIsArray($array);
-        $this->assertEquals(['a' => 1, 'b' => 2, 'c' => 3], $array);
+        $this->assertEquals([
+            'a' => 1,
+            'b' => 2,
+            'c' => 3,
+        ], $array);
     }
 
     /**
