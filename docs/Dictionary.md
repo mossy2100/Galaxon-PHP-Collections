@@ -2,6 +2,8 @@
 
 A type-safe key-value collection that accepts any PHP type for both keys and values.
 
+---
+
 ## Overview
 
 Dictionary provides a flexible key-value store that overcomes PHP array limitations. While PHP arrays only accept `string` or `int` keys, Dictionary lets you use values of any type.
@@ -24,7 +26,17 @@ $dict[true] = 'yes';                    // Boolean keys
 $dict[null] = 'empty';                  // Null key
 ```
 
+---
+
 ## Properties
+
+### items
+
+Inherited from [Collection](Collection.md#items). Internal array storage for the dictionary's Pair objects, keyed by the unique string representation of each Pair's key.
+
+### valueTypes
+
+Inherited from [Collection](Collection.md#valueTypes). TypeSet managing allowed value types for the Dictionary.
 
 ### keyTypes
 
@@ -73,9 +85,11 @@ $dict = new Dictionary(source: ['a' => 1, 'b' => 2, 'c' => 3]);
 $values = $dict->values; // [1, 2, 3]
 ```
 
+---
+
 ## Constructor
 
-### __construct()
+### \_\_construct()
 
 ```php
 public function __construct(
@@ -139,6 +153,8 @@ $generator = function() {
 };
 $dict = new Dictionary(source: $generator());
 ```
+
+---
 
 ## Factory Methods
 
@@ -551,7 +567,7 @@ $merged = $dict1->merge($dict2);
 
 ## Conversion Methods
 
-### __toString()
+### \_\_toString()
 
 ```php
 public function __toString(): string

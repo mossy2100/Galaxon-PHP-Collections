@@ -424,7 +424,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test callback returning non-Pair throws UnexpectedValueException.
         $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Callback must return a Pair, got int.');
+        $this->expectExceptionMessage('Cannot map: callback returned int, expected Pair.');
         // @phpstan-ignore binaryOp.invalid
         $dict->map(static fn ($pair) => $pair->value * 2); // Returns int, not Pair
     }
@@ -441,7 +441,7 @@ class DictionaryTransformTest extends TestCase
 
         // Test mapping to same key throws OutOfBoundsException.
         $this->expectException(OutOfBoundsException::class);
-        $this->expectExceptionMessage('Callback produced a duplicate key: "same".');
+        $this->expectExceptionMessage("Callback produced a duplicate key: 'same'.");
         $dict->map(static fn ($pair) => new Pair('same', $pair->value));
     }
 

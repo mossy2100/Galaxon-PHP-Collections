@@ -346,7 +346,7 @@ class SequenceConstructorTest extends TestCase
     {
         // Test: Attempt to create range with zero step
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('The step size cannot be zero');
+        $this->expectExceptionMessage('Cannot create range with a zero step size');
 
         Sequence::range(1, 10, 0);
     }
@@ -358,7 +358,7 @@ class SequenceConstructorTest extends TestCase
     {
         // Test: Attempt descending range with positive step
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('The step size must be negative for a decreasing range');
+        $this->expectExceptionMessage('Cannot create a decreasing range with a positive step size');
 
         Sequence::range(10, 1, 1);
     }
@@ -370,7 +370,7 @@ class SequenceConstructorTest extends TestCase
     {
         // Test: Attempt ascending range with negative step
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('The step size must be positive for an increasing range');
+        $this->expectExceptionMessage('Cannot create an increasing range with a negative step size');
 
         Sequence::range(1, 10, -1);
     }

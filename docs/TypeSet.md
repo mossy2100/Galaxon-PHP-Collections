@@ -74,7 +74,7 @@ The set of type names. Uses PHP 8.4 asymmetric visibility - readable internally,
 
 ## Constructor
 
-### __construct()
+### \_\_construct()
 
 ```php
 public function __construct(null|string|iterable $types = null)
@@ -384,7 +384,7 @@ $ts->checkValueType('text', 'age');    // TypeError: Disallowed age type: string
 public function getDefaultValue(): mixed
 ```
 
-Get a sensible default value based on the types in the TypeSet. Throws `DomainException` if no default can be determined.
+Get a sensible default value based on the types in the TypeSet. Throws `LogicException` if no default can be determined.
 
 **Default Value Rules (in priority order):**
 
@@ -395,7 +395,7 @@ Get a sensible default value based on the types in the TypeSet. Throws `DomainEx
 5. `string` → `''` (empty string)
 6. `array` or `iterable` → `[]` (empty array)
 7. `object` → `new stdClass()`
-8. Other types → throws `RuntimeException`
+8. Other types → throws `LogicException`
 
 **Examples:**
 ```php
@@ -416,7 +416,7 @@ $default = $ts->getDefaultValue(); // new stdClass()
 
 $ts = new TypeSet('DateTime');
 $default = $ts->getDefaultValue();
-// DomainException: No default value could be determined for this TypeSet.
+// LogicException: Cannot determine a default value for this TypeSet.
 ```
 
 ## Aggregation Methods
@@ -437,7 +437,7 @@ echo $ts->count(); // 3
 
 ## Conversion Methods
 
-### __toString()
+### \_\_toString()
 
 ```php
 public function __toString(): string

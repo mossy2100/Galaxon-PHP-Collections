@@ -591,7 +591,7 @@ class SequenceTransformationTest extends TestCase
     {
         // Test: Attempt to find max of empty Sequence
         $this->expectException(LengthException::class);
-        $this->expectExceptionMessage('Cannot find the maximum value of empty Sequence.');
+        $this->expectExceptionMessage('Cannot find the maximum value of an empty Sequence.');
 
         $seq = new Sequence('int');
         $seq->max();
@@ -656,7 +656,7 @@ class SequenceTransformationTest extends TestCase
     {
         // Test: Attempt to find average of empty Sequence
         $this->expectException(LengthException::class);
-        $this->expectExceptionMessage('Cannot calculate the average value of empty Sequence.');
+        $this->expectExceptionMessage('Cannot calculate the average of an empty Sequence.');
 
         $seq = new Sequence('int');
         $seq->average();
@@ -715,19 +715,14 @@ class SequenceTransformationTest extends TestCase
     }
 
     /**
-     * Test join method with objects that don't implement __toString().
+     * Test join method with non-Stringable objects converts via Stringify.
      */
     public function testJoinWithNonStringableObjects(): void
     {
-        // Test: Join with objects that can't be converted to strings
         $seq = new Sequence('object');
         $seq->append(new stdClass(), new stdClass());
 
-        // Test: Verify DomainException is thrown for non-stringable objects
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage(
-            'Cannot join Sequence: contains an object of class stdClass, which does not implement Stringable.'
-        );
-        $seq->join(', ');
+        $result = $seq->join(', ');
+        $this->assertSame('stdClass {}, stdClass {}', $result);
     }
 }

@@ -652,7 +652,7 @@ class TypeSetTest extends TestCase
     public function testGetDefaultValueThrowsForDateTime(): void
     {
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('No default value could be determined for this TypeSet');
+        $this->expectExceptionMessage('Cannot determine a default value for this TypeSet');
 
         $ts = new TypeSet('DateTime');
         $ts->getDefaultValue();
@@ -664,7 +664,7 @@ class TypeSetTest extends TestCase
     public function testGetDefaultValueThrowsForCallable(): void
     {
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('No default value could be determined for this TypeSet');
+        $this->expectExceptionMessage('Cannot determine a default value for this TypeSet');
 
         $ts = new TypeSet('callable');
         $ts->getDefaultValue();

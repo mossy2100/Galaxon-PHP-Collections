@@ -54,7 +54,7 @@ echo $pair->value; // 'Alice'
 
 ## Constructor
 
-### __construct()
+### \_\_construct()
 
 ```php
 public function __construct(public mixed $key, public mixed $value)

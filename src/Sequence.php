@@ -8,12 +8,12 @@ use ArrayAccess;
 use ArrayIterator;
 use DomainException;
 use Galaxon\Core\Numbers;
+use Galaxon\Core\Strings;
 use InvalidArgumentException;
 use LengthException;
 use LogicException;
 use OutOfRangeException;
 use Override;
-use Stringable;
 use Traversable;
 
 /**
@@ -145,14 +145,14 @@ final class Sequence extends Collection implements ArrayAccess
     public static function range(int|float $start, int|float $end, int|float $step = 1): self
     {
         // Validate step size. Use loose comparison here to validate either an int or float argument.
-        if (Numbers::equal($step, 0)) {
-            throw new DomainException('The step size cannot be zero.');
+        if (Numbers::isZero($step)) {
+            throw new DomainException('Cannot create range with a zero step size.');
         }
         if ($start <= $end && $step < 0) {
-            throw new DomainException('The step size must be positive for an increasing range.');
+            throw new DomainException('Cannot create an increasing range with a negative step size.');
         }
         if ($start >= $end && $step > 0) {
-            throw new DomainException('The step size must be negative for a decreasing range.');
+            throw new DomainException('Cannot create a decreasing range with a positive step size.');
         }
 
         // If any of the arguments are floats, generate a Sequence of floats; otherwise, ints.
@@ -365,7 +365,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check for an empty Sequence.
         if (count($this->items) === 0) {
-            throw new LengthException('No items in the Sequence.');
+            throw new LengthException('Cannot remove first item from an empty Sequence.');
         }
 
         // Remove and return the first item.
@@ -384,7 +384,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check for an empty Sequence.
         if (count($this->items) === 0) {
-            throw new LengthException('No items in the Sequence.');
+            throw new LengthException('Cannot remove last item from an empty Sequence.');
         }
 
         // Remove and return the last item.
@@ -471,7 +471,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Guard against empty Sequences.
         if ($this->empty()) {
-            throw new LengthException('No items in the Sequence.');
+            throw new LengthException('Cannot get first item of an empty Sequence.');
         }
 
         // Get the first item.
@@ -488,7 +488,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Guard against empty Sequences.
         if ($this->empty()) {
-            throw new LengthException('No items in the Sequence.');
+            throw new LengthException('Cannot get last item of an empty Sequence.');
         }
 
         // Get the last item.
@@ -554,18 +554,31 @@ final class Sequence extends Collection implements ArrayAccess
     /**
      * Get the unique values from the Sequence.
      *
-     * This method is analogous to array_unique().
+     * This method is analogous to array_unique() but is superior because array_unique() compares string
+     * representations of values, which means:
+     * - it errors for objects that don't implement Stringable
+     * - integers can compare as equal to floats
+     * - true compares as equal to integer 1 and float 1.0
+     * - false compares as equal to null and the empty string
      * @see https://www.php.net/manual/en/function.array-unique.php
+     *
+     * By contrast, this method will return all truly unique items, using strict comparison.
+     * Thus, for example, for a Sequence containing [true, 1, 1.0], all three will be included in the result.
      *
      * @return self A new Sequence containing the unique values.
      */
     public function unique(): self
     {
-        // Get the unique values.
-        $items = array_unique($this->items);
+        // Extract the unique values.
+        $result = [];
+        foreach ($this->items as $item) {
+            if (!in_array($item, $result, true)) {
+                $result[] = $item;
+            }
+        }
 
         // Construct the result.
-        return $this->fromSubset($items);
+        return $this->fromSubset($result);
     }
 
     // endregion
@@ -587,7 +600,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Guard against invalid chunk sizes.
         if ($size <= 0) {
-            throw new DomainException('Chunk size must be at least 1.');
+            throw new DomainException("Invalid chunk size: $size. Must be at least 1.");
         }
 
         // Break the array of items into chunks.
@@ -791,7 +804,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check we have items.
         if (empty($this->items)) {
-            throw new LengthException('Cannot find the maximum value of empty Sequence.');
+            throw new LengthException('Cannot find the maximum value of an empty Sequence.');
         }
 
         // Use a custom reducer to find the maximum value instead of max(), because that function will allow
@@ -812,7 +825,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check we have items.
         if ($this->empty()) {
-            throw new LengthException('Cannot calculate the average value of empty Sequence.');
+            throw new LengthException('Cannot calculate the average of an empty Sequence.');
         }
 
         // Find the average value.
@@ -822,26 +835,26 @@ final class Sequence extends Collection implements ArrayAccess
     /**
      * Find the concatenation of the values in the Sequence, optionally separated by a given string (the "glue").
      *
-     * NB: This method is analogous to implode().
-     * @see https://www.php.net/manual/en/function.implode.php
+     * NB: This method is similar to implode(), except that it doesn't perform an ordinary cast to string, but rather,
+     * makes use of Strings::toString() to get a string representation of any value.
+     *
+     * So:
+     * - strings will be unchanged (as for implode)
+     * - null, true, and false will become "null", "true", and "false", respectively
+     * - integers will be converted to strings as normal
+     * - float strings will be distinguishable from ints
+     * - enum strings will include the namespace, enum name, and case name
+     * - array strings will (in most cases) be valid PHP code
+     * - objects that implement Stringable will be converted to strings via their __toString() method
+     * - other objects will be converted to string via Stringify::stringifyObject().
      *
      * @param string $glue The string to separate the values with (default empty string).
      * @return string The concatenation of the values in the Sequence.
-     * @throws DomainException If the Sequence contains an object that does not implement Stringable.
+     * @see https://www.php.net/manual/en/function.implode.php
      */
     public function join(string $glue = ''): string
     {
-        // Validate all items can be converted to strings.
-        foreach ($this->items as $item) {
-            if (is_object($item) && !$item instanceof Stringable) {
-                throw new DomainException(
-                    'Cannot join Sequence: contains an object of class ' . $item::class . ', which does not ' .
-                    'implement Stringable.'
-                );
-            }
-        }
-
-        return implode($glue, $this->items);
+        return implode($glue, array_map(static fn ($item) => Strings::toString($item), $this->items));
     }
 
     // endregion
@@ -851,17 +864,19 @@ final class Sequence extends Collection implements ArrayAccess
     /**
      * Return a new Sequence with the items sorted in ascending order.
      *
-     * This method is analogous to sort(), except it's non-mutating.
+     * This method is analogous to sort(), except it's non-mutating and returns a new Sequence.
      * @see https://www.php.net/manual/en/function.sort.php
      *
+     * This method can issue a notice if items are not comparable, for example, an integer and an object.
+     *
      * @param int $flags The sorting flags.
-     * @return self The sorted Sequence.
+     * @return self A new Sequence with the values sorted.
      */
     public function sort(int $flags = SORT_REGULAR): self
     {
         // Copy the items array so the method is non-mutating.
         $items = $this->items;
-        sort($items, $flags);
+        sort($items, $flags); // @phpstan-ignore argument.type
 
         // Construct the result.
         return $this->fromSubset($items);
@@ -870,17 +885,19 @@ final class Sequence extends Collection implements ArrayAccess
     /**
      * Return a new Sequence with the items sorted in descending order.
      *
-     * This method is analogous to rsort(), except it's non-mutating.
+     * This method is analogous to rsort(), except it's non-mutating and returns a new Sequence.
      * @see https://www.php.net/manual/en/function.rsort.php
      *
+     * This method can issue a notice if items are not comparable, for example, an integer and an object.
+     *
      * @param int $flags The sorting flags.
-     * @return self The sorted Sequence.
+     * @return self A new Sequence with the values sorted.
      */
     public function sortReverse(int $flags = SORT_REGULAR): self
     {
         // Copy the items array so the method is non-mutating.
         $items = $this->items;
-        rsort($items, $flags);
+        rsort($items, $flags); // @phpstan-ignore argument.type
 
         // Construct the result.
         return $this->fromSubset($items);
@@ -1030,7 +1047,7 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check the index is an integer.
         if (!is_int($offset)) {
-            throw new InvalidArgumentException('Index must be an integer, ' . get_debug_type($offset) . ' given.');
+            throw new InvalidArgumentException('Invalid index type: ' . get_debug_type($offset) . '.');
         }
 
         return array_key_exists($offset, $this->items);
@@ -1059,7 +1076,7 @@ final class Sequence extends Collection implements ArrayAccess
      * Append or set a Sequence item.
      *
      * If the index is out of range, the Sequence will be increased in size to accommodate it.
-     * Any intermediate positions will be filled with the default value, if one can be inferred.
+     * Any intermediate positions will be filled with the default value if one can be inferred.
      * If a default value cannot be inferred, a DomainException will be thrown.
      *
      * @param mixed $offset The zero-based index position to set, or null to append.
@@ -1156,17 +1173,19 @@ final class Sequence extends Collection implements ArrayAccess
     {
         // Check the index is an integer.
         if (!is_int($index)) {
-            throw new InvalidArgumentException('Index must be an integer, ' . get_debug_type($index) . ' given.');
+            throw new InvalidArgumentException('Invalid index type: ' . get_debug_type($index) . '.');
         }
 
         // Check the index isn't negative.
         if ($index < 0) {
-            throw new OutOfRangeException('Index cannot be negative.');
+            throw new OutOfRangeException("Invalid index: $index. Cannot be negative.");
         }
 
         // Check the index isn't too large.
         if ($checkUpperBound && $index >= count($this->items)) {
-            throw new OutOfRangeException('Index is out of range.');
+            throw new OutOfRangeException(
+                "Index $index is outside the valid range 0-" . (count($this->items) - 1) . '.'
+            );
         }
     }
 
@@ -1200,7 +1219,7 @@ final class Sequence extends Collection implements ArrayAccess
             throw new LengthException('Cannot choose items from an empty Sequence.');
         }
         if ($count <= 0) {
-            throw new DomainException('Count must be greater than 0.');
+            throw new DomainException("Invalid count: $count. Must be at least 1.");
         }
         if ($count > $this->count()) {
             throw new LengthException("Cannot choose $count items from a Sequence with {$this->count()} items.");

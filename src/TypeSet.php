@@ -124,7 +124,7 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
         foreach ($types as $type) {
             // Check the type.
             if (!is_string($type)) {
-                throw new InvalidArgumentException('Types must be provided as strings.');
+                throw new InvalidArgumentException('Cannot add non-string type.');
             }
 
             // Trim in case the user did something like 'string | int'.
@@ -372,14 +372,12 @@ class TypeSet implements Countable, Stringable, IteratorAggregate
             return new stdClass();
         }
 
-        throw new LogicException(
-            "No default value could be determined for this TypeSet. Consider adding 'null' to the TypeSet."
-        );
+        throw new LogicException('Cannot determine a default value for this TypeSet.');
     }
 
     // endregion
 
-    // region Aggregation methods
+    // region Countable methods
 
     /**
      * Get the number of types in the set.

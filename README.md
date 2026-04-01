@@ -6,6 +6,8 @@ Type-safe collection classes for PHP 8.4+.
 
 ![PHP 8.4](docs/logo_php8_4.png)
 
+---
+
 ## Description
 
 A type-safe collection library featuring runtime type validation, immutable operations, and unrestricted key types.
@@ -15,11 +17,15 @@ A type-safe collection library featuring runtime type validation, immutable oper
 - **Dictionary** - Key-value pairs accepting any type as keys
 - **Set** - Unique value collections with set operations
 
+---
+
 ## Development and Quality Assurance / AI Disclosure
 
 [Claude Chat](https://claude.ai) and [Claude Code](https://www.claude.com/product/claude-code) were used in the development of this package. The core classes were designed, coded, and commented primarily by the author, with Claude providing substantial assistance with code review, suggesting improvements, debugging, and generating tests and documentation. All code was thoroughly reviewed by the author, and validated using industry-standard tools including [PHP_Codesniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer/), [PHPStan](https://phpstan.org/) (to level 9), and [PHPUnit](https://phpunit.de/index.html) to ensure full compliance with [PSR-12](https://www.php-fig.org/psr/psr-12/) coding standards and comprehensive unit testing with 100% code coverage. This collaborative approach resulted in a high-quality, thoroughly-tested, and well-documented package delivered in significantly less time than traditional development methods.
 
 ![Code Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
+
+---
 
 ## Why Galaxon Collections?
 
@@ -43,6 +49,8 @@ Galaxon Collections solves these problems with:
 
 ✅ **Mathematical correctness** - Proper type safety for operations like sum() and product().
 
+---
+
 ## Alternatives
 
 Before using this package, you may want to check out these PHP extensions:
@@ -51,6 +59,8 @@ Before using this package, you may want to check out these PHP extensions:
 - [Data Structures](https://www.php.net/manual/en/book.ds.php)
 
 These are official PHP extensions that provide efficient data structure implementations and will probably be well-supported going forward. However, if you need runtime type safety and generics-like behavior, or simply prefer a more functional style of programming, Galaxon Collections provides features that these extensions lack, including type constraints, type inference, and type-safe operations.
+
+---
 
 ## Features
 
@@ -116,16 +126,22 @@ $set1->subset($set2);      // false
 $set1->disjoint($set2);  // false
 ```
 
+---
+
 ## Installation
 
 ```bash
 composer require galaxon/collections
 ```
 
+---
+
 ## Requirements
 
 - PHP ^8.4
 - galaxon/core
+
+---
 
 ## Quick Start
 
@@ -215,6 +231,8 @@ var_dump($set->contains(2));  // true
 var_dump($set->contains(5));  // false
 ```
 
+---
+
 ## Classes
 
 ### Core Collections
@@ -228,6 +246,8 @@ var_dump($set->contains(5));  // false
 
 - **[TypeSet](docs/TypeSet.md)** - Runtime type validation and constraint management
 - **[Pair](docs/Pair.md)** - Immutable key-value pair container
+
+---
 
 ## Testing
 
@@ -252,27 +272,23 @@ composer test
 - 100% code coverage
 - Edge cases, error conditions, and type safety
 
+---
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details
 
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
-
-For questions or suggestions, please [open an issue](https://github.com/mossy2100/PHP-Collections/issues).
+---
 
 ## Support
 
 - **Issues**: https://github.com/mossy2100/PHP-Collections/issues
 - **Documentation**: See [docs/](docs/) directory for detailed class documentation
 - **Examples**: See test files for comprehensive usage examples
+
+For questions or suggestions, please [open an issue](https://github.com/mossy2100/PHP-Collections/issues).
+
+---
 
 ## Changelog
 

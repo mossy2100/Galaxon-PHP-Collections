@@ -17,15 +17,15 @@ Sequence provides a type-safe, indexed collection similar to arrays in languages
 
 ## Properties
 
+### items
+
+Inherited from [Collection](Collection.md#items). Internal array storage for the Sequence's elements, indexed sequentially from 0.
+
 ### valueTypes
 
-```php
-protected(set) TypeSet $valueTypes
-```
+Inherited from [Collection](Collection.md#valueTypes). TypeSet managing allowed value types for the Sequence.
 
-TypeSet managing allowed value types for the Sequence. Inherited from Collection.
-
-Example:
+**Example:**
 ```php
 $seq = new Sequence('int|string');
 echo $seq->valueTypes; // {int, string}
@@ -34,7 +34,7 @@ var_dump($seq->valueTypes->contains('int')); // true
     
 ## Constructor
 
-### __construct()
+### \_\_construct()
 
 ```php
 public function __construct(
@@ -764,7 +764,7 @@ echo $seq->average(); // 42
 public function join(string $glue = ''): string
 ```
 
-Concatenate values into a string, optionally separated by glue.
+Concatenate values into a string, optionally separated by glue. Uses `Strings::toString()` (from the Core package) to convert values of any type into readable strings.
 
 **Examples:**
 ```php
@@ -851,7 +851,7 @@ echo $sorted[0]; // -1
 
 ## Conversion Methods
 
-### __toString()
+### \_\_toString()
 
 ```php
 public function __toString(): string

@@ -269,7 +269,7 @@ class SequenceModificationTest extends TestCase
     {
         // Test: Attempt to remove first from empty Sequence
         $this->expectException(LengthException::class);
-        $this->expectExceptionMessage('No items in the Sequence');
+        $this->expectExceptionMessage('Cannot remove first item from an empty Sequence');
 
         $seq = new Sequence('int');
         $seq->removeFirst();
@@ -298,7 +298,7 @@ class SequenceModificationTest extends TestCase
     {
         // Test: Attempt to remove last from empty Sequence
         $this->expectException(LengthException::class);
-        $this->expectExceptionMessage('No items in the Sequence');
+        $this->expectExceptionMessage('Cannot remove last item from an empty Sequence');
 
         $seq = new Sequence('int');
         $seq->removeLast();

@@ -43,10 +43,6 @@ final class Dictionary extends Collection implements ArrayAccess
 
     // region Property hooks
 
-    // PHP_CodeSniffer doesn't know about property hooks yet.
-    // phpcs:disable PSR2.Classes.PropertyDeclaration
-    // phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact
-
     /**
      * Get all the keys as an array.
      *
@@ -78,9 +74,6 @@ final class Dictionary extends Collection implements ArrayAccess
             return $values;
         }
     }
-
-    // phpcs:enable PSR2.Classes.PropertyDeclaration
-    // phpcs:enable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 
     // endregion
 
@@ -214,7 +207,9 @@ final class Dictionary extends Collection implements ArrayAccess
         $nArgs = func_num_args();
         if ($nArgs === 1) {
             if (!$keyOrPair instanceof Pair) {
-                throw new InvalidArgumentException('Pair object expected, got ' . get_debug_type($keyOrPair) . '.');
+                throw new InvalidArgumentException(
+                    'Cannot add: expected a Pair, got ' . get_debug_type($keyOrPair) . '.'
+                );
             }
             $key = $keyOrPair->key;
             $value = $keyOrPair->value;
@@ -429,7 +424,7 @@ final class Dictionary extends Collection implements ArrayAccess
             // Validate the result of the callback.
             if (!is_bool($keep)) {
                 throw new UnexpectedValueException(
-                    'Callback must return a bool, got ' . Types::getBasicType($keep) . '.'
+                    'Cannot filter: callback returned ' . Types::getBasicType($keep) . ', expected bool.'
                 );
             }
 
@@ -517,7 +512,7 @@ final class Dictionary extends Collection implements ArrayAccess
             // Validate the result is a Pair.
             if (!$newPair instanceof Pair) {
                 throw new UnexpectedValueException(
-                    'Callback must return a Pair, got ' . Types::getBasicType($newPair) . '.'
+                    'Cannot map: callback returned ' . Types::getBasicType($newPair) . ', expected Pair.'
                 );
             }
 

@@ -197,7 +197,7 @@ abstract class Collection implements Countable, IteratorAggregate, Stringable
 
     // endregion
 
-    // region Countable implementation
+    // region Countable methods
 
     /**
      * Get the number of items in the Collection.

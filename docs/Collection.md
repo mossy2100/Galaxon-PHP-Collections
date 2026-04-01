@@ -2,6 +2,8 @@
 
 The abstract base class for all collection types in the Galaxon Collections library.
 
+---
+
 ## Overview
 
 Collection provides the foundation for Sequence, Dictionary, and Set by implementing common functionality and defining the contract that all concrete collections must follow.
@@ -21,6 +23,8 @@ While you cannot instantiate Collection directly, understanding its API helps yo
 - Standard PHP interfaces for seamless integration with existing code
 - Code reuse with common functionality implemented once
 - Polymorphism allowing collections to be used interchangeably where only Collection methods are needed
+
+---
 
 ## Properties
 
@@ -56,9 +60,11 @@ var_dump($seq->valueTypes->contains('int'));    // true
 var_dump($seq->valueTypes->contains('bool'));   // false
 ```
 
+---
+
 ## Constructor
 
-### __construct()
+### \_\_construct()
 
 ```php
 public function __construct(null|string|iterable $types = null)
@@ -74,6 +80,8 @@ Create a new Collection with optional type constraints.
 - `DomainException` - If a type name is invalid
 
 **Note:** This is called by concrete collection constructors. You cannot instantiate Collection directly.
+
+---
 
 ## Abstract Methods
 
@@ -146,6 +154,8 @@ Get an iterator for `foreach` loops. Implements the `IteratorAggregate` interfac
 - **Dictionary:** Iterates keys and values
 - **Set:** Iterates values with auto-generated integer keys
 
+---
+
 ## Modification Methods
 
 ### clear()
@@ -168,6 +178,8 @@ echo $seq->count(); // 0
 $seq->clear()->append(10, 20, 30);
 echo $seq->count(); // 3
 ```
+
+---
 
 ## Inspection Methods
 
@@ -256,6 +268,8 @@ echo $seq->count(); // 3
 echo count($seq); // 3
 ```
 
+---
+
 ## Conversion Methods
 
 ### toArray()
@@ -275,7 +289,7 @@ $array = $seq->toArray();
 var_dump($array); // [1, 2, 3]
 ```
 
-### __toString()
+### \_\_toString()
 
 ```php
 public function __toString(): string
@@ -291,6 +305,8 @@ echo $seq; // [1, 2, 3]
 $set = new Set('string', ['a', 'b', 'c']);
 echo $set; // {a, b, c}
 ```
+
+---
 
 ## Iteration
 
@@ -308,6 +324,8 @@ foreach ($collection as $key => $value) {
 ```
 
 The exact iteration behavior depends on the concrete collection type. See the documentation for Sequence, Dictionary, and Set for details.
+
+---
 
 ## Extending Collection
 
@@ -350,10 +368,12 @@ class MyCustomCollection extends Collection
 }
 ```
 
+---
+
 ## See Also
 
 - **[Sequence](Sequence.md)** - Ordered list implementation
-- **[Dictionary](Dictionary.md)** - Key-value pair implementation
+- **[Dictionary](Dictionary.md)** - Key-value collection
 - **[Pair](Pair.md)** - Key-value pair container used by Dictionary
 - **[Set](Set.md)** - Unique values implementation
 - **[TypeSet](TypeSet.md)** - Type constraint management

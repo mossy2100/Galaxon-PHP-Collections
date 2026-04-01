@@ -5,7 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+---
+
 ## [Unreleased]
+
+---
+
+## [1.0.1] - 2026-04-02
+
+### Changed
+
+- **Sequence::join()** — now uses `Strings::toString()` to convert items, supporting all types including non-Stringable objects, booleans, null, enums, and arrays.
+- **Exception messages** standardised across all classes to follow "Cannot X" convention:
+  - Range step size, chunk size, and count messages updated.
+  - Empty Sequence messages now specify the failed operation.
+  - Filter/map callback messages standardised across Set and Dictionary.
+  - Fixed missing article ("an") in max/average empty Sequence messages.
+
+### Fixed
+
+- **Sequence::join()** — no longer throws `DomainException` for non-Stringable objects. All items are now convertible to strings.
+
+### Documentation
+
+- Fixed incorrect exception types in TypeSet.md (`DomainException`/`RuntimeException` → `LogicException` for `getDefaultValue()`).
+- Standardised Dictionary description across See Also sections ("Key-value collection").
+- Added inherited `items` and `valueTypes` properties to Sequence, Dictionary, and Set docs with links to Collection.md.
+- Removed Contributing section from README (link moved to Support).
+
+---
 
 ## [1.0.0] - 2026-01-05
 
@@ -39,6 +67,8 @@ This is the first stable release of Galaxon Collections, ready for publication o
 - Updated all class documentation to reflect new exception types
 - Updated Dictionary filter() examples to use new callback signature
 
+---
+
 ## [0.3.0] - 2025-12-08
 
 ### Changed
@@ -69,6 +99,7 @@ This is the first stable release of Galaxon Collections, ready for publication o
 - Updated examples throughout to use new method names
 - Removed `uint` references from TypeSet documentation
 
+---
 
 ## [0.2.0] - 2025-01-15
 
@@ -87,6 +118,8 @@ This is the first stable release of Galaxon Collections, ready for publication o
 - Added comprehensive documentation for `Dictionary::map()` method in Dictionary.md
 - Updated README with new Dictionary methods
 - Added test coverage for all new functionality
+
+---
 
 ## [0.1.0] - 2025-01-14
 

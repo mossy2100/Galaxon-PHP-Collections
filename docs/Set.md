@@ -30,15 +30,15 @@ echo $set->count(); // 3
 
 ## Properties
 
+### items
+
+Inherited from [Collection](Collection.md#items). Internal array storage for the Set's elements, keyed by their unique string representation.
+
 ### valueTypes
 
-```php
-protected(set) TypeSet $valueTypes
-```
+Inherited from [Collection](Collection.md#valueTypes). TypeSet managing allowed value types for the Set.
 
-TypeSet managing allowed value types for the Set. Inherited from Collection.
-
-Example:
+**Example:**
 
 ```php
 $set = new Set('int|string');
@@ -48,7 +48,7 @@ var_dump($set->valueTypes->contains('int')); // true
 
 ## Constructor
 
-### __construct()
+### \_\_construct()
 
 ```php
 public function __construct(
@@ -456,7 +456,7 @@ echo $set->count(); // 6
 
 ## Conversion Methods
 
-### __toString()
+### \_\_toString()
 
 ```php
 public function __toString(): string
@@ -645,7 +645,7 @@ $set->add(1, 'two', 3.14, true, null, []); // All types allowed
 ## See Also
 
 - **[Collection](Collection.md)** - Abstract base class
-- **[Dictionary](Dictionary.md)** - Key-value pair implementation
+- **[Dictionary](Dictionary.md)** - Key-value collection
 - **[Sequence](Sequence.md)** - Ordered list collection
 - **[TypeSet](TypeSet.md)** - Type constraint management
 - **[Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Equatable.md)** - Trait for implementing `equal()`
