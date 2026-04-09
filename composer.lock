@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9031995022e107bddb216167783f589a",
+    "content-hash": "2ec1798267fa47461b4eb7d47b162c68",
     "packages": [
         {
             "name": "galaxon/core",
-            "version": "dev-main",
+            "version": "v1.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mossy2100/Galaxon-PHP-Core.git",
+                "reference": "f7f63931eab6bd5b4fc2eb22d871edd1472ad896"
+            },
             "dist": {
-                "type": "path",
-                "url": "../Core",
-                "reference": "d7be78156dfbfa30f90b9cb2b2674f2d31db1217"
+                "type": "zip",
+                "url": "https://api.github.com/repos/mossy2100/Galaxon-PHP-Core/zipball/f7f63931eab6bd5b4fc2eb22d871edd1472ad896",
+                "reference": "f7f63931eab6bd5b4fc2eb22d871edd1472ad896",
+                "shasum": ""
             },
             "require": {
                 "php": "^8.4"
@@ -29,45 +35,14 @@
                 "phpcodesniffer-search-depth": 3
             },
             "autoload": {
-                "psr-4": {
-                    "Galaxon\\Core\\": "src/"
-                },
                 "files": [
                     "src/functions.php"
-                ]
-            },
-            "autoload-dev": {
+                ],
                 "psr-4": {
-                    "Galaxon\\Core\\Tests\\": "tests/"
+                    "Galaxon\\Core\\": "src/"
                 }
             },
-            "scripts": {
-                "fix": [
-                    "vendor/bin/phpcbf -vp"
-                ],
-                "check": [
-                    "vendor/bin/phpcs -s"
-                ],
-                "report": [
-                    "vendor/bin/phpcs -q --report=summary"
-                ],
-                "analyze": [
-                    "vendor/bin/phpstan analyze -l 9"
-                ],
-                "test": [
-                    "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html build/coverage --coverage-clover build/logs/clover.xml --do-not-cache-result"
-                ],
-                "coverage": [
-                    "php scripts/coverage-check.php"
-                ],
-                "quality": [
-                    "@fix",
-                    "@check",
-                    "@analyze",
-                    "@test",
-                    "@coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -98,9 +73,7 @@
                 "issues": "https://github.com/mossy2100/Galaxon-PHP-Core/issues",
                 "source": "https://github.com/mossy2100/Galaxon-PHP-Core"
             },
-            "transport-options": {
-                "relative": true
-            }
+            "time": "2026-04-09T06:07:44+00:00"
         }
     ],
     "packages-dev": [
@@ -202,16 +175,16 @@
         },
         {
             "name": "galaxon/coding-standard",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mossy2100/Galaxon-PHP-Coding-Standard.git",
-                "reference": "4480f084bff8a06a061069f68462b1d4836d43f3"
+                "reference": "157af3204cf5986403a029cb3ac5bf28ae61c877"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mossy2100/Galaxon-PHP-Coding-Standard/zipball/4480f084bff8a06a061069f68462b1d4836d43f3",
-                "reference": "4480f084bff8a06a061069f68462b1d4836d43f3",
+                "url": "https://api.github.com/repos/mossy2100/Galaxon-PHP-Coding-Standard/zipball/157af3204cf5986403a029cb3ac5bf28ae61c877",
+                "reference": "157af3204cf5986403a029cb3ac5bf28ae61c877",
                 "shasum": ""
             },
             "require": {
@@ -253,7 +226,7 @@
                 "issues": "https://github.com/mossy2100/Galaxon-PHP-Coding-Standard/issues",
                 "source": "https://github.com/mossy2100/Galaxon-PHP-Coding-Standard"
             },
-            "time": "2026-03-30T03:53:16+00:00"
+            "time": "2026-04-09T05:36:35+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -939,16 +912,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.15",
+            "version": "12.5.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "aeb6899ffdbbf4b4ff5e6b6ebb77b35c51bb6d9a"
+                "reference": "85b62adab1a340982df64e66daa4a4435eb5723b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/aeb6899ffdbbf4b4ff5e6b6ebb77b35c51bb6d9a",
-                "reference": "aeb6899ffdbbf4b4ff5e6b6ebb77b35c51bb6d9a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/85b62adab1a340982df64e66daa4a4435eb5723b",
+                "reference": "85b62adab1a340982df64e66daa4a4435eb5723b",
                 "shasum": ""
             },
             "require": {
@@ -1017,7 +990,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.15"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.17"
             },
             "funding": [
                 {
@@ -1025,7 +998,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-03-31T06:41:33+00:00"
+            "time": "2026-04-08T03:04:19+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1098,16 +1071,16 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "7.1.4",
+            "version": "7.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "6a7de5df2e094f9a80b40a522391a7e6022df5f6"
+                "reference": "c284f55811f43d555e51e8e5c166ac40d3e33c63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/6a7de5df2e094f9a80b40a522391a7e6022df5f6",
-                "reference": "6a7de5df2e094f9a80b40a522391a7e6022df5f6",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/c284f55811f43d555e51e8e5c166ac40d3e33c63",
+                "reference": "c284f55811f43d555e51e8e5c166ac40d3e33c63",
                 "shasum": ""
             },
             "require": {
@@ -1166,7 +1139,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/7.1.4"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/7.1.5"
             },
             "funding": [
                 {
@@ -1186,7 +1159,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-24T09:28:48+00:00"
+            "time": "2026-04-08T04:43:00+00:00"
         },
         {
             "name": "sebastian/complexity",
@@ -2171,18 +2144,9 @@
             "time": "2025-12-08T11:19:18+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "galaxon/core",
-            "version": "dev-main",
-            "alias": "1.99.0",
-            "alias_normalized": "1.99.0.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "galaxon/core": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

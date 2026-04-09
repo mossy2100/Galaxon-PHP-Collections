@@ -7,7 +7,7 @@ namespace Galaxon\Collections;
 use Countable;
 use DomainException;
 use Galaxon\Core\Stringify;
-use Galaxon\Core\Traits\Equatable;
+use Galaxon\Core\Traits\Comparison\Equatable;
 use InvalidArgumentException;
 use IteratorAggregate;
 use Override;

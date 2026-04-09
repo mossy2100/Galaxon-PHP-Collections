@@ -121,7 +121,7 @@ Check if the Collection contains a specific value. Uses strict equality (value a
 abstract public function equal(mixed $other): bool
 ```
 
-Check if two Collections are equal. The definition of "equal" varies by collection type. This method comes from the [Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Equatable.md) trait.
+Check if two Collections are equal. The definition of "equal" varies by collection type. This method comes from the [Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Comparison/Equatable.md) trait.
 
 **Implementations:**
 - **Sequence:** Same type, count, values, and order
@@ -377,4 +377,4 @@ class MyCustomCollection extends Collection
 - **[Pair](Pair.md)** - Key-value pair container used by Dictionary
 - **[Set](Set.md)** - Unique values implementation
 - **[TypeSet](TypeSet.md)** - Type constraint management
-- **[Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Equatable.md)** - Trait for implementing `equal()`
+- **[Equatable](https://github.com/mossy2100/Galaxon-PHP-Core/blob/main/docs/Traits/Comparison/Equatable.md)** - Trait for implementing `equal()`

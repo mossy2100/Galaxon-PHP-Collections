@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`composer.json`** — Bumped `galaxon/core` constraint from `^1.0` to `^1.6`. This is a hard requirement: Core's traits were reorganised in v1.6.0 into `Traits/Asserts/` and `Traits/Comparison/` subnamespaces, and `Collection` imports `Galaxon\Core\Traits\Comparison\Equatable` (the new path). Older Core versions would fail to autoload.
+- **`Collection.php`** — Updated `use` statement: `Galaxon\Core\Traits\Equatable` → `Galaxon\Core\Traits\Comparison\Equatable`.
+
+### Documentation
+
+- Updated `Equatable` trait links in `Collection.md`, `Dictionary.md`, `Sequence.md`, and `Set.md` to point at the new `Traits/Comparison/Equatable.md` path.
+
 ---
 
 ## [1.0.1] - 2026-04-02
